@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="skb_home.scan"
+             Title="scan"
+             BackgroundColor="#000000">
+
+    <!-- Основной контейнер -->
+    <ScrollView Orientation="Vertical">
+        <!-- Прокрутка только по вертикали -->
+        <Grid>
+            <VerticalStackLayout>
+
+                <Grid ColumnDefinitions="*,Auto"
+                  RowDefinitions="Auto,Auto"
+                      Padding="0,10,25,0">
+                    <!-- Первая строка: Bluetooth -->
+                    <Label Text="Bluetooth" 
+                       FontSize="22"
+                       TextColor="#412bf7"
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="16,0,0,0"/>
+                    <Switch x:Name="BluetoothSwitch"
+                        VerticalOptions="Center"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        ThumbColor="White"
+                        OnColor="#197E19"
+                        Toggled="OnBluetoothToggled"/>
+
+                    <!-- Вторая строка: Scan -->
+                    <Label Text="Scan" 
+                       FontSize="22"
+                       TextColor="#412bf7"
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       Grid.Row="1"
+                       Grid.Column="0"
+                       Margin="16,0,0,0"/>
+                    <Switch x:Name="ScanSwitch"
+                        VerticalOptions="Center"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        ThumbColor="White"
+                        OnColor="#197E19"
+                        Toggled="OnScanToggled"/>
+                </Grid>
+
+                <!-- Обертывание ActivityIndicator в Grid -->
+                <!--<Grid HeightRequest="50"
+                  VerticalOptions="Center">
+                    <ActivityIndicator 
+                     x:Name="activityIndicator"
+                        IsRunning="False"
+                         IsVisible="False"
+                         Color="#FFFFFF"
+                          VerticalOptions="Center"
+                          HorizontalOptions="Center"
+                           HeightRequest="25"
+                                 WidthRequest="25"/>
+                </Grid>-->
+
+                <Grid HeightRequest="50"
+                  VerticalOptions="Center" 
+                     HorizontalOptions="Center">
+                    <Image
+                       x:Name="rotatingImage"
+                          Source="scb.png" 
+                        HorizontalOptions="Center"
+                             VerticalOptions="Center"
+                         HeightRequest="50"
+                          WidthRequest="50"
+                          Rotation="0"/>
+                </Grid>
+           
+
+                <!-- Минимальные правки: SelectionMode="None", убрать SelectionChanged, добавить TapGestureRecognizer в шаблон -->
+                <CollectionView x:Name="DevicesCollectionView"
+                ItemsLayout="VerticalList"
+                SelectionMode="None"  
+                HeightRequest="150">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="10">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackLayout Orientation="Vertical">
+
+                                    <Label Text="{Binding Name}" FontSize="18"  FontAttributes="Bold"  TextColor="#238e05" />
+                                    <Label Text="{Binding Address}" FontSize="14"  FontAttributes="Bold"  TextColor="#412bf7"/>
+                                </StackLayout>
+
+                                <!-- Добавлен минимальный TapGestureRecognizer -->
+                                <Grid.GestureRecognizers>
+
+                                    <TapGestureRecognizer Tapped="OnItemTapped"
+                                          CommandParameter="{Binding .}"
+                            />
+
+                                </Grid.GestureRecognizers>
+
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <Label Text="Устройства не найдены" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" TextColor="Black"   FontAttributes="Bold"  />
+                    </CollectionView.EmptyView>
+                </CollectionView>
+
+
+
+
+
+                <!-- Карусель -->
+                <Grid>
+                    <CarouselView x:Name="carouselView"
+                                  ItemsSource="{Binding CarouselItemScans}" 
+                                  IndicatorView="{x:Reference indicator}"
+                                  HorizontalOptions="Fill" 
+                                  VerticalOptions="Center"
+                                  PeekAreaInsets="70"
+                                  HeightRequest="360"
+                                  CurrentItemChanged="OnCarouselItemChanged">
+                        <CarouselView.ItemTemplate>
+                            <DataTemplate>
+                                <VerticalStackLayout x:Name="ItemContainer" 
+                                                     Spacing="10" 
+                                                     HorizontalOptions="Center" 
+                                                     VerticalOptions="Center">
+                                    <!-- Заголовок элемента -->
+                                    <Label Text="{Binding Title}" 
+                                           FontSize="20"
+                                           TextColor="White"
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="Center"
+                                           Margin="0,10" />
+
+                                    <!-- Изображение -->
+                                    <Image Source="{Binding ImageToDisplay}" 
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           Aspect="AspectFit" 
+                                           WidthRequest="{Binding Width}"
+                                           HeightRequest="{Binding Height}"
+                                           RotationY="{Binding RotationY}" 
+                                           Scale="{Binding Scale}" 
+                                           Opacity="{Binding Opacity}">
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                               Command="{Binding Path=BindingContext.ItemSelectedCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                  CommandParameter="{Binding}" />
+                                        </Image.GestureRecognizers>
+                                    </Image>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CarouselView.ItemTemplate>
+                    </CarouselView>
+
+                    <!-- Индикатор карусели -->
+                    <IndicatorView x:Name="indicator" 
+                                   IndicatorColor="Gray" 
+                                   SelectedIndicatorColor="Blue"
+                                   HorizontalOptions="Center" 
+                                   Margin="0,10,0,0" />
+                </Grid>
+
+               
+            </VerticalStackLayout>
+        </Grid>
+    </ScrollView>
+</ContentPage>

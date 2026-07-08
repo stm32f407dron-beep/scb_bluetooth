@@ -1,0 +1,699 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:skb_home"
+             x:Class="skb_home.Settingpage"
+             Title="додому"
+             BackgroundColor="#010513"
+             Padding="0">
+
+
+    <!-- Меню справа -->
+    <ContentPage.ToolbarItems>
+
+        <ToolbarItem Text="🔄"
+          Order="Primary" 
+          Priority="0"
+          Clicked="OnRefreshClicked"/>
+
+        <ToolbarItem Text="⚙"
+                 Order="Primary" 
+                 Priority="1"                
+                 Clicked="OnSettingsClicked"/>
+
+      
+    </ContentPage.ToolbarItems>
+
+
+
+    <!--  ВНИМАНИЕ: вот ресурсы шаблонов сверху -->
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="LegendTemplate">
+                <AbsoluteLayout>
+                    <HorizontalStackLayout Spacing="15"
+                        AbsoluteLayout.LayoutBounds="0.5, 0.000, -1, -1"
+                        AbsoluteLayout.LayoutFlags="PositionProportional"
+                        HorizontalOptions="Center"
+                        ZIndex="10">
+
+                        <!-- 1. Красный - КЗ -->
+                        <HorizontalStackLayout Spacing="5">
+                            <Border WidthRequest="18" HeightRequest="18" BackgroundColor="#5f0b0b"
+                                StrokeThickness="1" Stroke="White"
+                                StrokeShape="RoundRectangle 9">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnKzFilterTapped"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Label Text="к.з."
+                                TextColor="White"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                VerticalOptions="Center">
+                                <Label.Shadow>
+                                    <Shadow Brush="Black" Radius="5" Offset="1,1" Opacity="0.7"/>
+                                </Label.Shadow>
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnKzFilterTapped"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </HorizontalStackLayout>
+
+                        <!-- 2. Зеленый - Обрив -->
+                        <HorizontalStackLayout Spacing="5">
+                            <Border WidthRequest="18" HeightRequest="18" BackgroundColor="#ffff00"
+                                StrokeThickness="1" Stroke="White"
+                                StrokeShape="RoundRectangle 9">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnObrivFilterTapped"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Label Text="обрив"
+                                TextColor="White"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                VerticalOptions="Center">
+                                <Label.Shadow>
+                                    <Shadow Brush="Black" Radius="5" Offset="1,1" Opacity="0.7"/>
+                                </Label.Shadow>
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnObrivFilterTapped"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </HorizontalStackLayout>
+
+                        <!-- 3. Белый - Норма -->
+                        <HorizontalStackLayout Spacing="5">
+                            <Border WidthRequest="18" HeightRequest="18" BackgroundColor="White"
+                                StrokeThickness="1" Stroke="Gray"
+                                StrokeShape="RoundRectangle 9">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnNormaFilterTapped"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Label Text="норма"
+                                TextColor="White"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                VerticalOptions="Center">
+                                <Label.Shadow>
+                                    <Shadow Brush="Black" Radius="5" Offset="1,1" Opacity="0.7"/>
+                                </Label.Shadow>
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnNormaFilterTapped"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </HorizontalStackLayout>
+
+                        <!-- 4. Голубой - Всі -->
+                        <HorizontalStackLayout Spacing="5">
+                            <Border WidthRequest="18" HeightRequest="18" BackgroundColor="DeepSkyBlue"
+                                StrokeThickness="1" Stroke="White"
+                                StrokeShape="RoundRectangle 9">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnVsiFilterTapped"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Label Text="всі"
+                                TextColor="White"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                VerticalOptions="Center">
+                                <Label.Shadow>
+                                    <Shadow Brush="Black" Radius="5" Offset="1,1" Opacity="0.7"/>
+                                </Label.Shadow>
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnVsiFilterTapped"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </HorizontalStackLayout>
+                    </HorizontalStackLayout>
+
+
+
+
+
+
+                    <Ellipse Fill="#FFFFFF"
+           Stroke="#ffffff"
+           Opacity="0.3"
+           AbsoluteLayout.LayoutBounds="0.5, 0.8, 0.89, 0.71"
+           AbsoluteLayout.LayoutFlags="All" />
+
+                    <!-- ✅ ИЗМЕНЕНО: Нижняя часть пьедестала - теперь адаптивная -->
+                    <Ellipse Fill="#121212"
+           Stroke="#133F35"
+           StrokeThickness="0"
+          AbsoluteLayout.LayoutBounds="0.5, 0.752, 0.89, 0.69"
+           AbsoluteLayout.LayoutFlags="All" />
+
+                    <!-- ✅ ИЗМЕНЕНО: Средняя часть пьедестала - теперь адаптивная -->
+                    <Ellipse Fill="#000000"
+           Stroke="#2A2A2A"
+           StrokeThickness="2"
+          AbsoluteLayout.LayoutBounds="0.5, 0.59, 0.87, 0.65"
+           AbsoluteLayout.LayoutFlags="All">
+                        <Ellipse.Shadow>
+                            <Shadow Brush="#000000" Radius="6" Offset="0,6"/>
+                        </Ellipse.Shadow>
+                    </Ellipse>
+
+                    <!-- ✅ ИЗМЕНЕНО: Верхняя часть пьедестала - теперь адаптивная -->
+                    <Ellipse Fill="#000000"
+           AbsoluteLayout.LayoutBounds="0.5, 0.5, 0., 0.6"
+           AbsoluteLayout.LayoutFlags="All">
+                        <Ellipse.Shadow>
+                            <Shadow Brush="#12C59C" Radius="12" Offset="0,5"/>
+                        </Ellipse.Shadow>
+                    </Ellipse>
+                    
+                    
+                    
+                    
+                </AbsoluteLayout>
+            </DataTemplate>
+            <DataTemplate x:Key="ImageTemplate">
+                <Image Source="sh.jpg" Aspect="AspectFit"/>
+            </DataTemplate>
+            <local:SimpleTemplateSelector
+                x:Key="PedestalSelector"
+                LegendTemplate="{StaticResource LegendTemplate}"
+                ImageTemplate="{StaticResource ImageTemplate}" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <!--  конец ресурса DataTemplateSelector  -->
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- ✅ ДОБАВЛЕНО: ScrollView для вертикального скролла -->
+    <ScrollView Orientation="Vertical"
+                VerticalScrollBarVisibility="Default">
+
+        <AbsoluteLayout x:Name="LayoutContainer" >
+
+
+        <!-- ФОНОВОЕ ИЗОБРАЖЕНИЕ -->
+        <Image Source="sh2.jpg"
+           Aspect="AspectFill"
+           Opacity="0.85"
+           AbsoluteLayout.LayoutBounds="0, 0, 1, 0.46"
+           AbsoluteLayout.LayoutFlags="All"
+           ZIndex="0"/>
+
+
+
+
+
+        <Label Text="Струм шлейфів"
+       FontSize="26"
+       FontAttributes="Bold"
+       TextColor="#FFFFFF"
+       HorizontalTextAlignment="Center"
+       VerticalTextAlignment="Center"
+       RotationX="-1"
+       RotationY="1"
+       AbsoluteLayout.LayoutBounds="0.5, 0.05, -1, -1"
+       AbsoluteLayout.LayoutFlags="PositionProportional">
+            <Label.Shadow>
+                <Shadow Brush="Black" Radius="15" Offset="5,5" Opacity="0.7"/>
+            </Label.Shadow>
+        </Label>
+
+
+
+            <!-- ===== ВОТ ТУТ CarouselView вместо старой легенды+эллипсов ===== -->
+            <CarouselView x:Name="PedestalCarousel"
+                HeightRequest="220"
+                AbsoluteLayout.LayoutBounds="0.5,0.18,0.96,0.28"
+                AbsoluteLayout.LayoutFlags="All"
+                Loop="False"
+                IndicatorView="carouselIndicator"
+                ItemTemplate="{StaticResource PedestalSelector}"/>
+            <IndicatorView x:Name="carouselIndicator"
+                AbsoluteLayout.LayoutBounds="0.5,0.3,-1,-1"
+                AbsoluteLayout.LayoutFlags="PositionProportional"/>
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- Строка 1: Компактная -->
+        <Grid ColumnDefinitions="Auto,*,Auto" 
+      ColumnSpacing="10"
+      AbsoluteLayout.LayoutBounds="0.5, 0.44, 320, 50"
+      AbsoluteLayout.LayoutFlags="PositionProportional"
+      ZIndex="100">
+
+         
+
+            <Label Grid.Column="0"
+                   Text="Вичитати усі шлейфа"
+                   TextColor="#0F55F7"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Start">
+                <Label.Shadow>
+                    <Shadow Brush="Black" Radius="8" Offset="2,2" Opacity="0.6"/>
+                </Label.Shadow>
+            </Label>
+
+            <Button Grid.Column="1"
+                Text="📘"
+              BackgroundColor="Transparent"
+                TextColor="White"
+                FontSize="32"
+                CornerRadius="0"
+                HeightRequest="35"
+                WidthRequest="35"
+                Padding="0"
+                 Margin="25,0,0,0"           
+                BorderWidth="0"
+                  
+                Clicked="OnReadAllClicked"/>
+
+        </Grid>
+
+
+        <!-- Строка 2: Номер шлейфа с Entry -->
+        <!-- Строка 2: Entry для номера шлейфа -->
+        <Grid ColumnDefinitions="Auto,*,Auto" 
+      ColumnSpacing="10"
+      AbsoluteLayout.LayoutBounds="0.5, 0.53, 320, 50"
+      AbsoluteLayout.LayoutFlags="PositionProportional"
+      ZIndex="100">
+
+            <Entry Grid.Column="0"
+               x:Name="LoopNumberEntry"
+               Placeholder="Введіть № шлейфа"
+               PlaceholderColor="#0F55F7"
+               TextColor="White"
+               BackgroundColor="#000000"
+               WidthRequest="205"
+               HeightRequest="45"
+               Keyboard="Numeric"
+               MaxLength="2"
+               HorizontalTextAlignment="Start"
+               HorizontalOptions="Start"
+               VerticalOptions="Start"
+               FontSize="22"
+               FontAttributes="Bold"/>
+
+            <Button Grid.Column="1"
+                Text="📘"
+                BackgroundColor="Transparent"
+                TextColor="White"
+                FontSize="32"
+                CornerRadius="0"
+                HeightRequest="35"
+                WidthRequest="35"
+                Padding="0"
+                Margin="1,0,0,0"
+                BorderWidth="0"
+                Clicked="OnReadSingleClicked"/>
+
+        </Grid>
+
+
+
+        <!-- Строка 3: Включити термінал -->
+        <Grid ColumnDefinitions="Auto,*,Auto" 
+      ColumnSpacing="10"
+      AbsoluteLayout.LayoutBounds="0.5, 0.62, 320, 50"
+      AbsoluteLayout.LayoutFlags="PositionProportional"
+      ZIndex="100">
+
+            <Label Grid.Column="0"
+           Text="Включити термінал"
+           TextColor="#0F55F7"
+           FontSize="22"
+           FontAttributes="Bold"
+           VerticalOptions="Center"
+           HorizontalOptions="Start">
+                <Label.Shadow>
+                    <Shadow Brush="Black" Radius="8" Offset="2,2" Opacity="0.6"/>
+                </Label.Shadow>
+            </Label>
+
+            <Switch Grid.Column="1"
+            x:Name="TerminalSwitch"
+            OnColor="#1046B0"
+            ThumbColor="White"
+            Margin="55,0,0,0"
+            VerticalOptions="Center"
+            HorizontalOptions="Start"
+            Toggled="OnTerminalToggled"/>
+
+        </Grid>
+
+        <!-- Блок терминала с кнопкой очистки -->
+        <Border x:Name="TerminalBorder"
+        IsVisible="False"
+        Stroke="#0B0101"
+        StrokeThickness="2"
+        StrokeShape="RoundRectangle 10"
+        BackgroundColor="#738CB9"
+        Padding="10"
+        HeightRequest="220"
+        AbsoluteLayout.LayoutBounds="0.5, 0.99, 345, 245"
+        AbsoluteLayout.LayoutFlags="PositionProportional"
+        ZIndex="100">
+
+            <Grid RowDefinitions="Auto,*">
+
+                <!-- Заголовок с кнопкой очистки -->
+                <HorizontalStackLayout Grid.Row="0" 
+                              Spacing="10" 
+                              Margin="0,0,0,5">
+                    <Label Text="🖥️ Термінал"
+                   FontAttributes="Bold"
+                   FontSize="16"
+                   TextColor="#000000"
+                   VerticalOptions="Center"/>
+
+                    <Button Text="🗑️ Очистити"
+                    BackgroundColor="#E1E5F0"
+                    TextColor="#000000"
+                     FontAttributes="Bold"       
+                    FontSize="14"
+                    Padding="5,2"
+                    CornerRadius="5"
+                    Clicked="OnClearTerminalClicked"/>
+                </HorizontalStackLayout>
+
+                <!-- Текст терминала -->
+                <ScrollView Grid.Row="1" 
+                   x:Name="scrollView" 
+                   VerticalOptions="Fill">
+                    <Label x:Name="label4"
+                   Text="Empty text to receive data"
+                   FontAttributes="Bold"
+                   FontSize="18"
+                   TextColor="Black"
+                   LineBreakMode="WordWrap"
+                   VerticalTextAlignment="Start"
+                   HorizontalTextAlignment="Start"/>
+                </ScrollView>
+
+            </Grid>
+
+        </Border>
+
+
+    </AbsoluteLayout>
+
+    </ScrollView>
+
+</ContentPage>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--AbsoluteLayout.LayoutBounds="0.5, 0.31, -1, -1"-->
+<!--AbsoluteLayout.LayoutBounds="0.5, 0.299, -1, -1"-->
+<!--AbsoluteLayout.LayoutBounds="0.5, 0.29, -1, -1"-->
+<!--AbsoluteLayout.LayoutBounds="0.5, 0.289, -1, -1"-->
+<!-- Тень под пьедесталом -->
+<!--<Ellipse Fill="#06FFFF"
+                 Stroke="#b5c2c4"
+                 Opacity="0.3"
+                 WidthRequest="310"
+                 HeightRequest="133"
+                 AbsoluteLayout.LayoutBounds="0.5, 0.27, -1, -1"
+                
+                 AbsoluteLayout.LayoutFlags="PositionProportional" />
+
+        -->
+<!-- Нижняя часть пьедестала -->
+<!--
+        <Ellipse Fill="#121212"
+                 Stroke="#1A1A1A"
+                 StrokeThickness="2"
+                 WidthRequest="310"
+                 HeightRequest="140"
+                 AbsoluteLayout.LayoutBounds="0.5, 0.259, -1, -1"
+                
+                 AbsoluteLayout.LayoutFlags="PositionProportional" />
+
+        -->
+<!-- Средняя часть пьедестала -->
+<!--
+        <Ellipse Fill="#1F1F1F"
+                 Stroke="#2A2A2A"
+                 StrokeThickness="2"
+                 WidthRequest="300"
+                 HeightRequest="126"
+                 AbsoluteLayout.LayoutBounds="0.5, 0.25, -1, -1"
+                 
+                 AbsoluteLayout.LayoutFlags="PositionProportional">
+            <Ellipse.Shadow>
+                <Shadow Brush="#000000" Radius="6" Offset="0,6"/>
+            </Ellipse.Shadow>
+        </Ellipse>
+
+        -->
+<!-- Верхняя часть пьедестала -->
+<!--
+      
+        <Ellipse Fill="#1A1A1A"
+         WidthRequest="290"
+         HeightRequest="120"
+                 
+          AbsoluteLayout.LayoutBounds="0.5, 0.249, -1, -1"       
+         
+         AbsoluteLayout.LayoutFlags="PositionProportional">
+            <Ellipse.Shadow>
+                <Shadow Brush="#333333" Radius="12" Offset="0,4"/>
+            </Ellipse.Shadow>
+        </Ellipse>-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Строка с Grid для лучшего контроля -->
+<!--<Grid ColumnDefinitions="*,Auto" 
+      ColumnSpacing="15"
+      AbsoluteLayout.LayoutBounds="0.5, 0.65, 320, 50"
+      AbsoluteLayout.LayoutFlags="PositionProportional"
+      ZIndex="100">
+
+            <Label Grid.Column="0"
+           Text="Вичитати усі шлейфа"
+           TextColor="#14AC14"
+           FontSize="20"
+           FontAttributes="Bold"
+           VerticalOptions="Center"
+           HorizontalOptions="Start">
+                <Label.Shadow>
+                    <Shadow Brush="Black" Radius="8" Offset="2,2" Opacity="0.6"/>
+                </Label.Shadow>
+            </Label>
+
+            <Button Grid.Column="1"
+            Text="📋"
+            BackgroundColor="#14AC14"
+            TextColor="White"
+            FontAttributes="Bold"
+            FontSize="24"
+            CornerRadius="10"
+            HeightRequest="50"
+            WidthRequest="50"
+            Clicked="OnReadAllClicked">
+                <Button.Shadow>
+                    <Shadow Brush="Black" Radius="10" Offset="0,4" Opacity="0.5"/>
+                </Button.Shadow>
+            </Button>
+
+        </Grid>-->
+
+
+
+
+
+
+
+<!--Stroke="#44FF44"
+StrokeThickness="4"
+WidthRequest="290"
+HeightRequest="98"-->
+
+
+
+<!-- Слой 1 - Тень (задний слой) -->
+<!--<Label Text="Струм шлейфів"
+ FontSize="26"
+ FontAttributes="Bold"
+ TextColor="#0A0A0A"
+ Opacity="0.3"
+ HorizontalTextAlignment="Center"
+ VerticalTextAlignment="Center"
+ RotationX="-15"
+ RotationY="5"
+ AbsoluteLayout.LayoutBounds="0.502, 0.192, -1, -1"
+ AbsoluteLayout.LayoutFlags="PositionProportional"
+ ZIndex="1"/>
+
+  -->
+<!-- Слой 2 - Основной текст -->
+<!--
+  <Label Text="Струм шлейфів"
+ FontSize="26"
+ FontAttributes="Bold"
+ TextColor="Black"
+ HorizontalTextAlignment="Center"
+ VerticalTextAlignment="Center"
+ RotationX="-15"
+ RotationY="5"
+ AbsoluteLayout.LayoutBounds="0.5, 0.19, -1, -1"
+ AbsoluteLayout.LayoutFlags="PositionProportional"
+ ZIndex="2">
+      <Label.Shadow>
+          <Shadow Brush="Black" 
+          Radius="10" 
+          Offset="4,4" 
+          Opacity="0.5"/>
+      </Label.Shadow>
+  </Label>
+
+  -->
+<!-- Слой 3 - Световой блик (передний) -->
+<!--
+  <Label Text="Струм шлейфів"
+ FontSize="26"
+ FontAttributes="Bold"
+ TextColor="White"
+ Opacity="0.2"
+ HorizontalTextAlignment="Center"
+ VerticalTextAlignment="Center"
+ RotationX="-15"
+ RotationY="5"
+ AbsoluteLayout.LayoutBounds="0.499, 0.189, -1, -1"
+ AbsoluteLayout.LayoutFlags="PositionProportional"
+ ZIndex="3"/>-->
+
+
+
+
+
+<!-- Обводка (тень) -->
+<!--<Label Text="Струм шлейфів"
+FontSize="28"
+FontAttributes="Bold"
+TextColor="Black"
+HorizontalTextAlignment="Center"
+VerticalTextAlignment="Center"
+RotationX="-15"
+RotationY="5"
+AbsoluteLayout.LayoutBounds="0.501, 0.191, -1, -1"
+AbsoluteLayout.LayoutFlags="PositionProportional"
+ZIndex="1"/>
+
+ <Label Text="Струм шлейфів"
+FontSize="28"
+FontAttributes="Bold"
+TextColor="Black"
+HorizontalTextAlignment="Center"
+VerticalTextAlignment="Center"
+RotationX="-15"
+RotationY="5"
+AbsoluteLayout.LayoutBounds="0.499, 0.189, -1, -1"
+AbsoluteLayout.LayoutFlags="PositionProportional"
+ZIndex="1"/>
+
+ -->
+<!-- Основной текст -->
+<!--
+ <Label Text="Струм шлейфів"
+FontSize="28"
+FontAttributes="Bold"
+TextColor="#2A2A2A"
+HorizontalTextAlignment="Center"
+VerticalTextAlignment="Center"
+RotationX="-15"
+RotationY="5"
+AbsoluteLayout.LayoutBounds="0.5, 0.19, -1, -1"
+AbsoluteLayout.LayoutFlags="PositionProportional"
+ZIndex="2">
+     <Label.Shadow>
+         <Shadow Brush="Black" Radius="15" Offset="5,5" Opacity="0.7"/>
+     </Label.Shadow>
+ </Label>-->
+
+
+
+<!--<Label Text="Струм шлейфів"
+       FontSize="26"
+       FontAttributes="Bold"
+       TextColor="Black"
+       HorizontalTextAlignment="Center"
+       VerticalTextAlignment="Center"
+       RotationX="-5"
+       RotationY="25"
+       AbsoluteLayout.LayoutBounds="0.5, 0.19, -1, -1"
+       AbsoluteLayout.LayoutFlags="PositionProportional">
+            <Label.Shadow>
+                <Shadow Brush="Black" 
+                Radius="8" 
+                Offset="3,3" 
+                Opacity="0.5"/>
+            </Label.Shadow>
+        </Label>-->
+
+    
+    

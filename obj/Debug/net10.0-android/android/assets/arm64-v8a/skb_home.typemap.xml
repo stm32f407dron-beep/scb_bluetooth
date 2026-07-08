@@ -1,0 +1,12 @@
+<api type="debug" assembly-name="skb_home" mvid="cc2cd32da84d4a8aa5126b9a09fa6214">
+  <java-to-managed>
+    <entry java-name="crc64490127d2af21bcf3/MainActivity" managed-name="skb_home.MainActivity, skb_home" managed-type-token-id="33554446" />
+    <entry java-name="crc64490127d2af21bcf3/MainApplication" managed-name="skb_home.MainApplication, skb_home" managed-type-token-id="33554447" />
+    <entry java-name="crc6480c50f3443e5ab61/Device_Receiver" managed-name="skb_home.Platforms.Android.Device_Receiver, skb_home" managed-type-token-id="33554462" />
+  </java-to-managed>
+  <managed-to-java>
+    <entry java-name="crc64490127d2af21bcf3/MainActivity" managed-name="skb_home.MainActivity, skb_home" managed-type-token-id="33554446" />
+    <entry java-name="crc64490127d2af21bcf3/MainApplication" managed-name="skb_home.MainApplication, skb_home" managed-type-token-id="33554447" />
+    <entry java-name="crc6480c50f3443e5ab61/Device_Receiver" managed-name="skb_home.Platforms.Android.Device_Receiver, skb_home" managed-type-token-id="33554462" />
+  </managed-to-java>
+</api>

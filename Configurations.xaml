@@ -1,0 +1,1360 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="skb_home.Configurations"
+             Title="Конфігурація"
+             BackgroundColor="#181818"
+             >
+    <ScrollView>
+        <VerticalStackLayout Spacing="22" Padding="0,20,0,0">
+
+
+
+
+            <!-- Одна общая "карточка" (один овальный фон) для CodeObject1 + AccessPoint1 + IpServer1  "Auto,Auto,12,Auto,Auto,12,Auto,Auto,12,Auto,Auto,12,Auto,Auto,16" :  RowDefinitions="Auto,Auto,12,Auto,Auto,12,Auto,Auto,12,Auto,Auto,12,Auto,Auto,16"  -->
+            <Grid Margin="10,0,10,0"
+                  Padding="0,0,0,12"
+                  ColumnDefinitions="Auto,*,70"
+                  RowDefinitions="Auto,Auto,12,Auto,Auto,12,Auto,Auto,12,Auto,Auto,12,Auto,Auto,12,Auto,Auto,12,Auto,Auto,16">
+
+                <!-- Общий овальный фон на ВСЮ карточку -->
+                <BoxView CornerRadius="18"
+                     BackgroundColor="#242424"
+                     HorizontalOptions="Fill"
+                     VerticalOptions="Fill"
+                     Grid.Row="0"
+                     Grid.RowSpan="20"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="3" />
+
+                <!-- ===== CodeObject1 (Row 0-1) ===== -->
+
+                <!-- Заголовок -->
+                <Label x:Name="CodeObject1Label"
+                   Text="Обьект № 1"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Start"
+                   Margin="12,16,8,0"
+                   Grid.Row="0"
+                   Grid.Column="0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnServerPortTapped"
+                                  CommandParameter="2|CodeObject1" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <!-- Значение -->
+                <Label x:Name="CodeObject1ValueLabel"
+                   Text="empty"
+                   FontSize="18"
+                   TextColor="#A9A9B0"
+                   FontAttributes="Bold"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Fill"
+                   HorizontalTextAlignment="End"
+                   Margin="0,18,10,0"
+                   Grid.Row="0"
+                   Grid.Column="1"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation" />
+
+                <!-- Entry -->
+                <Entry x:Name="CodeObject1Entry"
+                   Placeholder="Введите значение"
+                   Keyboard="Numeric"
+                   MaxLength="5"
+                   TextChanged="CodeObject1_TextChanged"
+                   FontSize="18"
+                   TextColor="White"
+                   BackgroundColor="#232323"
+                   Margin="10,0,10,0"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Fill"
+                   HeightRequest="44"
+                   Grid.Row="1"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2" />
+
+                <!-- Кнопка -->
+                <Button Text="⏺️"
+                    BackgroundColor="#313131"
+                    TextColor="#000000"
+                    FontSize="32"
+                    CornerRadius="10"
+                    HeightRequest="44"
+                    WidthRequest="44"
+                    Padding="0"
+                    Margin="0,0,10,0"
+                    BorderWidth="0"
+                    Clicked="CodeObject1"
+                    HorizontalOptions="End"
+                    Grid.Row="1"
+                    Grid.Column="2" />
+
+            
+                <!-- ===== AccessPoint1 (Row 3-4) ===== -->
+
+                <!-- Заголовок -->
+                <Label x:Name="AccessPoint1tLabel"
+                   Text="Точка доступу"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Start"
+                   Margin="12,0,8,0"
+                   Grid.Row="3"
+                   Grid.Column="0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnServerPortTapped"
+                                  CommandParameter="2|AccessPoint1" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <!-- Значение -->
+                <Label x:Name="AccessPoint1ValueLabel"
+                   Text="empty"
+                   FontSize="18"
+                   TextColor="#A9A9B0"
+                   FontAttributes="Bold"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Fill"
+                   HorizontalTextAlignment="End"
+                   Margin="0,0,10,0"
+                   Grid.Row="3"
+                   Grid.Column="1"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation" />
+
+                <!-- Entry -->
+                <Entry x:Name="AccessPoint1Entry"
+                   Placeholder="Введите значение"
+                   Keyboard="Text"
+                   MaxLength="8"
+                   TextChanged="AccessPoint1Entry_TextChanged"
+                   FontSize="18"
+                   TextColor="White"
+                   BackgroundColor="#232323"
+                   Margin="10,0,10,0"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Fill"
+                   HeightRequest="44"
+                   Grid.Row="4"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2" />
+
+                <!-- Кнопка -->
+                <Button Text="⏺️"
+                    BackgroundColor="#313131"
+                    TextColor="#000000"
+                    FontSize="32"
+                    CornerRadius="10"
+                    HeightRequest="44"
+                    WidthRequest="44"
+                    Padding="0"
+                    Margin="0,0,10,0"
+                    BorderWidth="0"
+                    Clicked="AccessPoint1"
+                    HorizontalOptions="End"
+                    Grid.Row="4"
+                    Grid.Column="2" />
+
+            
+
+                <!-- ===== IpServer1 (Row 6-7) ===== -->
+
+                <!-- Заголовок -->
+                <Label x:Name="IpServer1tLabel"
+                       Text="Ip Адреса"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       Margin="12,0,8,0"
+                       Grid.Row="6"
+                       Grid.Column="0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnServerPortTapped"
+                                  CommandParameter="2|ipServer1" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <!-- Значение (получит широкую колонку и IP будет помещаться лучше) -->
+                <Label x:Name="IpServer1ValueLabel"
+                       Text="empty"
+                       FontSize="18"
+                       TextColor="#A9A9B0"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Fill"
+                       HorizontalTextAlignment="End"
+                       Margin="0,0,5,0"
+                       Grid.Row="6"
+                       Grid.Column="1"
+                       MaxLines="2"
+                       LineBreakMode="TailTruncation" />
+
+                <!-- Entry -->
+                <Entry x:Name="IpServer1Entry"
+                       Placeholder="Введите значение"
+                       Keyboard="Text"
+                       MaxLength="20"
+                       TextChanged="IpServer1Entry_TextChanged"
+                       FontSize="18"
+                       TextColor="White"
+                       BackgroundColor="#232323"
+                       Margin="10,0,10,8"
+                       HeightRequest="44"
+                       Grid.Row="7"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="2" />
+
+                <!-- Кнопка -->
+                <Button Text="⏺️"
+                        BackgroundColor="#313131"
+                        TextColor="#000000"
+                        FontSize="32"
+                        CornerRadius="10"
+                        HeightRequest="44"
+                        WidthRequest="44"
+                        Padding="0"
+                        Margin="0,0,10,0"
+                        BorderWidth="0"
+                        Clicked="IpServer1"
+                        HorizontalOptions="End"
+                        Grid.Row="7"
+                        Grid.Column="2" />
+
+
+                <!-- ===== ServerPort (Row ) ===== -->
+                <!-- ===== ServerPort1 (4-я секция) ===== -->
+
+                <!-- Заголовок (Row 9) -->
+                <Label x:Name="ServerPortLabel"
+                       Text="Порт сервера"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       Margin="12,0,8,0"
+                       Grid.Row="9"
+                       Grid.Column="0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnServerPortTapped"
+                              CommandParameter="2|ServerPort1" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <!-- Значение (Row 9) -->
+                <Label x:Name="ServerPortValueLabel"
+                       Text="empty"
+                       FontSize="18"
+                       TextColor="#A9A9B0"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Fill"
+                       HorizontalTextAlignment="End"
+                       Margin="0,0,10,0"
+                       Grid.Row="9"
+                       Grid.Column="1"
+                       MaxLines="1"
+                       LineBreakMode="TailTruncation"/>
+
+                <!-- Entry (Row 10) -->
+                <Entry x:Name="ServerPortEntry"
+                       Placeholder="Введите значение"
+                       Keyboard="Numeric"
+                       MaxLength="5"
+                       TextChanged="ServerPortEntry_TextChanged"
+                       FontSize="18"
+                       TextColor="White"
+                       BackgroundColor="#232323"
+                       Margin="10,0,10,16"
+                       HeightRequest="44"
+                       Grid.Row="10"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="2"/>
+
+                <!-- Кнопка (Row 10) -->
+                <Button Text="⏺️"
+                        BackgroundColor="#313131"
+                        TextColor="#000000"
+                        FontSize="32"
+                        CornerRadius="10"
+                        HeightRequest="44"
+                        WidthRequest="44"
+                        Padding="0"
+                        Margin="0,0,10,8"
+                        BorderWidth="0"
+                        Clicked="ServerPort1"
+                        HorizontalOptions="End"
+                        Grid.Row="10"
+                        Grid.Column="2"/>
+
+
+
+                <!-- ===== Hours1 ===== -->
+                                <Label x:Name="Hours1Label"
+                       Text="Години"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       Margin="12,0,8,0"
+                       Grid.Row="12"
+                       Grid.Column="0">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnServerPortTapped"
+                                              CommandParameter="2|Hours1" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+
+                                <Label x:Name="Hours1ValueLabel"
+                       Text="empty"
+                       FontSize="18"
+                       TextColor="#A9A9B0"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Fill"
+                       HorizontalTextAlignment="End"
+                       Margin="0,0,10,0"
+                       Grid.Row="12"
+                       Grid.Column="1"
+                       MaxLines="1"
+                       LineBreakMode="TailTruncation"/>
+
+                                <Entry x:Name="Hours1Entry"
+                       Placeholder="Введите часы"
+                       Keyboard="Numeric"
+                       MaxLength="2"
+                       TextChanged="Hours1Entry_TextChanged"
+                       FontSize="18"
+                       TextColor="White"
+                       BackgroundColor="#232323"
+                       Margin="10,0,10,16"
+                       HeightRequest="44"
+                       Grid.Row="13"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="2"/>
+
+                                <Button Text="⏺️"
+                        BackgroundColor="#313131"
+                        TextColor="#000000"
+                        FontSize="32"
+                        CornerRadius="10"
+                        HeightRequest="44"
+                        WidthRequest="44"
+                        Padding="0"
+                        Margin="0,0,10,8"
+                        BorderWidth="0"
+                        Clicked="Hours1"
+                        HorizontalOptions="End"
+                        Grid.Row="13"
+                        Grid.Column="2"/>
+
+                                <!-- ===== Minutes1 ===== -->
+                                <Label x:Name="Minutes1Label"
+                       Text="Хвилини"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       Margin="12,0,8,0"
+                       Grid.Row="15"
+                       Grid.Column="0">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnServerPortTapped"
+                                              CommandParameter="2|Minutes1" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+
+                                <Label x:Name="Minutes1ValueLabel"
+                       Text="empty"
+                       FontSize="18"
+                       TextColor="#A9A9B0"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Fill"
+                       HorizontalTextAlignment="End"
+                       Margin="0,0,10,0"
+                       Grid.Row="15"
+                       Grid.Column="1"
+                       MaxLines="1"
+                       LineBreakMode="TailTruncation"/>
+
+                                <Entry x:Name="Minutes1Entry"
+                       Placeholder="Введите минуты"
+                       Keyboard="Numeric"
+                       MaxLength="2"
+                       TextChanged="Minutes1Entry_TextChanged"
+                       FontSize="18"
+                       TextColor="White"
+                       BackgroundColor="#232323"
+                       Margin="10,0,10,16"
+                       HeightRequest="44"
+                       Grid.Row="16"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="2"/>
+
+                                <Button Text="⏺️"
+                        BackgroundColor="#313131"
+                        TextColor="#000000"
+                        FontSize="32"
+                        CornerRadius="10"
+                        HeightRequest="44"
+                        WidthRequest="44"
+                        Padding="0"
+                        Margin="0,0,10,8"
+                        BorderWidth="0"
+                        Clicked="Minutes1"
+                        HorizontalOptions="End"
+                        Grid.Row="16"
+                        Grid.Column="2"/>
+
+
+
+
+
+
+
+
+
+
+
+                <!-- ===== EnableOption (Row 12) ===== -->
+                <Label x:Name="EnableOptionLabel"
+                       Text="Включити UDP"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       Margin="12,0,8,16"
+                       Grid.Row="18"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="2">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnEnableOptionTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <!-- Квадрат-индикатор справа -->
+                <Border x:Name="EnableOptionBox"
+                    Grid.Row="18"
+                    Grid.Column="2"
+                    HeightRequest="26"
+                    WidthRequest="26"
+                    Stroke="White"
+                    StrokeThickness="2"
+                    BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 4"
+                    HorizontalOptions="End"
+                    VerticalOptions="Center"
+                    Margin="0,0,18,16">
+                    <Label x:Name="EnableOptionCheck"
+                       Text=""
+                       FontSize="18"
+                       TextColor="White"
+                       HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Center"/>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnUDP1Tapped" />
+                    </Border.GestureRecognizers>
+                </Border>
+
+
+              
+                <!-- ===== EnableAck (Row 13) ===== -->
+                <Label x:Name="EnableAckLabel"
+                   Text="Включити ACK"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   Margin="12,10,8,16"
+                   Grid.Row="19"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnEnableACK1Tapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+
+
+
+
+                <Border x:Name="EnableAckBox"
+                    Grid.Row="19"
+                    Grid.Column="2"
+                    HeightRequest="26"
+                    WidthRequest="26"
+                    Stroke="White"
+                    StrokeThickness="2"
+                    BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 4"
+                    HorizontalOptions="End"
+                    VerticalOptions="Center"
+                    Margin="0,10,18,16">
+                                <Label x:Name="EnableAckCheck"
+                       Text=""
+                       FontSize="18"
+                       TextColor="White"
+                       HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Center" />
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnACK1Tapped" />
+                    </Border.GestureRecognizers>
+                </Border>
+
+
+
+
+
+
+
+
+
+            </Grid>
+
+
+
+
+
+
+
+            <Grid ColumnDefinitions="Auto,*,Auto"
+      ColumnSpacing="10"
+      HeightRequest="50"
+      WidthRequest="320">
+                <Label Grid.Column="0"
+           Margin="4,15,0,0"
+           Text="Включити термінал"
+           TextColor="#FFFFFF"
+           FontSize="22"
+           FontAttributes="Bold"
+           VerticalOptions="Center"
+           HorizontalOptions="Start">
+                    <Label.Shadow>
+                        <Shadow Brush="Black" Radius="8" Offset="2,2" Opacity="0.6"/>
+                    </Label.Shadow>
+                </Label>
+
+                <Switch Grid.Column="2"
+            x:Name="TerminalSwitch"
+            OnColor="#1046B0"
+            ThumbColor="White"
+            Margin="0,15,4,0"
+            VerticalOptions="Center"
+            HorizontalOptions="End"
+            Toggled="OnTerminalToggled"/>
+            </Grid>
+
+            <Border x:Name="TerminalBorder"
+        IsVisible="False"
+        Stroke="#0B0101"
+        StrokeThickness="2"
+        StrokeShape="RoundRectangle 10"
+        BackgroundColor="#4A9192"
+        Padding="10"
+        Margin="0,15,0,0"
+        HeightRequest="510"
+        WidthRequest="345">
+
+                <Grid RowDefinitions="Auto,*">
+                    <HorizontalStackLayout Grid.Row="0" Spacing="10" Margin="0,0,0,5">
+                        <Label Text="🖥️ Термінал"
+                   FontAttributes="Bold"
+                   FontSize="16"
+                   TextColor="#000000"
+                   VerticalOptions="Center"/>
+
+                        <Button Text="🗑️ Очистити"
+                    BackgroundColor="#FFFFFF"
+                    TextColor="#000000"
+                    FontAttributes="Bold"
+                    FontSize="14"
+                    Padding="5,2"
+                    CornerRadius="5"
+                    Clicked="OnClearTerminalClicked"/>
+                    </HorizontalStackLayout>
+
+                    <ScrollView Grid.Row="1" x:Name="scrollView" VerticalOptions="Fill">
+                        <Label x:Name="label4"
+                   Text="Empty text to receive data"
+                   FontAttributes="Bold"
+                   FontSize="18"
+                   TextColor="Black"
+                   LineBreakMode="WordWrap"
+                   VerticalTextAlignment="Start"
+                   HorizontalTextAlignment="Start"/>
+                    </ScrollView>
+                </Grid>
+
+            </Border>
+
+
+
+
+
+
+
+
+            <!-- Одна общая "карточка" (один овальный фон) для CodeObject1 + AccessPoint1 -->
+            <!--<Grid Margin="10,0,10,0"
+                  Padding="0"
+                  ColumnDefinitions="*,84"
+                  RowDefinitions="Auto,Auto,12,Auto,Auto,12,Auto,Auto">
+
+                --><!-- Общий овальный фон на ВСЮ карточку --><!--
+                <BoxView CornerRadius="18"
+                 BackgroundColor="#242424"
+                 HorizontalOptions="Fill"
+                 VerticalOptions="Fill"
+                 Grid.Row="0" Grid.RowSpan="8"
+                 Grid.Column="0" Grid.ColumnSpan="2" />
+
+                --><!-- ===== CodeObject1 (строка заголовка) ===== --><!--
+                <Label x:Name="CodeObject1Label"
+                   Text="Config.CodeObject1"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Start"
+                   Margin="12,16,0,0"
+                   Grid.Row="0"
+                   Grid.Column="0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnServerPortTapped"
+                                  CommandParameter="2|CodeObject1" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <Label x:Name="CodeObject1ValueLabel"
+                   Text="empty"
+                   FontSize="18"
+                   TextColor="#A9A9B0"
+                   FontAttributes="Bold"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Fill"
+                   HorizontalTextAlignment="End"
+                   Margin="0,18,10,0"
+                   Grid.Row="0"
+                   Grid.Column="1"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation" />
+
+                --><!-- ===== CodeObject1 (строка ввода + кнопка) ===== --><!--
+                    <Entry x:Name="CodeObject1Entry"
+                       Placeholder="Введите значение"
+                       Keyboard="Numeric"
+                       MaxLength="5"
+                       TextChanged="CodeObject1_TextChanged"
+                       FontSize="18"
+                       TextColor="White"
+                       BackgroundColor="#232323"
+                       Margin="10,0,10,0"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Fill"
+                       HeightRequest="44"
+                       Grid.Row="1"
+                       Grid.Column="0" />
+
+                <Button Text="⏺️"
+                        BackgroundColor="#313131"
+                        TextColor="#000000"
+                        FontSize="32"
+                        CornerRadius="10"
+                        HeightRequest="44"
+                        WidthRequest="44"
+                        Padding="0"
+                        Margin="0,0,10,0"
+                        BorderWidth="0"
+                        Clicked="CodeObject1"
+                        HorizontalOptions="End"
+                        Grid.Row="1"
+                        Grid.Column="1" />
+
+           
+
+                --><!-- ===== AccessPoint1 (строка заголовка) ===== --><!--
+                <Label x:Name="AccessPoint1tLabel"
+                   Text="Config.AccessPoint1"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Start"
+                   Margin="12,0,0,0"
+                   Grid.Row="3"
+                   Grid.Column="0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnServerPortTapped"
+                                  CommandParameter="2|AccessPoint1" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <Label x:Name="AccessPoint1ValueLabel"
+                   Text="empty"
+                   FontSize="18"
+                   TextColor="#A9A9B0"
+                   FontAttributes="Bold"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Fill"
+                   HorizontalTextAlignment="End"
+                   Margin="0,0,10,0"
+                   Grid.Row="3"
+                   Grid.Column="1"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation" />
+
+                --><!-- ===== AccessPoint1 (строка ввода + кнопка) ===== --><!--
+                <Entry x:Name="AccessPoint1Entry"
+                   Placeholder="Введите значение"
+                   Keyboard="Text"
+                   MaxLength="8"
+                   TextChanged="AccessPoint1Entry_TextChanged"
+                   FontSize="18"
+                   TextColor="White"
+                   BackgroundColor="#232323"
+                   Margin="10,0,10,16"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Fill"
+                   HeightRequest="44"
+                   Grid.Row="4"
+                   Grid.Column="0" />
+
+                <Button Text="⏺️"
+                    BackgroundColor="#313131"
+                    TextColor="#000000"
+                    FontSize="32"
+                    CornerRadius="10"
+                    HeightRequest="44"
+                    WidthRequest="44"
+                    Padding="0"
+                    Margin="0,0,10,16"
+                    BorderWidth="0"
+                    Clicked="AccessPoint1"
+                    HorizontalOptions="End"
+                    Grid.Row="4"
+                    Grid.Column="1" />
+
+                --><!-- ===== IpServer1 (строка заголовка) ===== -->
+                <!-- ===== IpServer1 (3-я секция) ===== -->
+
+                <!-- Заголовок (Row 6) --><!--
+                <Label x:Name="IpServer1tLabel"
+       Text="Config.IpServer1"
+       FontSize="18"
+       FontAttributes="Bold"
+       TextColor="White"
+       Margin="12,0,0,0"
+       Grid.Row="6"
+       Grid.Column="0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnServerPortTapped"
+                              CommandParameter="2|ipServer1" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                --><!-- Значение (Row 6) --><!--
+                <Label x:Name="IpServer1ValueLabel"
+       Text="empty"
+       FontSize="18"
+       TextColor="#A9A9B0"
+       FontAttributes="Bold"
+       HorizontalOptions="Fill"
+       HorizontalTextAlignment="End"
+       Margin="0,0,10,0"
+       Grid.Row="6"
+       Grid.Column="1"
+       MaxLines="1"
+       LineBreakMode="TailTruncation"/>
+
+                --><!-- Entry (Row 7) --><!--
+                <Entry x:Name="IpServer1Entry"
+       Placeholder="Введите значение"
+       Keyboard="Text"
+       MaxLength="20"
+       TextChanged="IpServer1Entry_TextChanged"
+       FontSize="18"
+       TextColor="White"
+       BackgroundColor="#232323"
+       Margin="10,0,10,16"
+       HeightRequest="44"
+       Grid.Row="7"
+       Grid.Column="0"/>
+
+                --><!-- Кнопка (Row 7) --><!--
+                <Button Text="⏺️"
+        BackgroundColor="#313131"
+        TextColor="#000000"
+        FontSize="32"
+        CornerRadius="10"
+        HeightRequest="44"
+        WidthRequest="44"
+        Padding="0"
+        Margin="0,0,10,16"
+        BorderWidth="0"
+        Clicked="IpServer1"
+        HorizontalOptions="End"
+        Grid.Row="7"
+        Grid.Column="1"/>
+
+
+            </Grid>-->
+
+
+             
+            <!-- AccessPoint2 -->
+            <Grid Margin="10,25,10,0" Padding="0"
+                    ColumnDefinitions="*,84"
+                    RowDefinitions="Auto,Auto">
+
+                <BoxView CornerRadius="18"
+                   BackgroundColor="#242424"
+                   HorizontalOptions="Fill"
+                   VerticalOptions="Fill"
+                   Grid.Row="0" Grid.RowSpan="2"
+                   Grid.Column="0" Grid.ColumnSpan="2"/>
+
+                <Label x:Name="AccessPoint2tLabel"
+                     Text="Config.AccessPoint2"
+                     FontSize="18"
+                     FontAttributes="Bold"
+                     TextColor="White"
+                     VerticalOptions="Start"
+                     HorizontalOptions="Start"
+                     Margin="12,16,0,0"
+                     Grid.Column="0">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnServerPortTapped" CommandParameter="2|AccessPoint2" />
+                            </Label.GestureRecognizers>
+                        </Label>
+
+                <Label x:Name="AccessPoint2ValueLabel"
+                         Text="empty"
+                         FontSize="18"
+                         TextColor="#A9A9B0"
+                         FontAttributes="Bold"
+                         VerticalOptions="Start"
+                         HorizontalOptions="Fill"
+                         HorizontalTextAlignment="End"
+                         Margin="0,18,10,12"
+                         Grid.Row="0"
+                         Grid.Column="1"
+                         MaxLines="1"
+                         LineBreakMode="TailTruncation"/>
+
+                <Entry x:Name="AccessPoint2Entry"
+                         Placeholder="Введите значение"
+                         Keyboard="Text"
+                         MaxLength="8"  
+                         TextChanged="AccessPoint2Entry_TextChanged"   
+                         FontSize="18"
+                         TextColor="White"
+                         BackgroundColor="#232323"
+                         Margin="10,0,0,12"
+                         VerticalOptions="Center"
+                         HorizontalOptions="Fill"
+                         HeightRequest="44"
+                         Grid.Row="1"
+                         Grid.Column="0"/>
+
+                <Button Grid.Row="1" Grid.Column="1"
+                          Text="⏺️ Запис"
+                          BackgroundColor="#313131"
+                          TextColor="#000000"
+                          FontSize="32"
+                          CornerRadius="10"
+                          HeightRequest="44"
+                          WidthRequest="44"
+                          Padding="0"
+                          Margin="0,0,10,5"
+                          BorderWidth="0"
+                          Clicked="AccessPoint2"
+                          HorizontalOptions="End"/>
+            </Grid>
+
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+
+            <!-- ServerPort1 -->
+            <!--<Grid Margin="10,-15,10,0" Padding="0"
+                  ColumnDefinitions="*,84"
+                  RowDefinitions="Auto,Auto">
+
+                <BoxView CornerRadius="18"
+                     BackgroundColor="#242424"
+                     HorizontalOptions="Fill"
+                     VerticalOptions="Fill"
+                     Grid.Row="0" Grid.RowSpan="2"
+                     Grid.Column="0" Grid.ColumnSpan="2"/>
+
+                  <Label x:Name="ServerPortLabel"
+                   Text="Config.ServerPort1"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Start"
+                   Margin="12,16,0,0"
+                   Grid.Column="0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnServerPortTapped" CommandParameter="2|ServerPort1" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                   <Label x:Name="ServerPortValueLabel"
+                       Text="empty"
+                       FontSize="18"
+                       TextColor="#A9A9B0"
+                       FontAttributes="Bold"
+                       VerticalOptions="Start"
+                       HorizontalOptions="Fill"
+                       HorizontalTextAlignment="End"
+                       Margin="0,18,10,12"
+                       Grid.Row="0"
+                       Grid.Column="1"
+                       MaxLines="1"
+                       LineBreakMode="TailTruncation"/>
+
+                  <Entry x:Name="ServerPortEntry"
+                   Placeholder="Введите значение"
+                   Keyboard="Numeric"
+                   MaxLength="5"  
+                   TextChanged="ServerPortEntry_TextChanged"   
+                   FontSize="18"
+                   TextColor="White"
+                   BackgroundColor="#232323"
+                   Margin="10,0,0,12"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Fill"
+                   HeightRequest="44"
+                   Grid.Row="1"
+                   Grid.Column="0"/>
+
+                  <Button Grid.Row="1" Grid.Column="1"
+                    Text="⏺️ Запис"
+                    BackgroundColor="#313131"
+                    TextColor="#000000"
+                    FontSize="32"
+                    CornerRadius="10"
+                    HeightRequest="44"
+                    WidthRequest="44"
+                    Padding="0"
+                    Margin="0,0,10,5"
+                    BorderWidth="0"
+                    Clicked="ServerPort1"
+                    HorizontalOptions="End"/>
+            </Grid>-->
+
+
+            <!-- ServerPort2 -->
+            <Grid Margin="10,-15,10,0" Padding="0"
+                  ColumnDefinitions="*,84"
+                  RowDefinitions="Auto,Auto">
+
+                <BoxView CornerRadius="18"
+                     BackgroundColor="#242424"
+                     HorizontalOptions="Fill"
+                     VerticalOptions="Fill"
+                     Grid.Row="0" Grid.RowSpan="2"
+                     Grid.Column="0" Grid.ColumnSpan="2"/>
+
+                <Label x:Name="ServerPor2tLabel"
+                   Text="Config.ServerPort2"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Start"
+                   Margin="12,16,0,0"
+                   Grid.Column="0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnServerPortTapped" CommandParameter="2|ServerPort2" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <Label x:Name="ServerPort2ValueLabel"
+                   Text="empty"
+                   FontSize="18"
+                   TextColor="#A9A9B0"
+                   FontAttributes="Bold"
+                   VerticalOptions="Start"
+                   HorizontalOptions="Fill"
+                   HorizontalTextAlignment="End"
+                   Margin="0,18,10,12"
+                   Grid.Row="0"
+                   Grid.Column="1"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation"/>
+
+                <Entry x:Name="ServerPort2Entry"
+                       Placeholder="Введите значение"
+                       Keyboard="Numeric"
+                       MaxLength="5"  
+                       TextChanged="ServerPort2Entry_TextChanged"   
+                       FontSize="18"
+                       TextColor="White"
+                       BackgroundColor="#232323"
+                       Margin="10,0,0,12"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Fill"
+                       HeightRequest="44"
+                       Grid.Row="1"
+                       Grid.Column="0"/>
+
+                            <Button Grid.Row="1" Grid.Column="1"
+                    Text="⏺️ Запис"
+                    BackgroundColor="#313131"
+                    TextColor="#000000"
+                    FontSize="32"
+                    CornerRadius="10"
+                    HeightRequest="44"
+                    WidthRequest="44"
+                    Padding="0"
+                    Margin="0,0,10,5"
+                    BorderWidth="0"
+                    Clicked="ServerPort2"
+                    HorizontalOptions="End"/>
+            </Grid>
+
+
+
+            <!--ipServer1--><!--
+            <Grid Margin="10,-15,10,0" Padding="0,0,0,12"
+                  ColumnDefinitions="Auto,*,84"
+                  RowDefinitions="Auto,Auto">
+
+                <BoxView CornerRadius="18"
+                     BackgroundColor="#242424"
+                     Grid.Row="0" Grid.RowSpan="2"
+                     Grid.Column="0" Grid.ColumnSpan="3"/>
+
+                --><!-- Заголовок --><!--
+                <Label x:Name="IpServer1tLabel"
+                       Text="Config.IpServer1"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       Margin="12,16,8,0"
+                       Grid.Row="0"
+                       Grid.Column="0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnServerPortTapped"
+                                  CommandParameter="2|ipServer1" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                --><!-- Значение (получит нормальную ширину и сместится влево) --><!--
+                <Label x:Name="IpServer1ValueLabel"
+                   Text="empty"
+                   FontSize="18"
+                   TextColor="#A9A9B0"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="End"
+                   Margin="0,18,-70,12"
+                   Grid.Row="0"
+                   Grid.Column="1"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation"/>
+
+                --><!-- Entry --><!--
+                <Entry x:Name="IpServer1Entry"
+                   Placeholder="Введите значение"
+                   Keyboard="Text"
+                   MaxLength="20"
+                   TextChanged="IpServer1Entry_TextChanged"
+                   FontSize="18"
+                   TextColor="White"
+                   BackgroundColor="#232323"
+                   Margin="10,0,0,12"
+                   HeightRequest="44"
+                   Grid.Row="1"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2"/>
+
+                --><!-- Кнопка --><!--
+                    <Button Grid.Row="1" Grid.Column="2"
+                        Text="⏺️ Запис"
+                        BackgroundColor="#313131"
+                        TextColor="#000000"
+                        FontSize="32"
+                        CornerRadius="10"
+                        HeightRequest="44"
+                        WidthRequest="44"
+                        Padding="0"
+                        Margin="0,0,10,5"
+                        BorderWidth="0"
+                        Clicked="IpServer1"
+                        HorizontalOptions="End"/>
+            </Grid>-->
+
+
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
+
+
+
+
+
+
+
+
+
+
+<!-- CodeObject1 -->
+<!--<Grid Margin="10,0,10,0" Padding="0"
+    ColumnDefinitions="*,84"
+    RowDefinitions="Auto,Auto">
+
+     <BoxView CornerRadius="18"
+           BackgroundColor="#242424"
+           HorizontalOptions="Fill"
+           VerticalOptions="Fill"
+           Grid.Row="0" Grid.RowSpan="2"
+           Grid.Column="0" Grid.ColumnSpan="2"/>
+
+     <Label x:Name="CodeObject1Label"
+         Text="Config.CodeObject1"
+         FontSize="18"
+         FontAttributes="Bold"
+         TextColor="White"
+         VerticalOptions="Start"
+         HorizontalOptions="Start"
+         Margin="12,16,0,0"
+         Grid.Column="0">
+         <Label.GestureRecognizers>
+             <TapGestureRecognizer Tapped="OnServerPortTapped" CommandParameter="2|CodeObject1" />
+         </Label.GestureRecognizers>
+     </Label>
+
+     <Label x:Name="CodeObject1ValueLabel"
+         Text="empty"
+         FontSize="18"
+         TextColor="#A9A9B0"
+         FontAttributes="Bold"
+         VerticalOptions="Start"
+         HorizontalOptions="Fill"
+         HorizontalTextAlignment="End"
+         Margin="0,18,10,12"
+         Grid.Row="0"
+         Grid.Column="1"
+         MaxLines="1"
+         LineBreakMode="TailTruncation"/>
+
+     <Entry x:Name="CodeObject1Entry"
+         Placeholder="Введите значение"
+         Keyboard="Numeric"
+         MaxLength="5"  
+         TextChanged="CodeObject1_TextChanged"   
+         FontSize="18"
+         TextColor="White"
+         BackgroundColor="#232323"
+         Margin="10,0,0,12"
+         VerticalOptions="Center"
+         HorizontalOptions="Fill"
+         HeightRequest="44"
+         Grid.Row="1"
+         Grid.Column="0"/>
+
+     <Button Grid.Row="1" Grid.Column="1"
+          Text="⏺️ Запис"
+          BackgroundColor="#313131"
+          TextColor="#000000"
+          FontSize="32"
+          CornerRadius="10"
+          HeightRequest="44"
+          WidthRequest="44"
+          Padding="0"
+          Margin="0,0,10,5"
+          BorderWidth="0"
+          Clicked="CodeObject1"
+          HorizontalOptions="End"/>
+ </Grid>
+
+
+
+
+ -->
+<!-- AccessPoint1 -->
+<!--
+ <Grid Margin="10,-15,10,0" Padding="0"
+       ColumnDefinitions="*,84"
+       RowDefinitions="Auto,Auto">
+
+     <BoxView CornerRadius="18"
+          BackgroundColor="#242424"
+          HorizontalOptions="Fill"
+          VerticalOptions="Fill"
+          Grid.Row="0" Grid.RowSpan="2"
+          Grid.Column="0" Grid.ColumnSpan="2"/>
+
+     <Label x:Name="AccessPoint1tLabel"
+            Text="Config.AccessPoint1"
+            FontSize="18"
+            FontAttributes="Bold"
+            TextColor="White"
+            VerticalOptions="Start"
+            HorizontalOptions="Start"
+            Margin="12,16,0,0"
+            Grid.Column="0">
+         <Label.GestureRecognizers>
+             <TapGestureRecognizer Tapped="OnServerPortTapped" CommandParameter="2|AccessPoint1" />
+         </Label.GestureRecognizers>
+     </Label>
+
+     <Label x:Name="AccessPoint1ValueLabel"
+            Text="empty"
+            FontSize="18"
+            TextColor="#A9A9B0"
+            FontAttributes="Bold"
+            VerticalOptions="Start"
+            HorizontalOptions="Fill"
+            HorizontalTextAlignment="End"
+            Margin="0,18,10,12"
+            Grid.Row="0"
+            Grid.Column="1"
+            MaxLines="1"
+            LineBreakMode="TailTruncation"/>
+
+     <Entry x:Name="AccessPoint1Entry"
+            Placeholder="Введите значение"
+            Keyboard="Text"
+            MaxLength="8"  
+            TextChanged="AccessPoint1Entry_TextChanged"   
+            FontSize="18"
+            TextColor="White"
+            BackgroundColor="#232323"
+            Margin="10,0,0,12"
+            VerticalOptions="Center"
+            HorizontalOptions="Fill"
+            HeightRequest="44"
+            Grid.Row="1"
+            Grid.Column="0"/>
+
+     <Button Grid.Row="1" Grid.Column="1"
+             Text="⏺️ Запис"
+             BackgroundColor="#313131"
+             TextColor="#000000"
+             FontSize="32"
+             CornerRadius="10"
+             HeightRequest="44"
+             WidthRequest="44"
+             Padding="0"
+             Margin="0,0,10,5"
+             BorderWidth="0"
+             Clicked="AccessPoint1"
+             HorizontalOptions="End"/>
+ </Grid>-->
+
+
+
+
+
+<!--ipServer1-->
+<!--<Grid Margin="10,-15,10,0" Padding="0"
+                   ColumnDefinitions="*,140"
+                   RowDefinitions="Auto,Auto">
+
+                <BoxView CornerRadius="18"
+                  BackgroundColor="#242424"
+                  HorizontalOptions="Fill"
+                  VerticalOptions="Fill"
+                  Grid.Row="0" Grid.RowSpan="2"
+                  Grid.Column="0" Grid.ColumnSpan="2"/>
+
+                <Label x:Name="IpServer1tLabel"
+                    Text="Config.IpServer1"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="White"
+                    VerticalOptions="Start"
+                    HorizontalOptions="Start"
+                    Margin="12,16,0,0"
+                    Grid.Column="0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnServerPortTapped" CommandParameter="2|ipServer1" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <Label x:Name="IpServer1ValueLabel"
+                    Text="empty"
+                    FontSize="18"
+                    TextColor="#A9A9B0"
+                    FontAttributes="Bold"
+                    VerticalOptions="Start"
+                    HorizontalOptions="Fill"
+                    HorizontalTextAlignment="End"
+                    Margin="0,18,15,12"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    MaxLines="1"
+                    LineBreakMode="TailTruncation"/>
+
+                <Entry x:Name="IpServer1Entry"
+                        Placeholder="Введите значение"
+                        Keyboard="Text"
+                        MaxLength="20"  
+                        TextChanged="IpServer1Entry_TextChanged"   
+                        FontSize="18"
+                        TextColor="White"
+                        BackgroundColor="#232323"
+                        Margin="10,0,0,12"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Fill"
+                        HeightRequest="44"
+                        Grid.Row="1"
+                        Grid.Column="0"/>
+
+                <Button Grid.Row="1" Grid.Column="1"
+                         Text="⏺️ Запис"
+                         BackgroundColor="#313131"
+                         TextColor="#000000"
+                         FontSize="32"
+                         CornerRadius="10"
+                         HeightRequest="44"
+                         WidthRequest="44"
+                         Padding="0"
+                         Margin="0,0,10,5"
+                         BorderWidth="0"
+                         Clicked="IpServer1"
+                         HorizontalOptions="End"/>
+            </Grid>-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

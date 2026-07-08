@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"           
+             x:Class="skb_home.MainPage"
+              BackgroundColor="#ad040d1a"
+             Shell.NavBarIsVisible="false">
+
+
+    <!--xmlns:skia="clr-namespace:SkiaSharp.Views.Maui.Controls;assembly=SkiaSharp.Views.Maui.Controls"-->
+    
+
+        <!-- Обертка для прокрутки экрана -->
+    <AbsoluteLayout>
+        <!-- Верхняя Панель -->
+        <Grid AbsoluteLayout.LayoutBounds="0,0,1,0.08" 
+            AbsoluteLayout.LayoutFlags="All"
+            HeightRequest="50"
+          
+            BackgroundColor="#1f1f1f" Padding="0,1">
+          
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Заголовок -->
+            <Label Text=""
+                FontSize="16" 
+                TextColor="White"
+                VerticalOptions="Center"
+                HorizontalOptions="Start"
+                 Margin="10,0,0,0"
+                 FontAttributes="Bold" />
+
+                <!-- Кнопка для вызова меню -->
+                  <Button Grid.Column="1"
+                   Text="☰" 
+                    FontSize="24" 
+                    TextColor="#0c69c6"
+                    FontAttributes="Bold"
+                    BackgroundColor="Transparent"
+                    WidthRequest="30"
+                  
+                    Clicked="OnMenuClicked"
+                    HorizontalOptions="End"
+                    VerticalOptions="Center" />
+
+                   
+            <Grid Grid.Column="2"
+                    WidthRequest="20" 
+                      HeightRequest="20" 
+                   HorizontalOptions="End" 
+                   VerticalOptions="Center"
+                    Margin="0,0,7,0"    >
+                <ImageButton Source="home3.png" 
+                 BackgroundColor="#0c69c6"
+                 Aspect="Center" 
+                    Clicked="OnHashClicked" />
+            </Grid>
+
+
+        </Grid>
+
+        <!-- Основной контент -->
+        <VerticalStackLayout AbsoluteLayout.LayoutBounds="0,0.1,1,0.75"
+                              AbsoluteLayout.LayoutFlags="All"
+                              Padding="35">
+         
+
+            <!--<Grid HeightRequest="250"  
+                VerticalOptions="Start"
+                HorizontalOptions="Center"
+                 Margin="0,4,0,10">
+            
+
+                <Image Source="fon.jpg" 
+                   Aspect="AspectFill" 
+                    WidthRequest="350"
+                    
+                    HeightRequest="255"
+                   
+                    HorizontalOptions="Center"
+                   
+                    VerticalOptions="Start"
+                     Grid.Row="0" 
+                    Grid.Column="0" />
+
+
+                    <Label Text="Вас вітає"
+                   FontSize="20"
+                   HorizontalOptions="Center"
+                   TextColor="White"
+                   FontAttributes="Bold"
+                   Margin="0,70,0,0" />
+
+                 <Label Text="СКБ ЕЛЕКТРОНМАШ!"
+                   FontSize="24"
+                   HorizontalOptions="Center"
+                   TextColor="White"
+                   FontAttributes="Bold"
+                   Margin="0,20,0,0" />
+
+              
+                <Image x:Name="rotatingImage"
+                       Source="scb.png"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       HeightRequest="92"
+                       WidthRequest="81"
+                       Margin="0,19,0,0" />
+
+
+
+
+
+            </Grid>-->
+
+
+            <Grid HeightRequest="250"
+      VerticalOptions="Start"
+      HorizontalOptions="Center"
+      Margin="0,4,0,10"
+      RowSpacing="0">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- верхний текст -->
+                    <RowDefinition Height="*"/>
+                    <!-- зона для значка -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- нижний текст (СКБ...) -->
+                </Grid.RowDefinitions>
+
+                <!-- Фон на весь Grid -->
+                <Image Source="fon.jpg"
+           Aspect="AspectFill"
+           WidthRequest="350"
+           HeightRequest="255"
+           HorizontalOptions="Center"
+           VerticalOptions="Fill"
+           Grid.Row="0"
+           Grid.RowSpan="3"/>
+
+                <!-- ВЕРХ: "Вас вітає" -->
+                <Label Text="Вас вітає"
+           Grid.Row="0"
+           FontSize="24"
+           HorizontalOptions="Center"
+           TextColor="White"
+           FontAttributes="Bold"
+           Margin="0,69,0,0"/>
+
+                <!-- ЦЕНТР: вращающийся значок -->
+                <Image x:Name="rotatingImage"
+           Grid.Row="1"
+           Source="scb.png"
+           HorizontalOptions="Center"
+           VerticalOptions="Center"
+           HeightRequest="92"
+           WidthRequest="81"/>
+
+                <!-- НИЗ: "СКБ ЕЛЕКТРОНМАШ!" (будет ниже значка, но на фоне картинки) -->
+                <Label Text="СКБ ЕЛЕКТРОНМАШ!"
+           Grid.Row="2"
+           FontSize="24"
+           HorizontalOptions="Center"
+           TextColor="White"
+           FontAttributes="Bold"
+           Margin="0,25,0,14"/>
+            </Grid>
+
+
+
+
+
+
+
+
+
+            <Label Text="www.chelmash.com.ua"
+               FontSize="16"
+                HorizontalOptions="Center"
+                TextColor="Blue"
+                 FontAttributes="Bold"
+                  Margin="0,10,0,0">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnLinkTapped" NumberOfTapsRequired="1" />
+                </Label.GestureRecognizers>
+            </Label>
+
+
+
+
+            <!-- Горизонтальная прокрутка -->
+            <CarouselView ItemsSource="{Binding CarouselItems}" IndicatorView="indicator">
+                <CarouselView.ItemTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+
+                            <Label Text="{Binding Title}" 
+                       FontSize="20"
+                        TextColor="White"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       Margin="0,10" />
+
+                            <!-- Показываем либо рисунок, либо снежинку -->
+                            <Border Stroke="#0B0101" 
+                        StrokeThickness="2"
+                        StrokeShape="RoundRectangle 25" 
+                        BackgroundColor="#7a154d85"
+                      
+                        Padding="5"
+                        Margin="5"
+                        HeightRequest="220"
+                        WidthRequest="220">
+
+                                <Image Source="{Binding ImageToDisplay}" 
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           HeightRequest="200"
+                           WidthRequest="200">
+                                    <Image.GestureRecognizers>
+                                        <TapGestureRecognizer 
+                                Command="{Binding Path=BindingContext.ItemSelectedCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" 
+                                CommandParameter="{Binding}" />
+                                    </Image.GestureRecognizers>
+                                </Image>
+
+                            </Border>
+
+
+
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CarouselView.ItemTemplate>
+            </CarouselView>
+
+
+            <!-- Индикатор -->
+            <IndicatorView x:Name="indicator" IndicatorColor="Gray" SelectedIndicatorColor="Blue" 
+               HorizontalOptions="Center" Margin="0,10,0,0" />
+
+        </VerticalStackLayout>
+
+       
+    </AbsoluteLayout>
+
+
+    
+
+
+</ContentPage>
+
+
+<!--<Grid HeightRequest="250"  
+    VerticalOptions="Start"
+    HorizontalOptions="Center"
+     Margin="0,2,0,10">
+
+
+       -->
+<!--SkiaSharp Canvas-->
+<!-- 
+     <skia:SKCanvasView PaintSurface="OnPaintSurface"
+            WidthRequest="330"
+            HeightRequest="250"
+            HorizontalOptions="Center"
+            VerticalOptions="Start"
+            Grid.Row="0" 
+            Grid.Column="0" />
+
+
+       -->
+<!--Текст и изображение поверх фона-->
+<!-- 
+     <Label Text="Вас вітає"
+       FontSize="20"
+       HorizontalOptions="Center"
+        TextColor="White"
+        FontAttributes="Bold"
+        Margin="0,70,0,0" />
+
+     <Label Text="СКБ ЕЛЕКТРОНМАШ!"
+         FontSize="24"
+         HorizontalOptions="Center"
+         TextColor="White"
+          FontAttributes="Bold"
+        Margin="0,20,0,0" />
+
+     <Image Source="scb.png"
+        HorizontalOptions="Center"
+        VerticalOptions="Center"
+        HeightRequest="92"
+        WidthRequest="81"
+        Margin="0,10,0,0" />
+    </Grid>-->
+
+
+
+<!--<Grid HeightRequest="250"  
+                VerticalOptions="Start"
+                HorizontalOptions="Center"
+                 Margin="0,2,0,10">
+
+
+              
+
+                <Image Source="fon.jpg" 
+                   Aspect="AspectFill" 
+                    WidthRequest="330"
+                    
+                    HeightRequest="250"
+                   
+                    HorizontalOptions="Center"
+                   
+                    VerticalOptions="Start"
+                     Grid.Row="0" 
+                    Grid.Column="0" />
+
+
+                    <Label Text="Вас вітає"
+                   FontSize="20"
+                   HorizontalOptions="Center"
+                   TextColor="White"
+                   FontAttributes="Bold"
+                   Margin="0,70,0,0" />
+
+            <Label Text="СКБ ЕЛЕКТРОНМАШ!"
+                   FontSize="24"
+                   HorizontalOptions="Center"
+                   TextColor="White"
+                   FontAttributes="Bold"
+                   Margin="0,20,0,0" />
+
+            <Image Source="scb.png"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   HeightRequest="92"
+                   WidthRequest="81"
+                   Margin="0,10,0,0" />
+
+           
+
+
+          </Grid>-->
+
+
+
+
+
+
+
+
+<!-- Кликабельный элемент -->
+<!--<Border Stroke="#141414"
+        StrokeThickness="2"
+        StrokeShape="RoundRectangle 15"
+        BackgroundColor="#1f1f1f"
+        Padding="10"
+        Margin="0,60,0,0"
+        HorizontalOptions="Center"
+        VerticalOptions="Center"
+        WidthRequest="220"
+        HeightRequest="60">
+
+
+
+
+
+    <Label Text=" + Додати прилад "
+           FontSize="18"
+           TextColor="White"
+           HorizontalOptions="Center"
+           VerticalOptions="Center">
+        <Label.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnAddDeviceTapped" />
+        </Label.GestureRecognizers>
+    </Label>
+</Border>-->
+

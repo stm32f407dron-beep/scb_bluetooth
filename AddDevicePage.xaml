@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="skb_home.AddDevicePage">
+    <VerticalStackLayout Padding="20">
+
+        <!-- Заголовок -->
+        <Label Text="Додати пристрій"
+               FontSize="24"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               Margin="0,0,0,30" />
+
+        <!-- Горизонтальная прокрутка -->
+        <CarouselView ItemsSource="{Binding CarouselItems}" IndicatorView="{x:Reference indicator}" 
+              HorizontalOptions="Fill" VerticalOptions="Center"
+              PeekAreaInsets="60"
+              HeightRequest="270">
+            <CarouselView.ItemTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                        <!-- Заголовок -->
+                        <Label Text="{Binding Title}" 
+                       FontSize="20"
+                       TextColor="White"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       Margin="0,10" />
+
+                        <Border Stroke="#0B0101" 
+                        StrokeThickness="2"
+                        StrokeShape="RoundRectangle 25" 
+                        BackgroundColor="#7a0b3a6a"
+                        Padding="10"
+                        Margin="5">
+
+                            <!-- VisualStateManager для эффекта "глубины" -->
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup>
+                                    <!-- Центральный элемент -->
+                                    <VisualState x:Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Property="WidthRequest" Value="230" />
+                                            <Setter Property="HeightRequest" Value="230" />
+                                            <Setter Property="Opacity" Value="1" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <!-- Боковые элементы -->
+                                    <VisualState x:Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter Property="WidthRequest" Value="180" />
+                                            <Setter Property="HeightRequest" Value="180" />
+                                            <Setter Property="Opacity" Value="0.7" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+
+                            <Image Source="{Binding ImageToDisplay}" 
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           HeightRequest="200"
+                           WidthRequest="200">
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                Command="{Binding Path=BindingContext.ItemSelectedCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" 
+                                CommandParameter="{Binding}" />
+                                </Image.GestureRecognizers>
+                            </Image>
+                        </Border>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+
+        <!-- Индикатор -->
+        <IndicatorView x:Name="indicator" IndicatorColor="Gray" SelectedIndicatorColor="Blue" 
+               HorizontalOptions="Center" Margin="0,10,0,0" />
+
+
+    </VerticalStackLayout>
+</ContentPage>

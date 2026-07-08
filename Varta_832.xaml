@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="skb_home.Varta_832"
+             Title="Varta_832">
+
+    <!-- Весь контент внутри ScrollView -->
+    <ScrollView>
+        <VerticalStackLayout>
+
+            <!-- Таблица -->
+            <CollectionView ItemsSource="{Binding Frames}">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical"/>
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout>
+
+                            <!-- Заголовок -->
+                            <Label Text="{Binding Header}"
+                                   FontAttributes="Bold"
+                                   FontSize="16"
+                                   TextColor="#1b6fc3"
+                                   Margin="0,5"/>
+
+                            <!-- Первая строка: BSVH -->
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="48"
+                                  Padding="2">
+                                <Label Text="BSVH1:" FontAttributes="Bold" Grid.Column="0"/>
+                                <Label Text="{Binding Exists}" Grid.Column="1"/>
+                            </Grid>
+
+                            <!-- 16 строк ШС -->
+                            <CollectionView ItemsSource="{Binding Values}">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical"/>
+                                </CollectionView.ItemsLayout>
+
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="Auto,*"
+                                              ColumnSpacing="30"
+                                              Padding="2">
+                                            <!-- Левая колонка: имя -->
+                                            <Label Text="{Binding Name}"
+                                                   FontAttributes="Bold"
+                                                   Grid.Column="0"
+                                                   TextColor="#1db41d"/>
+                                            <!-- Правая колонка: значение -->
+                                            <Label Text="{Binding Value}"
+                                                   Grid.Column="1"
+                                                   TextColor="White"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Терминал -->
+            <Border x:Name="TerminalBorder"
+                    IsVisible="False"
+                    Stroke="#0B0101"
+                    StrokeThickness="2"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="#4A9192"
+                    Padding="10"
+                    Margin="0,15,0,0"
+                    HeightRequest="510"
+                    WidthRequest="345">
+
+                <Grid RowDefinitions="Auto,*">
+                    <HorizontalStackLayout Grid.Row="0" Spacing="10" Margin="0,0,0,5">
+                        <Label Text="🖥️ Термінал"
+                               FontAttributes="Bold"
+                               FontSize="16"
+                               TextColor="#000000"
+                               VerticalOptions="Center"/>
+
+                        <Button Text="🗑️ Очистити"
+                                BackgroundColor="#FFFFFF"
+                                TextColor="#000000"
+                                FontAttributes="Bold"
+                                FontSize="14"
+                                Padding="5,2"
+                                CornerRadius="5"
+                                Clicked="OnClearTerminalClicked"/>
+                    </HorizontalStackLayout>
+
+                    <ScrollView Grid.Row="1" x:Name="scrollView" VerticalOptions="Fill">
+                        <Label x:Name="label4"
+                               Text="Empty text to receive data"
+                               FontAttributes="Bold"
+                               FontSize="18"
+                               TextColor="Black"
+                               LineBreakMode="WordWrap"
+                               VerticalTextAlignment="Start"
+                               HorizontalTextAlignment="Start"/>
+                    </ScrollView>
+                </Grid>
+            </Border>
+
+            <!-- Кнопка сохранения -->
+            <Button Text="⏏️ Витягнути"
+                    BackgroundColor="#10950C"
+                    TextColor="#000000"
+                    FontAttributes="Bold"
+                    FontSize="14"
+                    Padding="2,1"
+                    CornerRadius="3"
+                    WidthRequest="90"
+                    HorizontalOptions="Center"
+                    Clicked="OnSaveTerminalClicked"/>
+
+            <!-- Кнопка терминала -->
+            <Grid ColumnDefinitions="Auto,*,Auto"
+                  ColumnSpacing="10"
+                  HeightRequest="50"
+                  WidthRequest="320">
+                <Label Grid.Column="0"
+                       Margin="4,15,0,0"
+                       Text="Включити термінал"
+                       TextColor="#FFFFFF"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Start">
+                    <Label.Shadow>
+                        <Shadow Brush="Black" Radius="8" Offset="2,2" Opacity="0.6"/>
+                    </Label.Shadow>
+                </Label>
+
+                <Switch Grid.Column="2"
+                        x:Name="TerminalSwitch"
+                        OnColor="#1046B0"
+                        ThumbColor="White"
+                        Margin="0,15,4,0"
+                        VerticalOptions="Center"
+                        HorizontalOptions="End"
+                        Toggled="OnTerminalToggled"/>
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

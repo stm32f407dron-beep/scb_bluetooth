@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="skb_home.Varta_1_816"
+             Title="Varta 1/816"       
+             BackgroundColor="#000000"
+             Padding="-1">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="🔄" Order="Primary" Priority="0" Clicked="OnRefreshClicked"/>
+        <ToolbarItem Text="⚙" Order="Primary" Priority="1" Clicked="OnSettingsClicked"/>
+    </ContentPage.ToolbarItems>
+    <ScrollView Orientation="Vertical" VerticalScrollBarVisibility="Default">
+        <StackLayout HorizontalOptions="Center" Spacing="2" Padding="0,4">
+
+            <!-- Заголовок -->
+            <Label Text="Струм шлейфів"
+                Margin="0,5,0,0"   
+             FontSize="24"
+             FontAttributes="Bold"
+             TextColor="#FFFFFF"
+             HorizontalTextAlignment="Center"
+             VerticalTextAlignment="Center"
+                 
+                   >
+                <Label.Shadow>
+                    <Shadow Brush="Black" Radius="15" Offset="5,5" Opacity="0.7"/>
+                </Label.Shadow>
+            </Label>
+
+
+            <!-- Легенда состояний (овалы с подписями) -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="22" Margin="0,6,0,4">
+                <!-- Норма -->
+                <StackLayout Orientation="Horizontal" Spacing="5" VerticalOptions="Center">
+                    <BoxView Color="Green"
+                 WidthRequest="28" HeightRequest="14"
+                 CornerRadius="3"
+                 VerticalOptions="Center"
+                    BackgroundColor ="Black"                  
+                             />
+                    <Label Text="норма"
+               FontSize="14"
+               TextColor="White"
+               VerticalOptions="Center"
+               
+                 FontAttributes="Bold"      
+                           />
+                </StackLayout>
+                <!-- Обрив -->
+                <StackLayout Orientation="Horizontal" Spacing="5" VerticalOptions="Center">
+                    <BoxView Color="Blue"
+                 WidthRequest="28" HeightRequest="14"
+                 CornerRadius="3"
+                 VerticalOptions="Center"
+                   BackgroundColor ="Black"                   
+                             />
+                    <Label Text="обрив"
+               FontSize="14"
+               TextColor="White"
+               VerticalOptions="Center"
+               FontAttributes="Bold"/>
+                </StackLayout>
+                <!-- К.З. -->
+                <StackLayout Orientation="Horizontal" Spacing="5" VerticalOptions="Center">
+                    <BoxView Color="#6e1717"
+                 WidthRequest="28" HeightRequest="14"
+                 CornerRadius="5"
+                 VerticalOptions="Center"
+                  BackgroundColor ="Black"           
+                             />
+                    <Label Text="к.з."
+               FontSize="14"
+               TextColor="White"
+               VerticalOptions="Center"
+               FontAttributes="Bold"/>
+                </StackLayout>
+            </HorizontalStackLayout>
+
+
+
+            <!-- Гистограмма с идеальной разметкой -->
+            <Grid WidthRequest="340" HeightRequest="270"
+            RowDefinitions="20,246,30,*"
+            ColumnDefinitions="25,275,25">
+
+                 <!--Белый скруглённый фон--> 
+                <Border Grid.Row="1" Grid.Column="1"
+                BackgroundColor="#CAE9FBF9"
+                Stroke="{x:Null}"
+                StrokeShape="RoundRectangle 12"
+                HeightRequest="246"
+                WidthRequest="300"
+                       
+                        />
+
+                 <!--График--> 
+                <GraphicsView x:Name="HistCanvas"
+                      Grid.Row="1"
+                      Grid.Column="1"
+                      WidthRequest="275"
+                      HeightRequest="246"
+                      BackgroundColor="Transparent"
+                             
+                              />
+            </Grid>
+
+
+            <!--<Grid
+                RowDefinitions="20,*,30,*"
+                ColumnDefinitions="25,*,25"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill">
+
+                 Белый скруглённый фон 
+                <Border Grid.Row="1" Grid.Column="1"
+                    BackgroundColor="#95E8EF"
+                    Stroke="{x:Null}"
+                    StrokeShape="RoundRectangle 12"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Fill" />
+
+                 График 
+                <GraphicsView x:Name="HistCanvas"
+                  Grid.Row="1"
+                  Grid.Column="1"
+                  BackgroundColor="Transparent"
+                  HorizontalOptions="Fill"
+                  VerticalOptions="Fill" />
+            </Grid>-->
+
+
+
+
+
+
+
+
+
+
+            <!-- Остальные элементы как у тебя -->
+            <!--<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10"
+            AbsoluteLayout.LayoutBounds="0.5, 0.44, 320, 50"
+            AbsoluteLayout.LayoutFlags="PositionProportional" ZIndex="100">
+                <Label Grid.Column="0"
+                  Margin="14,0,0,0"     
+               Text="Вичитати усі шлейфа"
+               TextColor="#FFFFFF"
+               FontSize="22"
+               FontAttributes="Bold"
+               VerticalOptions="Center"
+               HorizontalOptions="Start">
+                    <Label.Shadow>
+                        <Shadow Brush="Black" Radius="8" Offset="2,2" Opacity="0.6"/>
+                    </Label.Shadow>
+                </Label>
+                <Button Grid.Column="1"
+                Text="📘"
+                BackgroundColor="Transparent"
+                TextColor="White"
+                FontSize="32"
+                CornerRadius="0"
+                HeightRequest="65"
+                WidthRequest="35"
+                Padding="0"
+                Margin="2,0,0,5"           
+                BorderWidth="0"
+                Clicked="OnReadAllClicked"/>
+            </Grid>-->
+
+            <!--<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" HeightRequest="50" WidthRequest="320">
+                <Entry Grid.Column="0"
+                 Margin="0,0,0,0"           
+               x:Name="LoopNumberEntry"
+               Placeholder="Введіть № шлейфа"
+               PlaceholderColor="#FFFFFF"
+               TextColor="White"
+               BackgroundColor="#000000"
+               WidthRequest="205"
+               HeightRequest="45"
+               Keyboard="Numeric"
+               MaxLength="2"
+               HorizontalTextAlignment="Start"
+               HorizontalOptions="Start"
+               VerticalOptions="Start"
+               FontSize="22"
+               FontAttributes="Bold"/>
+                <Button Grid.Column="1"
+                Text="📘"
+                BackgroundColor="Transparent"
+                TextColor="White"
+                FontSize="32"
+                CornerRadius="0"
+                HeightRequest="35"
+                WidthRequest="35"
+                Padding="0"
+                Margin="13,0,0,0"
+                BorderWidth="0"
+                Clicked="OnReadSingleClicked"/>
+            </Grid>-->
+
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" HeightRequest="50" WidthRequest="320">
+                <Label Grid.Column="0"
+                  Margin="4,15,0,0"          
+               Text="Включити термінал"
+               TextColor="#FFFFFF"
+               FontSize="22"
+               FontAttributes="Bold"
+               VerticalOptions="Center"
+               HorizontalOptions="Start">
+                    <Label.Shadow>
+                        <Shadow Brush="Black" Radius="8" Offset="2,2" Opacity="0.6"/>
+                    </Label.Shadow>
+                </Label>
+                <Switch Grid.Column="1"
+                x:Name="TerminalSwitch"
+                OnColor="#1046B0"
+                ThumbColor="White"
+                Margin="40,15,0,0"
+                VerticalOptions="Center"
+                HorizontalOptions="Start"
+                Toggled="OnTerminalToggled"/>
+            </Grid>
+
+            <Border x:Name="TerminalBorder"
+              IsVisible="False"
+              Stroke="#0B0101"
+              StrokeThickness="2"
+              StrokeShape="RoundRectangle 10"
+              BackgroundColor="#4A9192"
+              Padding="10"
+              Margin="0,15,0,0"      
+              HeightRequest="510"
+              WidthRequest="345">
+                <Grid RowDefinitions="Auto,*">
+                    <HorizontalStackLayout Grid.Row="0" Spacing="10" Margin="0,0,0,5">
+                        <Label Text="🖥️ Термінал"
+                   FontAttributes="Bold"
+                   FontSize="16"
+                   TextColor="#000000"
+                   VerticalOptions="Center"/>
+                        <Button Text="🗑️ Очистити"
+                    BackgroundColor="#FFFFFF"
+                    TextColor="#000000"
+                    FontAttributes="Bold"
+                    FontSize="14"
+                    Padding="5,2"
+                    CornerRadius="5"
+                    Clicked="OnClearTerminalClicked"/>
+                    </HorizontalStackLayout>
+                    <ScrollView Grid.Row="1" x:Name="scrollView" VerticalOptions="Fill">
+                        <Label x:Name="label4"
+                   Text="Empty text to receive data"
+                   FontAttributes="Bold"
+                   FontSize="18"
+                   TextColor="Black"
+                   LineBreakMode="WordWrap"
+                   VerticalTextAlignment="Start"
+                   HorizontalTextAlignment="Start"/>
+                    </ScrollView>
+                </Grid>
+            </Border>
+        </StackLayout>
+    </ScrollView>
+</ContentPage>
