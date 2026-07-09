@@ -50,7 +50,7 @@ public partial class scan : ContentPage
         // Инициализация данных карусели
         CarouselItemScans = new ObservableCollection<CarouselItemScan>
         {
-            new CarouselItemScan { Title = "ВАРТА 1/816", ImagePath = "varta.jpg", IconFallback = "" },
+         //   new CarouselItemScan { Title = "ВАРТА 1/816", ImagePath = "varta.jpg", IconFallback = "" },
             new CarouselItemScan { Title = "ВАРТА 2/816", ImagePath = "varta.jpg", IconFallback = "" },
             new CarouselItemScan { Title = "ВАРТA 832", ImagePath = "v_832.jpg", IconFallback = "" }
         };
@@ -73,7 +73,7 @@ public partial class scan : ContentPage
             // Логика для перехода на Settingpage
             if (selectedItem.Title == "ВАРТА 1/816")
             {
-                await Navigation.PushAsync(new Settingpage(_bluetoothService));
+              //  await Navigation.PushAsync(new Settingpage(_bluetoothService));
             }
             // Логика для перехода на Varta_1_816
             if (selectedItem.Title == "ВАРТА 2/816")
