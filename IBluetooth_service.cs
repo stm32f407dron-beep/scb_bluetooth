@@ -50,6 +50,7 @@ namespace skb_home
         public event Action<string> DataReceivedVarta832;
         Task ReceiverData_Varta832();
 
+        // Новая задача для Varta832_Old - пока не использую
         Task ReceiverData_Varta832_Old();
 
 
@@ -57,7 +58,7 @@ namespace skb_home
         string[] TypeValue { get; }
 
 
-
+        // Событие для передачи VartaFrame
         event Action<VartaFrame> DataReceivedFrame;
 
 

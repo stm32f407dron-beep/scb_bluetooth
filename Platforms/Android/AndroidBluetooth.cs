@@ -1571,8 +1571,9 @@ namespace skb_home.Platforms.Android
             }
         }
 
-
+        // событие для задачи Task ReceiverData_Varta832()
         public event Action<VartaFrame> DataReceivedFrame;
+        //  
         public async Task ReceiverData_Varta832()
         {
             // Если прием уже запущен — второй раз не стартуем 
