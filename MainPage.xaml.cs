@@ -70,7 +70,7 @@ public partial class MainPage : ContentPage
         // Настройка данных: первая страница с рисунком, остальные с снежинкой
         CarouselItems = new ObservableCollection<CarouselItem>
             {
-                new CarouselItem { Title = "ВАРТА 1/816", ImagePath = "varta.jpg", IconFallback = "" }, // Первая страница с рисунком
+              //  new CarouselItem { Title = "ВАРТА 1/816", ImagePath = "varta.jpg", IconFallback = "" }, // Первая страница с рисунком
                 new CarouselItem { Title = "ВАРТА 2/816", ImagePath = "varta.jpg", IconFallback = "" }, // Вторая страница со снежинкой
                 new CarouselItem { Title = "ВАРТA 832", ImagePath = "v_832.jpg", IconFallback = "" } // Третья страница со снежинкой
             };
@@ -170,10 +170,10 @@ public partial class MainPage : ContentPage
             // Переход на Settingpage  "ВАРТА 1/816"
             if (selectedItem.Title == "ВАРТА 1/816")
             {
-#if ANDROID
-                Android.Util.Log.Info("MainPage", "Navigating to Settingpage.");
-#endif
-                await Navigation.PushAsync(new Settingpage(_bluetoothService));
+//#if ANDROID
+//                Android.Util.Log.Info("MainPage", "Navigating to Settingpage.");
+//#endif
+//                await Navigation.PushAsync(new Settingpage(_bluetoothService));
             }
 
             // Переход на  страницу Varta_1_816 "ВАРТА 2/816"
