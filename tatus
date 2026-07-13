@@ -1,0 +1,29 @@
+cc[33mcommit bca5d994f02df0b9142fa24127b6254ee442ef0a[m[33m ([m[1;36mHEAD -> [m[1;32mbranch_1[m[33m, [m[1;31morigin/branch_1[m[33m)[m
+Author: stm32f407dron-beep <stm32f407dron@gmail.com>
+Date:   Thu Jul 9 17:59:30 2026 +0300
+
+    Изменения в branch_1, из файла scan убран переход на ВАРТА 1/816
+
+[33mcommit b6bdaea514c62ff35449fa6b2e7b0550b5559ef3[m
+Author: stm32f407dron-beep <stm32f407dron@gmail.com>
+Date:   Thu Jul 9 16:38:11 2026 +0300
+
+    Очистка временных файлов из репозитория
+
+[33mcommit 444a30592e315c47fcb959744de5c2a144db46ba[m
+Author: stm32f407dron-beep <stm32f407dron@gmail.com>
+Date:   Thu Jul 9 16:18:38 2026 +0300
+
+    Добавлен .gitignore для временных файлов
+
+[33mcommit c8a149ab1f28f8669aa1142004f11011c8390a16[m
+Author: Dron07Stm12 <dronperenen@gmail.com>
+Date:   Wed Jul 8 21:10:24 2026 +0300
+
+    Первый коммит проекта scb_home
+
+[33mcommit 24426c9ffe325565f9bd782d5794c77dfaefbf60[m
+Author: Dron07Stm12 <dronperenen@gmail.com>
+Date:   Wed Jul 8 20:28:13 2026 +0300
+
+    новый scb_home

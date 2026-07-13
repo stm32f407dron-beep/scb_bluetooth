@@ -43,6 +43,21 @@ public partial class MainPage : ContentPage
     private bool _isRotating = false;
 
 
+
+    // 🔥 НОВОЕ: Динамические размеры
+    public double ScreenWidth => DeviceDisplay.Current.MainDisplayInfo.Width / DeviceDisplay.Current.MainDisplayInfo.Density;
+    public double ScreenHeight => DeviceDisplay.Current.MainDisplayInfo.Height / DeviceDisplay.Current.MainDisplayInfo.Density;
+    public double CardSize => ScreenWidth * 0.6; // 60% ширины экрана
+   // public double IconSize => CardSize * 0.8; // 80% от размера карточки
+    public double TopGridHeight => ScreenHeight * 0.3; // 30% высоты экрана
+
+
+
+
+
+
+
+
     public MainPage(IBluetooth_service bluetoothService)
     {
         InitializeComponent();
