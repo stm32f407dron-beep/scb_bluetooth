@@ -110,7 +110,7 @@
             <Label Text="www.chelmash.com.ua"
                    FontSize="16"
                    HorizontalOptions="Center"
-                   TextColor="Blue"
+                   TextColor="#21219b"
                    FontAttributes="Bold"
                    Margin="0,5,0,15">
                 <Label.GestureRecognizers>
@@ -138,7 +138,7 @@
                             <Border Stroke="#0F0101" 
                                     StrokeThickness="2"
                                     StrokeShape="RoundRectangle 25" 
-                                    BackgroundColor="#B31C1C38"
+                                    BackgroundColor="#5A151563"
                                     Padding="5"
                                     Margin="5"
                                     HeightRequest="{Binding Path=BindingContext.CardSize, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
@@ -165,8 +165,8 @@
 
             <!-- Индикатор -->
             <IndicatorView x:Name="indicator" 
-                          IndicatorColor="Gray" 
-                          SelectedIndicatorColor="Blue" 
+                          IndicatorColor="White" 
+                          SelectedIndicatorColor="#181869" 
                           HorizontalOptions="Center" 
                           Margin="0,10,0,0" />
 
