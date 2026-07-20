@@ -127,6 +127,7 @@
                                            HorizontalOptions="Center" 
                                            VerticalOptions="Center">
 
+                            <!-- Привязка Label.Text → берёт Title, обьект class CarouselItem -->
                             <Label Text="{Binding Title}" 
                                    FontSize="20"
                                    TextColor="White"
@@ -144,6 +145,7 @@
                                     HeightRequest="{Binding Path=BindingContext.CardSize, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                     WidthRequest="{Binding Path=BindingContext.CardSize, Source={RelativeSource AncestorType={x:Type ContentPage}}}">
 
+                                <!-- Привязка Image.Source → берёт ImageToDisplay, обьект class CarouselItem -->
                                 <Image Source="{Binding ImageToDisplay}" 
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center"
@@ -175,6 +177,18 @@
     </AbsoluteLayout>
 
 </ContentPage>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 <!--<Grid HeightRequest="250"  
     VerticalOptions="Start"
     HorizontalOptions="Center"

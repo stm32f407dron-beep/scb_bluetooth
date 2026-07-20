@@ -30,7 +30,7 @@ public partial class MainPage : ContentPage
     // Поле для хранения активного меню
     private PopupMenu? activePopupMenu;
 
-    // Коллекция элементов для карусели
+    // Коллекция элементов для карусели - ObservableCollection уведомляет UI при добавлении/удалении элементов
     public ObservableCollection<CarouselItem> CarouselItems { get; set; }
 
     // Команда для обработки выбора элемента карусели
@@ -82,7 +82,8 @@ public partial class MainPage : ContentPage
 
 
         //
-        // Настройка данных: первая страница с рисунком, остальные с снежинкой
+        // Настройка данных: первая страница с рисунком
+        // коллекция привязана к CarouselView через ItemsSource="{Binding CarouselItems}".
         CarouselItems = new ObservableCollection<CarouselItem>
             {
               //  new CarouselItem { Title = "ВАРТА 1/816", ImagePath = "varta.jpg", IconFallback = "" }, // Первая страница с рисунком
@@ -322,7 +323,7 @@ public partial class MainPage : ContentPage
                 if (isSelected != value)
                 {
                     isSelected = value;
-                    OnPropertyChanged(nameof(IsSelected)); // Уведомление об изменении свойства
+                    OnPropertyChanged(nameof(IsSelected)); // Уведомление об изменении свойства IsSelected
                 }
             }
         }
@@ -330,10 +331,14 @@ public partial class MainPage : ContentPage
         // Выбор отображаемого изображения (рисунок или снежинка)
         public string ImageToDisplay => string.IsNullOrEmpty(ImagePath) ? IconFallback : ImagePath;
 
+       
+
         // Реализация интерфейса INotifyPropertyChanged
+        // событие, для привязки данных (Binding) в MAUI
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
+            //PropertyChanged — это событие (по сути, делегат), на которое подписывается система привязки данных (Binding) 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
