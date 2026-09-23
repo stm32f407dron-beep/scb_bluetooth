@@ -1,0 +1,10 @@
+/bin/
+/obj/
+/.vs/
+/*.dll
+/*.exe
+/*.pdb
+/*.apk
+/*.aab
+/*.ipa
+
