@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"           
              x:Class="skb_home.MainPage"
-             BackgroundColor="#ad040d1a"
+             BackgroundColor="#1a1a1a"
              Shell.NavBarIsVisible="false">
 
     <AbsoluteLayout>
@@ -83,7 +83,7 @@
                        HorizontalOptions="Center"
                        TextColor="White"
                        FontAttributes="Bold"
-                       Margin="0,20,0,0"/>
+                       Margin="0,40,0,0"/>
 
                 <!-- ЦЕНТР: вращающийся значок (фиксированный размер) -->
                 <Image x:Name="rotatingImage"
@@ -110,7 +110,7 @@
             <Label Text="www.chelmash.com.ua"
                    FontSize="16"
                    HorizontalOptions="Center"
-                   TextColor="#21219b"
+                   TextColor="#B0B0B0"
                    FontAttributes="Bold"
                    Margin="0,5,0,15">
                 <Label.GestureRecognizers>
@@ -139,7 +139,7 @@
                             <Border Stroke="#0F0101" 
                                     StrokeThickness="2"
                                     StrokeShape="RoundRectangle 25" 
-                                    BackgroundColor="#5A151563"
+                                    BackgroundColor="#1C276D"
                                     Padding="5"
                                     Margin="5"
                                     HeightRequest="{Binding Path=BindingContext.CardSize, Source={RelativeSource AncestorType={x:Type ContentPage}}}"

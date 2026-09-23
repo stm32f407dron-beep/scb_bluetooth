@@ -230,7 +230,7 @@ public partial class MainPage : ContentPage
         {
             "Сканувати",
             "Додати прилад",
-            "Нова автоматизація"
+          //  "Нова автоматизація"
         };
 
         // Создаем новое меню
@@ -259,9 +259,9 @@ public partial class MainPage : ContentPage
 #endif
                 await Navigation.PushAsync(new AddDevicePage());
                 break;
-            case "Нова автоматизація":
-                await DisplayAlert("Меню", "Функція автоматизація в розробці.", "OK");
-                break;
+         //   case "Нова автоматизація":
+          //      await DisplayAlert("Меню", "Функція автоматизація в розробці.", "OK");
+          //      break;
             case "Сканувати":
 #if ANDROID
                 Android.Util.Log.Info("MainPage", "Navigating to scan page.");
