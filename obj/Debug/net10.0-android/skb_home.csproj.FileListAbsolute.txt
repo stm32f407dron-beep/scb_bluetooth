@@ -1,0 +1,5 @@
+C:\Users\User\source\repos\skb_home\obj\Debug\net10.0-android\.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+C:\Users\User\source\repos\skb_home\obj\Debug\net10.0-android\build.props
+C:\Users\User\source\repos\skb_home\obj\Debug\net10.0-android\adb.props
+C:\Users\User\source\repos\skb_home\obj\Debug\net10.0-android\_CompileBindingJava.FileList.txt
+C:\Users\User\source\repos\skb_home\obj\Debug\net10.0-android\skb_home.csproj.AssemblyReference.cache
