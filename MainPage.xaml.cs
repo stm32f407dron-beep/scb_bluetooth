@@ -47,15 +47,21 @@ public partial class MainPage : ContentPage
     // 🔥 НОВОЕ: Динамические размеры
     public double ScreenWidth => DeviceDisplay.Current.MainDisplayInfo.Width / DeviceDisplay.Current.MainDisplayInfo.Density;
     public double ScreenHeight => DeviceDisplay.Current.MainDisplayInfo.Height / DeviceDisplay.Current.MainDisplayInfo.Density;
-    public double CardSize => ScreenWidth * 0.6; // 60% ширины экрана
+
+   // public double CardSize => ScreenWidth * 0.6; // 60% ширины экрана
    // public double IconSize => CardSize * 0.8; // 80% от размера карточки
-    public double TopGridHeight => ScreenHeight * 0.3; // 30% высоты экрана
+  //  public double TopGridHeight => ScreenHeight * 0.3; // 30% высоты экрана
+
+    //
+    // СТАЛО:
+    // Не меньше 200 dp (для мелких экранов) и не больше 320 dp (для планшетов)
+    public double CardSize => Math.Clamp(ScreenWidth * 0.6, 200, 320);
+
+    // Не меньше 220 dp, иначе текст "Вас вітає" налезет на логотип
+    public double TopGridHeight => Math.Max(220, ScreenHeight * 0.28);
 
 
-
-
-
-
+    //
 
 
     public MainPage(IBluetooth_service bluetoothService)

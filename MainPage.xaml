@@ -146,18 +146,18 @@
                                     WidthRequest="{Binding Path=BindingContext.CardSize, Source={RelativeSource AncestorType={x:Type ContentPage}}}">
 
                                 <!-- Привязка Image.Source → берёт ImageToDisplay, обьект class CarouselItem -->
+                                <!-- СТАЛО: -->
                                 <Image Source="{Binding ImageToDisplay}" 
-                                       HorizontalOptions="Center"
-                                       VerticalOptions="Center"
-                                       HeightRequest="200"
-                                       WidthRequest="200">
+                                  HorizontalOptions="Fill"
+                                  VerticalOptions="Fill"
+                                   Aspect="AspectFit">
                                     <Image.GestureRecognizers>
                                         <TapGestureRecognizer 
-                                            Command="{Binding Path=BindingContext.ItemSelectedCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" 
-                                            CommandParameter="{Binding}" />
+                                         Command="{Binding Path=BindingContext.ItemSelectedCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" 
+                                          CommandParameter="{Binding}" />
                                     </Image.GestureRecognizers>
                                 </Image>
-
+                                
                             </Border>
 
                         </VerticalStackLayout>
