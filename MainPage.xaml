@@ -5,178 +5,190 @@
              BackgroundColor="#1a1a1a"
              Shell.NavBarIsVisible="false">
 
-    <AbsoluteLayout>
-        <!-- Верхняя Панель (8%) -->
-        <Grid AbsoluteLayout.LayoutBounds="0,0,1,0.075" 
+    <!-- Корневой AbsoluteLayout, чтобы меню позиционировалось точно так, как было задуманно в PopupMenu -->
+    <AbsoluteLayout x:Name="RootLayout">
+
+        <!-- Вся страница (Grid со скроллом) занимает 100% ширины и высоты -->
+        <Grid AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
               AbsoluteLayout.LayoutFlags="All"
-              BackgroundColor="#1f1f1f" 
-              Padding="0,1">
+              RowDefinitions="50, *">
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+            <!-- 1. Верхняя Панель -->
+            <Grid Grid.Row="0"
+                  BackgroundColor="#1f1f1f" 
+                  Padding="10,0"
+                  ColumnDefinitions="*, Auto, Auto">
 
-            <Label Text=""
-                   FontSize="16" 
-                   TextColor="White"
-                   VerticalOptions="Center"
-                   HorizontalOptions="Start"
-                   Margin="10,0,0,0"
-                   FontAttributes="Bold" />
-
-            <Button Grid.Column="1"
-                    Text="☰" 
-                    FontSize="24" 
-                    TextColor="#0c69c6"
-                    FontAttributes="Bold"
-                    BackgroundColor="Transparent"
-                    WidthRequest="30"
-                    Clicked="OnMenuClicked"
-                    HorizontalOptions="End"
-                    VerticalOptions="Center" />
-
-            <Grid Grid.Column="2"
-                  WidthRequest="20" 
-                  HeightRequest="20" 
-                  HorizontalOptions="End" 
-                  VerticalOptions="Center"
-                  Margin="0,0,7,0">
-                <ImageButton Source="home3.png" 
-                             BackgroundColor="#0c69c6"
-                             Aspect="Center" 
-                             Clicked="OnHashClicked" />
-            </Grid>
-        </Grid>
-
-        <!-- Основной контент (75%) -->
-        <VerticalStackLayout AbsoluteLayout.LayoutBounds="0,1.5,1,0.9"
-                             AbsoluteLayout.LayoutFlags="All"
-                             Padding="15,0,15,15">
-
-            <!-- Верхний Grid (логотип) -->
-            <Grid HeightRequest="{Binding TopGridHeight}"
-                  VerticalOptions="Start"
-                  HorizontalOptions="Center"
-                  Margin="0,0,0,15"
-                  RowSpacing="0">
-
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <!-- Фон -->
-                <Image Source="fon.jpg"
-                       Aspect="AspectFill"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Fill"
-                       Grid.Row="0"
-                       Grid.RowSpan="3"/>
-
-                <!-- ВЕРХ: "Вас вітає" -->
-                <Label Text="Вас вітає"
-                       Grid.Row="0"
-                       FontSize="24"
-                       HorizontalOptions="Center"
+                <Label Text=""
+                       FontSize="16" 
                        TextColor="White"
-                       FontAttributes="Bold"
-                       Margin="0,40,0,0"/>
-
-                <!-- ЦЕНТР: вращающийся значок (фиксированный размер) -->
-                <Image x:Name="rotatingImage"
-                       Grid.Row="1"
-                       Source="scb.png"
-                       HorizontalOptions="Center"
                        VerticalOptions="Center"
-                       HeightRequest="92"
-                       WidthRequest="81"
-                       Margin="0,35,0,0"
-                       />
+                       HorizontalOptions="Start"
+                       FontAttributes="Bold" />
 
-                <!-- НИЗ: "СКБ ЕЛЕКТРОНМАШ!" -->
-                <Label Text="СКБ ЕЛЕКТРОНМАШ!"
-                       Grid.Row="2"
-                       FontSize="24"
-                       HorizontalOptions="Center"
-                       TextColor="White"
-                       FontAttributes="Bold"
-                       Margin="0,15,0,10"/>
+                <Button Grid.Column="1"
+                        Text="☰" 
+                        FontSize="24" 
+                        TextColor="#0c69c6"
+                        FontAttributes="Bold"
+                        BackgroundColor="Transparent"
+                        WidthRequest="40"
+                        Clicked="OnMenuClicked"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center" />
+
+                <Button Grid.Column="2"
+                        Text="⌂" 
+                        FontSize="26" 
+                        TextColor="#0c69c6"
+                        FontAttributes="Bold"
+                        BackgroundColor="Transparent"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        Padding="0"
+                        Clicked="OnHashClicked"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center"
+                        Margin="5,0,5,0" /> 
             </Grid>
 
-            <!-- Сайт -->
-            <Label Text="www.chelmash.com.ua"
-                   FontSize="16"
-                   HorizontalOptions="Center"
-                   TextColor="#B0B0B0"
-                   FontAttributes="Bold"
-                   Margin="0,5,0,15">
-                <Label.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnLinkTapped" NumberOfTapsRequired="1" />
-                </Label.GestureRecognizers>
-            </Label>
+            <!-- 2. Основной контент со скроллом -->
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Padding="15,5,15,15" Spacing="8">
 
-            <!-- CarouselView с адаптивными карточками -->
-            <CarouselView ItemsSource="{Binding CarouselItems}" 
-                          IndicatorView="indicator">
-                <CarouselView.ItemTemplate>
-                    <DataTemplate>
-                        <VerticalStackLayout Spacing="10" 
-                                           HorizontalOptions="Center" 
-                                           VerticalOptions="Center">
+                    <!-- Верхний баннер -->
+                    <Grid HeightRequest="{Binding TopGridHeight}"
+                          HorizontalOptions="Fill"
+                          Margin="0,0,0,10"
+                          RowSpacing="0">
 
-                            <!-- Привязка Label.Text → берёт Title, обьект class CarouselItem -->
-                            <Label Text="{Binding Title}" 
-                                   FontSize="20"
-                                   TextColor="White"
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="Center"
-                                   Margin="0,10" />
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                            <!-- Адаптивная карточка -->
-                            <Border Stroke="#0F0101" 
-                                    StrokeThickness="2"
-                                    StrokeShape="RoundRectangle 25" 
-                                    BackgroundColor="#1C276D"
-                                    Padding="5"
-                                    Margin="5"
-                                    HeightRequest="{Binding Path=BindingContext.CardSize, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
-                                    WidthRequest="{Binding Path=BindingContext.CardSize, Source={RelativeSource AncestorType={x:Type ContentPage}}}">
+                        <Image Source="fon.jpg"
+                               Aspect="AspectFill"
+                               Grid.RowSpan="3"/>
 
-                                <!-- Привязка Image.Source → берёт ImageToDisplay, обьект class CarouselItem -->
-                                <!-- СТАЛО: -->
-                                <Image Source="{Binding ImageToDisplay}" 
-                                  HorizontalOptions="Fill"
-                                  VerticalOptions="Fill"
-                                   Aspect="AspectFit">
-                                    <Image.GestureRecognizers>
-                                        <TapGestureRecognizer 
-                                         Command="{Binding Path=BindingContext.ItemSelectedCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" 
-                                          CommandParameter="{Binding}" />
-                                    </Image.GestureRecognizers>
-                                </Image>
-                                
-                            </Border>
+                        <Label Text="Вас вітає"
+                               Grid.Row="0"
+                               FontSize="21"
+                               HorizontalOptions="Center"
+                               TextColor="White"
+                               FontAttributes="Bold"
+                               Margin="0,45,0,5"/>
 
-                        </VerticalStackLayout>
-                    </DataTemplate>
-                </CarouselView.ItemTemplate>
-            </CarouselView>
+                        <Image x:Name="rotatingImage"
+                               Grid.Row="1"
+                               Source="scb.png"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               HeightRequest="80"
+                               WidthRequest="70"/>
 
-            <!-- Индикатор -->
-            <IndicatorView x:Name="indicator" 
-                          IndicatorColor="White" 
-                          SelectedIndicatorColor="#181869" 
-                          HorizontalOptions="Center" 
-                          Margin="0,10,0,0" />
+                        <Label Text="СКБ ЕЛЕКТРОНМАШ!"
+                               Grid.Row="2"
+                               FontSize="21"
+                               HorizontalOptions="Center"
+                               TextColor="White"
+                               FontAttributes="Bold"
+                               Margin="0,5,0,12"/>
+                    </Grid>
 
-        </VerticalStackLayout>
+                    <!-- Сайт -->
+                    <Label Text="www.chelmash.com.ua"
+                           FontSize="15"
+                           HorizontalOptions="Center"
+                           TextColor="#B0B0B0"
+                           FontAttributes="Bold"
+                           Margin="0,0,0,8">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnLinkTapped" />
+                        </Label.GestureRecognizers>
+                    </Label>
 
+                    <!-- Карусель -->
+                    <CarouselView ItemsSource="{Binding CarouselItems}" 
+                                  IndicatorView="indicator">
+                        <CarouselView.ItemTemplate>
+                            <DataTemplate>
+                                <VerticalStackLayout Spacing="8" 
+                                                     HorizontalOptions="Center" 
+                                                     VerticalOptions="Center">
+
+                                    <Label Text="{Binding Title}" 
+                                           FontSize="18"
+                                           TextColor="White"
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="Center"
+                                           Margin="0,4" />
+
+                                    <Border Stroke="#0F0101" 
+                                            StrokeThickness="2"
+                                            StrokeShape="RoundRectangle 25" 
+                                            BackgroundColor="#1C276D"
+                                            Padding="5"
+                                            Margin="5"
+                                            HeightRequest="{Binding Path=BindingContext.CardSize, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                            WidthRequest="{Binding Path=BindingContext.CardSize, Source={RelativeSource AncestorType={x:Type ContentPage}}}">
+
+                                        <Image Source="{Binding ImageToDisplay}" 
+                                               HorizontalOptions="Fill"
+                                               VerticalOptions="Fill"
+                                               Aspect="AspectFit">
+                                            <Image.GestureRecognizers>
+                                                <TapGestureRecognizer 
+                                                    Command="{Binding Path=BindingContext.ItemSelectedCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" 
+                                                    CommandParameter="{Binding}" />
+                                            </Image.GestureRecognizers>
+                                        </Image>
+                                    </Border>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CarouselView.ItemTemplate>
+                    </CarouselView>
+
+                    <!-- Индикатор -->
+                    <IndicatorView x:Name="indicator" 
+                                   IndicatorColor="White" 
+                                   SelectedIndicatorColor="#181869" 
+                                   HorizontalOptions="Center" 
+                                   Margin="0,8,0,0" />
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+        </Grid>
     </AbsoluteLayout>
-
 </ContentPage>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

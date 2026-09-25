@@ -220,26 +220,24 @@ public partial class MainPage : ContentPage
         }
     }
     //
-    //  Обработчик нажатия на кнопку меню
+    // Обработчик нажатия на кнопку меню
     private void OnMenuClicked(object sender, EventArgs e)
     {
-        // Проверка, если меню уже активно
+        // 1. Закрытие меню, если оно открыто
         if (activePopupMenu != null)
         {
-            this.RemoveChild(activePopupMenu); // Убираем меню
+            RootLayout.Children.Remove(activePopupMenu);
             activePopupMenu = null;
             return;
         }
 
-        // Создание пунктов меню Додати прилад Нова автоматизація  Сканувати
+        // 2. Создание меню
         var options = new List<string>
         {
             "Сканувати",
-            "Додати прилад",
-          //  "Нова автоматизація"
+            "Додати прилад"
         };
 
-        // Создаем новое меню
         var popupMenu = new PopupMenu(options)
         {
             OptionSelected = OptionSelected
@@ -247,13 +245,19 @@ public partial class MainPage : ContentPage
 
         activePopupMenu = popupMenu;
 
-        // Проверяем верхний тип контейнера
-        var layout = this.Content as AbsoluteLayout;
-        if (layout != null)
-        {
-            layout.Children.Add(popupMenu); // Добавляем меню поверх контента
-        }
+        // 3. Задаем координаты слева вверху (под верхней полосой)
+        // X = 10 dp слева, Y = 50 dp (сразу под шапкой)
+       // AbsoluteLayout.SetLayoutBounds(popupMenu, new Rect(10, 50, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
+        // СТАЛО (в самый левый угол, выше и левее):
+        // X = 0 (вплотную к левому краю) или 5 (с минимальным аккуратным зазором)
+        // Y = 0 (в самый верх экрана) или 40 (если нужно аккуратно под иконку)
+        AbsoluteLayout.SetLayoutBounds(popupMenu, new Rect(0, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
+        AbsoluteLayout.SetLayoutFlags(popupMenu, Microsoft.Maui.Layouts.AbsoluteLayoutFlags.None);
+
+        // Добавляем поверх страницы в RootLayout
+        RootLayout.Children.Add(popupMenu);
     }
+
     // Обработчик выбора пункта меню
     private async void OptionSelected(string option)
     {
@@ -265,22 +269,19 @@ public partial class MainPage : ContentPage
 #endif
                 await Navigation.PushAsync(new AddDevicePage());
                 break;
-         //   case "Нова автоматизація":
-          //      await DisplayAlert("Меню", "Функція автоматизація в розробці.", "OK");
-          //      break;
+
             case "Сканувати":
 #if ANDROID
                 Android.Util.Log.Info("MainPage", "Navigating to scan page.");
 #endif
-                await Navigation.PushAsync(new scan(_bluetoothService),animated: false);
-               
+                await Navigation.PushAsync(new scan(_bluetoothService), animated: false);
                 break;
         }
 
-        // Убираем меню после выбора
+        // Закрываем меню
         if (activePopupMenu != null)
         {
-            this.RemoveChild(activePopupMenu);
+            RootLayout.Children.Remove(activePopupMenu);
             activePopupMenu = null;
         }
     }
@@ -352,6 +353,87 @@ public partial class MainPage : ContentPage
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
