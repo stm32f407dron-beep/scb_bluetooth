@@ -59,7 +59,7 @@
                     <!-- Верхний баннер с вращающимся логотипом -->
                     <Grid HeightRequest="{Binding TopGridHeight}"
                           HorizontalOptions="Fill"
-                          Margin="0,0,0,10"
+                          Margin="0,55,0,10"
                           RowSpacing="0">
 
                         <Grid.RowDefinitions>
@@ -99,7 +99,8 @@
 
                     <!-- Карусель приборов -->
                     <CarouselView ItemsSource="{Binding CarouselItems}" 
-                                  IndicatorView="indicator">
+                                  IndicatorView="indicator"
+                                  Margin="0,50,0,0">
                         <CarouselView.ItemTemplate>
                             <DataTemplate>
                                 <VerticalStackLayout Spacing="8" 
