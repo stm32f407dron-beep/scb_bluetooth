@@ -5,15 +5,15 @@
              BackgroundColor="#1a1a1a"
              Shell.NavBarIsVisible="false">
 
-    <!-- Корневой AbsoluteLayout, чтобы меню позиционировалось точно так, как было задуманно в PopupMenu -->
+    <!-- Корневой AbsoluteLayout для выпадающего меню PopupMenu -->
     <AbsoluteLayout x:Name="RootLayout">
 
-        <!-- Вся страница (Grid со скроллом) занимает 100% ширины и высоты -->
+        <!-- Вся страница: 50 (шапка) / * (основной скролл) / Auto (сайт внизу) -->
         <Grid AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
               AbsoluteLayout.LayoutFlags="All"
-              RowDefinitions="50, *">
+              RowDefinitions="50, *, Auto">
 
-            <!-- 1. Верхняя Панель -->
+            <!-- 1. Верхняя панель (Grid.Row="0") -->
             <Grid Grid.Row="0"
                   BackgroundColor="#1f1f1f" 
                   Padding="10,0"
@@ -49,14 +49,14 @@
                         Clicked="OnHashClicked"
                         HorizontalOptions="End"
                         VerticalOptions="Center"
-                        Margin="5,0,5,0" /> 
+                        Margin="5,0,5,0" />
             </Grid>
 
-            <!-- 2. Основной контент со скроллом -->
-            <ScrollView Grid.Row="1">
-                <VerticalStackLayout Padding="15,5,15,15" Spacing="8">
+            <!-- 2. Основной контент (Grid.Row="1") — занимает всё свободное место -->
+            <ScrollView Grid.Row="1" VerticalOptions="Fill">
+                <VerticalStackLayout Padding="15,5,15,10" Spacing="8">
 
-                    <!-- Верхний баннер -->
+                    <!-- Верхний баннер с вращающимся логотипом -->
                     <Grid HeightRequest="{Binding TopGridHeight}"
                           HorizontalOptions="Fill"
                           Margin="0,0,0,10"
@@ -97,19 +97,7 @@
                                Margin="0,5,0,12"/>
                     </Grid>
 
-                    <!-- Сайт -->
-                    <Label Text="www.chelmash.com.ua"
-                           FontSize="15"
-                           HorizontalOptions="Center"
-                           TextColor="#B0B0B0"
-                           FontAttributes="Bold"
-                           Margin="0,0,0,8">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnLinkTapped" />
-                        </Label.GestureRecognizers>
-                    </Label>
-
-                    <!-- Карусель -->
+                    <!-- Карусель приборов -->
                     <CarouselView ItemsSource="{Binding CarouselItems}" 
                                   IndicatorView="indicator">
                         <CarouselView.ItemTemplate>
@@ -150,57 +138,59 @@
                         </CarouselView.ItemTemplate>
                     </CarouselView>
 
-                    <!-- Индикатор -->
+                    <!-- Индикатор карусели -->
                     <IndicatorView x:Name="indicator" 
                                    IndicatorColor="White" 
                                    SelectedIndicatorColor="#181869" 
                                    HorizontalOptions="Center" 
-                                   Margin="0,8,0,0" />
+                                   Margin="0,4,0,0" />
 
                 </VerticalStackLayout>
             </ScrollView>
 
+            <!-- 3. Сайт строго внизу экрана (Grid.Row="2") -->
+            <Label Grid.Row="2"
+                   Text="www.chelmash.com.ua"
+                   FontSize="15"
+                   HorizontalOptions="Fill"
+                   HorizontalTextAlignment="Center"
+                   VerticalOptions="End"
+                   TextColor="#B0B0B0"
+                   FontAttributes="Bold"
+                   Margin="0,4,0,14">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnLinkTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+
         </Grid>
     </AbsoluteLayout>
 </ContentPage>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!--<Grid HeightRequest="250"  
     VerticalOptions="Start"
     HorizontalOptions="Center"
