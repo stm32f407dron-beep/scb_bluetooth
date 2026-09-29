@@ -11,6 +11,22 @@ namespace skb_home;
 public partial class Varta_1_816 : ContentPage
 {
 
+    // ====== АДАПТИВНЫЕ РАЗМЕРЫ ПОД ЭКРАН (ТЕЛЕФОН / ПЛАНШЕТ) ======
+    public double ScreenWidth => DeviceDisplay.Current.MainDisplayInfo.Width / DeviceDisplay.Current.MainDisplayInfo.Density;
+    public double ScreenHeight => DeviceDisplay.Current.MainDisplayInfo.Height / DeviceDisplay.Current.MainDisplayInfo.Density;
+
+    // Ширина графика: 92% экрана, но не менее 300 dp и не более 650 dp (на планшетах)
+    public double HistWidth => Math.Clamp(ScreenWidth * 0.92, 300, 650);
+
+    // Высота графика: около 32% экрана (от 230 до 350 dp)
+    public double HistHeight => Math.Clamp(ScreenHeight * 0.32, 230, 350);
+
+    // Ширина переключателя и терминала под ширину графика
+    public double ContentCardWidth => Math.Clamp(ScreenWidth * 0.92, 300, 650);
+
+    // Высота терминала: от 260 до 450 dp
+    public double TerminalHeight => Math.Clamp(ScreenHeight * 0.45, 260, 450);
+    // ==============================================================
 
     // Добавим поле для хранения ссылки на Bluetooth-сервис
     private readonly IBluetooth_service _bluetoothService;
@@ -38,6 +54,10 @@ public partial class Varta_1_816 : ContentPage
     public Varta_1_816(IBluetooth_service bluetooth)
 	{
 		InitializeComponent();
+
+        // связываем разметку с вычисляемыми свойствами страницы
+        BindingContext = this;
+
         _bluetoothService = bluetooth;
         // Запускаем прием при открытии страницы
         _bluetoothService.ReceiverData();
