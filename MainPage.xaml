@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"           
              x:Class="skb_home.MainPage"
-             BackgroundColor="#1a1a1a"
+             BackgroundColor="#40737a"
              Shell.NavBarIsVisible="false">
 
     <!-- Корневой AbsoluteLayout для выпадающего меню PopupMenu -->
@@ -29,7 +29,7 @@
                 <Button Grid.Column="1"
                         Text="☰" 
                         FontSize="24" 
-                        TextColor="#0c69c6"
+                        TextColor="#0cb0c6"
                         FontAttributes="Bold"
                         BackgroundColor="Transparent"
                         WidthRequest="40"
@@ -40,7 +40,7 @@
                 <Button Grid.Column="2"
                         Text="⌂" 
                         FontSize="26" 
-                        TextColor="#0c69c6"
+                        TextColor="#0cb0c6"
                         FontAttributes="Bold"
                         BackgroundColor="Transparent"
                         WidthRequest="40"
@@ -68,7 +68,7 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <Image Source="fon.jpg"
+                        <Image Source="fon2.png"
                                Aspect="AspectFill"
                                Grid.RowSpan="3"/>
 
@@ -78,7 +78,7 @@
                                HorizontalOptions="Center"
                                TextColor="White"
                                FontAttributes="Bold"
-                               Margin="0,45,0,5"/>
+                               Margin="0,50,0,5"/>
 
                         <Image x:Name="rotatingImage"
                                Grid.Row="1"
@@ -117,7 +117,7 @@
                                     <Border Stroke="#0F0101" 
                                             StrokeThickness="2"
                                             StrokeShape="RoundRectangle 25" 
-                                            BackgroundColor="#1C276D"
+                                            BackgroundColor="#4C778D"
                                             Padding="5"
                                             Margin="5"
                                             HeightRequest="{Binding Path=BindingContext.CardSize, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
@@ -142,7 +142,7 @@
                     <!-- Индикатор карусели -->
                     <IndicatorView x:Name="indicator" 
                                    IndicatorColor="White" 
-                                   SelectedIndicatorColor="#181869" 
+                                   SelectedIndicatorColor="#2D94AA" 
                                    HorizontalOptions="Center" 
                                    Margin="0,4,0,0" />
 
@@ -156,7 +156,7 @@
                    HorizontalOptions="Fill"
                    HorizontalTextAlignment="Center"
                    VerticalOptions="End"
-                   TextColor="#B0B0B0"
+                   TextColor="#13A9BD"
                    FontAttributes="Bold"
                    Margin="0,4,0,14">
                 <Label.GestureRecognizers>
