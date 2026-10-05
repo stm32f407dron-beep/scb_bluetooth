@@ -56,7 +56,7 @@
             <ScrollView Grid.Row="1" VerticalOptions="Fill">
                 <VerticalStackLayout Padding="15,5,15,10" Spacing="8">
 
-                    <!-- Верхний баннер с плавным растворением в фон -->
+                    <!-- Верхний баннер с плавным растворением во все 4 стороны -->
                     <Grid HeightRequest="{Binding TopGridHeight}"
                           HorizontalOptions="Fill"
                           Margin="0,55,0,10"
@@ -86,7 +86,20 @@
                             </BoxView.Background>
                         </BoxView>
 
-                        <!-- Тексты и логотип поверх картинки и градиента -->
+                        <!-- 3. Слой горизонтального градиента: растворяет левую и правую стороны -->
+                        <BoxView Grid.RowSpan="3"
+                                 InputTransparent="True">
+                            <BoxView.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#40737a" Offset="0.0"/>
+                                    <GradientStop Color="Transparent" Offset="0.18"/>
+                                    <GradientStop Color="Transparent" Offset="0.82"/>
+                                    <GradientStop Color="#40737a" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </BoxView.Background>
+                        </BoxView>
+
+                        <!-- Тексты и логотип поверх картинки и градиентов -->
                         <Label Text="Вас вітає"
                                Grid.Row="0"
                                FontSize="21"
@@ -182,14 +195,6 @@
         </Grid>
     </AbsoluteLayout>
 </ContentPage>
-
-
-
-
-
-
-
-
 
 
 
