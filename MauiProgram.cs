@@ -14,7 +14,7 @@ namespace skb_home
         {
             var builder = MauiApp.CreateBuilder();
             builder
-                .UseMauiApp<App>()
+                .UseMauiApp<App>()                                          // Указывает, что App является корневым классом приложения
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -36,10 +36,38 @@ namespace skb_home
             builder.Services.AddSingleton<IBluetooth_service, AndroidBluetooth>();
 #endif
 
+
+
+            //Когда вызывается builder.Build()
+
+            //создаётся объект MauiApp, который хранит:
+
+            //контейнер DI(все зарегистрированные сервисы),
+
+            //конфигурацию ресурсов,
+
+            //ссылку на главный класс приложения(App).
+
             return builder.Build();
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //1.Приложение запускается
