@@ -167,13 +167,28 @@ public partial class MainPage : ContentPage
     // Обработчик нажатия на кнопку домик - авьторизация
     private async void OnHashClicked(object sender, EventArgs e)
     {
-        // Ваш код для обработки нажатия кнопки #
-      //   DisplayAlert("Меню", "Функція авторизація в розробці.", "OK");
+        if (AuthService.IsAuthorized)
+        {
+            // Пользователь УЖЕ авторизован: показываем статус
+            string roleTitle = AuthService.IsAdmin ? "Адміністратор Сервера" : "Клієнт";
 
-        // Открываем модально созданную страницу
-        await Navigation.PushModalAsync(new LoginPage());
+            bool logout = await DisplayAlert(
+                "Стан авторизації",
+                $"Ви авторизовані як:\n{AuthService.CurrentUserName} ({roleTitle})",
+                "Вийти з акаунту",
+                "Закрити");
 
-
+            if (logout)
+            {
+                await AuthService.LogoutAsync();
+                await DisplayAlert("Вихід", "Ви успішно вийшли з системи.", "OK");
+            }
+        }
+        else
+        {
+            // Пользователь НЕ авторизован: открываем модальную страницу входа
+            await Navigation.PushModalAsync(new LoginPage());
+        }
     }
 
 

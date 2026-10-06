@@ -2,20 +2,60 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="skb_home.LoginPage"
-             Title="Авторизація"
-             BackgroundColor="#1a1a1a">
+             BackgroundColor="#1a1a1a"
+             Title="Авторизація">
 
-    <VerticalStackLayout Spacing="15" Padding="30" VerticalOptions="Center">
-        <Label Text="Вхід у систему" 
-               FontSize="22" 
-               TextColor="White" 
-               HorizontalOptions="Center" 
-               FontAttributes="Bold"/>
+    <Grid VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="320">
+        <Border Stroke="#0cb0c6"
+                StrokeThickness="1.5"
+                StrokeShape="RoundRectangle 16"
+                BackgroundColor="#242424"
+                Padding="20">
 
-        <Entry Placeholder="Логін" TextColor="White" />
-        <Entry Placeholder="Пароль" IsPassword="True" TextColor="White" />
+            <VerticalStackLayout Spacing="14">
+                <Label Text="Вхід у систему"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center" />
 
-        <Button Text="Увійти" BackgroundColor="#0c69c6" Clicked="OnLoginClicked"/>
-        <Button Text="Скасувати" BackgroundColor="Transparent" TextColor="Gray" Clicked="OnCancelClicked"/>
-    </VerticalStackLayout>
+                <!-- Поле ввода логина -->
+                <Entry x:Name="LoginEntry"
+                       Placeholder="Логін"
+                       PlaceholderColor="#80FFFFFF"
+                       TextColor="White"
+                       BackgroundColor="#333333" />
+
+                <!-- Поле ввода пароля -->
+                <Entry x:Name="PasswordEntry"
+                       Placeholder="Пароль"
+                       PlaceholderColor="#80FFFFFF"
+                       IsPassword="True"
+                       TextColor="White"
+                       BackgroundColor="#333333" />
+
+                <!-- Кнопка Входа -->
+                <Button Text="Увійти"
+                        BackgroundColor="#0cb0c6"
+                        TextColor="Black"
+                        FontAttributes="Bold"
+                        CornerRadius="8"
+                        Clicked="OnLoginClicked" />
+
+                <!-- Кнопка Регистрации -->
+                <Button Text="Зареєструватися"
+                        BackgroundColor="#333333"
+                        TextColor="#0cb0c6"
+                        FontAttributes="Bold"
+                        CornerRadius="8"
+                        Clicked="OnRegisterClicked" />
+
+                <!-- Кнопка Отмены -->
+                <Button Text="Скасувати"
+                        BackgroundColor="Transparent"
+                        TextColor="#A0A0A0"
+                        Clicked="OnCancelClicked" />
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
 </ContentPage>

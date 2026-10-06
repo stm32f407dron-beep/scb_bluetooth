@@ -25,6 +25,11 @@ namespace skb_home
         {
             InitializeComponent();
 
+
+
+            // Проверяем, был ли сохранен логин ранее
+            Task.Run(async () => await AuthService.InitAsync());
+
             //  Инициализация главной страницы с использованием NavigationPage
             //  MainPage = new NavigationPage(new MainPage());
 
