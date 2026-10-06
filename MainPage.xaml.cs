@@ -165,10 +165,15 @@ public partial class MainPage : ContentPage
 
 
     // Обработчик нажатия на кнопку домик - авьторизация
-    private void OnHashClicked(object sender, EventArgs e)
+    private async void OnHashClicked(object sender, EventArgs e)
     {
         // Ваш код для обработки нажатия кнопки #
-         DisplayAlert("Меню", "Функція авторизація в розробці.", "OK");
+      //   DisplayAlert("Меню", "Функція авторизація в розробці.", "OK");
+
+        // Открываем модально созданную страницу
+        await Navigation.PushModalAsync(new LoginPage());
+
+
     }
 
 

@@ -6,8 +6,28 @@ using skb_home.Platforms.Android;
 #endif
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using System.Text;
+
+
+
+
 namespace skb_home
 {
+
+
+    //MainApplication.cs сам по себе настройки не придумывает: он просто обращается к MauiProgram.cs и
+    //говорит: «Собери мне всё приложение». А уже MauiProgram.cs выступает настоящим сборочным цехом.
+
+    //Что здесь происходит по шагам:
+    // 1. Шаблон «Строитель» (MauiAppBuilder)
+    //  Строка var builder = MauiApp.CreateBuilder(); создаёт объект-строитель.Ты не создаёшь приложение сразу одной командой,
+    //  а постепенно «навешиваешь» на этот builder нужные блоки:
+
+    //   .UseMauiApp<App>() — говорит MAUI: «Главным классом приложения в кроссплатформенном мире будет класс App» (тот самый App.xaml.cs).
+
+    //   .ConfigureFonts(...) — регистрирует шрифты для интерфейса.
+
+
+
     public static class MauiProgram
     {
         public static MauiApp CreateMauiApp()
@@ -47,6 +67,11 @@ namespace skb_home
             //конфигурацию ресурсов,
 
             //ссылку на главный класс приложения(App).
+            // Финал сборки: builder.Build()Строка return builder.Build(); запечатывает коробку: она собирает все шрифты,
+            // настройки и зарегистрированные сервисы в единый готовый объект MauiApp и возвращает его обратно в MainApplication.cs.   
+
+
+
 
             return builder.Build();
         }

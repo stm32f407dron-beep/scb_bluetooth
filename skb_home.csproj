@@ -70,6 +70,9 @@
 	  <MauiXaml Update="Configurations.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="LoginPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="scan.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

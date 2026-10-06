@@ -3,6 +3,20 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace skb_home
 {
+
+
+    // App.xaml.cs — это точка входа в кроссплатформенную часть приложения.
+    // После того как MauiProgram собрал приложение командой builder.Build(),
+    // MAUI начинает оживлять кроссплатформенную визуальную часть. Первым создается экземпляр класса App.   
+
+
+    //1) public partial class App : Application
+    //partial(частичный класс) : означает, что класс разбит на два файла.
+    //Часть генерируется автоматически из разметки App.xaml (компилятор создает метод InitializeComponent()),
+    //а часть пишешь ты здесь на C#. При компиляции они склеиваются в один класс.
+    //: Application(из мира Microsoft.Maui.Controls.Application, а не Android.App.Application (Класс Android)): базовый класс MAUI,
+    //управляющий жизненным циклом кроссплатформенного приложения(старт, сворачивание в фон, возобновление).
+
     public partial class App : Application
     {
 
