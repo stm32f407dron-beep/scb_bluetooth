@@ -23,7 +23,8 @@ public static class AuthService
     {
         return CurrentRole != UserRole.None;
     };
-    public static bool IsAuthorized => checkAuthDelegate();
+    public static bool IsAuthorized { get { return checkAuthDelegate(); } }
+
 
     // Делегат и геттер проверки прав администратора
     public static Func<bool> checkAuthAdminDelegate = delegate ()
