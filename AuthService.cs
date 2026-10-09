@@ -15,7 +15,7 @@ public enum UserRole
 
 public static class AuthService
 {
-    public static UserRole CurrentRole { get; private set; } = UserRole.None;
+    public static UserRole CurrentRole { get; private set; } = UserRole.None; // Текущая роль пользователя
     public static string CurrentUserName { get; private set; } = string.Empty;
 
     // Делегат и геттер проверки авторизации
@@ -39,7 +39,7 @@ public static class AuthService
 
     private static Dictionary<string, string> _registeredClients = new(StringComparer.OrdinalIgnoreCase);
 
-    public static async Task InitAsync()
+    public static async Task InitAsync() // Инициализация сервиса авторизации
     {
         try
         {
@@ -67,21 +67,21 @@ public static class AuthService
 
     public static async Task<(bool Success, string ErrorMessage)> RegisterClientAsync(string login, string password)
     {
-        if (string.IsNullOrWhiteSpace(login))
+        if (string.IsNullOrWhiteSpace(login)) // Перевірка на порожній логін
             return (false, "Логін не може бути порожнім!");
 
-        if (string.IsNullOrWhiteSpace(password) || password.Length < 4)
+        if (string.IsNullOrWhiteSpace(password) || password.Length < 4) // Перевірка на порожній пароль та мінімальну довжину
             return (false, "Пароль має містити хоча б 4 символи!");
 
-        if (_registeredClients.ContainsKey(login.Trim()))
+        if (_registeredClients.ContainsKey(login.Trim()))  // Перевірка на існування користувача з таким логіном
             return (false, "Користувач із таким логіном вже існує!");
 
-        _registeredClients[login.Trim()] = password;
+        _registeredClients[login.Trim()] = password; //Тоесть записываем в этот ключ пароль, а не хэш. В реальном приложении нужно использовать хэширование паролей.
 
         try
         {
-            string json = JsonSerializer.Serialize(_registeredClients);
-            await SecureStorage.Default.SetAsync(RegisteredUsersKey, json);
+            string json = JsonSerializer.Serialize(_registeredClients); // Сериализация словаря зарегистрированных клиентов в JSON
+            await SecureStorage.Default.SetAsync(RegisteredUsersKey, json); // Шифрование и сохранение JSON в безопасное хранилище Android (KeyStore)
             return (true, string.Empty);
         }
         catch (Exception ex)
