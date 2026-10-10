@@ -1571,7 +1571,8 @@ namespace skb_home.Platforms.Android
             }
         }
 
-
+        // Этап физического рождения в памяти (AndroidBluetooth.cs) - DataReceivedFrame
+        // В классе реализации платформа создает скрытую ссылку (мультикаст-делегат)
         public event Action<VartaFrame> DataReceivedFrame;
         public async Task ReceiverData_Varta832()
         {
@@ -1598,7 +1599,7 @@ namespace skb_home.Platforms.Android
                 var input = bluetoothSocket?.InputStream;
                 if (input == null)
                 {
-                    // Если входной поток недоступен — сообщаем об ошибке и выходим
+                    // Если входной поток недоступен — сообщаем  в терминале об ошибке и выходим
                     DataReceivedVarta832?.Invoke("Error: InputStream is null");
                     _rxRunningVarta832 = false;
                     return;
@@ -1614,7 +1615,15 @@ namespace skb_home.Platforms.Android
                     {
                         // Чтение данных из входного потока в буфер - await  позволяет не блокировать поток UI,
                         // а Task.Run выполняет чтение в отдельном потоке, но дождется его завершения.
-                        bytesRead = await Task.Run(() => input.Read(buffer, 0, buffer.Length));
+                      //  bytesRead = await Task.Run(() => input.Read(buffer, 0, buffer.Length));
+
+                        // обьявляем делегат, который хранит ссылку на функцию чтения из потока.
+                       Func<int> func = delegate() { return input.Read(buffer, 0, buffer.Length); };
+                       bytesRead = await Task.Run(func);
+
+
+
+
                     }
                     catch (Exception readEx)
                     {
@@ -1791,8 +1800,21 @@ namespace skb_home.Platforms.Android
 
 
 
+                                // _target (регистр X0 / аргумент 'this'):
+                                // Адрес страницы Varta_832 в памяти — контекст, чтобы метод знал, чью коллекцию Frames менять.
 
+                                // Аргумент frame (регистр X1):
+                                // Полезные данные — адрес созданного кадра с шлейфами, переданный из класса Android.
 
+                                // _methodPtr:
+                                // Адрес машинного кода — точка входа в само скомпилированное тело метода-обработчика.
+                                // В момент выполнения этой строчки процессор:
+                                //Итог:
+                                //Кладёт _target(страницу Varta_832) в регистр первого аргумента(X0).
+
+                                //Кладёт frame(полезную нагрузку) в регистр второго аргумента(X1).
+
+                                //Делает прыжок по адресу _methodPtr, запуская тело твоего метода уже с готовыми аргументами на руках.
 
                                 DataReceivedFrame?.Invoke(frame);
                             }

@@ -90,27 +90,30 @@ public static class AuthService
         }
     }
 
-    public static async Task<bool> TryLoginAsync(string login, string password)
+    public static async Task<bool> TryLoginAsync(string login, string password) // Метод для попытки входа в систему
     {
         // 1. Пароль администратора сервера
         if (password == "Admin#Server2026")
         {
-            CurrentRole = UserRole.ServerAdmin;
-            CurrentUserName = "Адміністратор Сервера";
-            await SaveSessionAsync();
+            CurrentRole = UserRole.ServerAdmin;    // Устанавливаем роль администратора сервера
+            CurrentUserName = "Адміністратор Сервера"; // Устанавливаем имя пользователя администратора сервера
+            await SaveSessionAsync();     // Сохраняем сессию в безопасное хранилище
             return true;
         }
 
         // 2. Проверка зарегистрированного клиента
         if (!string.IsNullOrWhiteSpace(login))
         {
+            // Метод TryGetValue нашёл по логину (ключу) нужный пароль в словаре,
+            // а благодаря модификатору out он получил прямой доступ к ячейке памяти
+            // переменной storedPassword и физически записал это значение прямо в неё.
             if (_registeredClients.TryGetValue(login.Trim(), out string storedPassword))
             {
                 if (storedPassword == password)
                 {
                     CurrentRole = UserRole.Client;
                     CurrentUserName = login.Trim();
-                    await SaveSessionAsync();
+                    await SaveSessionAsync();  // Сохраняем сессию в безопасное хранилище
                     return true;
                 }
             }
@@ -119,7 +122,7 @@ public static class AuthService
         return false;
     }
 
-    private static async Task SaveSessionAsync()
+    private static async Task SaveSessionAsync() // Метод для сохранения текущей сессии пользователя в безопасное хранилище
     {
         try
         {
@@ -132,7 +135,7 @@ public static class AuthService
         }
     }
 
-    public static async Task LogoutAsync()
+    public static async Task LogoutAsync() // Метод для выхода пользователя из системы
     {
         CurrentRole = UserRole.None;
         CurrentUserName = string.Empty;

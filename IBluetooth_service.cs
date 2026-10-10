@@ -46,21 +46,23 @@ namespace skb_home
         Task TransmitterData_writeByte(byte value, byte read = 0x02, byte address = 0x01, byte[]? index = null, byte? subindex = null, bool wrapWithRawStartStop = true);
 
 
-        //Новая задача для Varta832
-        public event Action<string> DataReceivedVarta832;
-        Task ReceiverData_Varta832();
 
+        // задача для Varta832 под вывод в терминал для отладки
+        public event Action<string> DataReceivedVarta832;
         Task ReceiverData_Varta832_Old();
 
 
-        // ⚡ Новое свойство для таблицы кодов
-        string[] TypeValue { get; }
 
-
-
+        // Новая задача для Varta832
+        Task ReceiverData_Varta832();
+        //В интерфейсе IBluetooth_service объявляем контракт 
+        //Смысл делегата Action<VartaFrame>: Это готовый тип делегата из.NET, который говорит:
+        //«Любой метод-обработчик, который подпишется на это событие, обязан принимать
+        //ровно один параметр типа VartaFrame и возвращать void» (сигнатура вида void Method(VartaFrame frame)). ⚡
         event Action<VartaFrame> DataReceivedFrame;
 
-
+        // ⚡ Новое свойство для таблицы кодов
+        string[] TypeValue { get; }
 
     }
 }

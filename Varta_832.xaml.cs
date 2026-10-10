@@ -30,7 +30,7 @@ public partial class Varta_832 : ContentPage
 
     };
 
-    public ObservableCollection<VartaFrame> Frames { get; set; } = new();
+    public ObservableCollection<VartaFrame> Frames { get; set; } = new(); // Коллекция фреймов Varta
 
     //010100003001001447
 
@@ -46,25 +46,39 @@ public partial class Varta_832 : ContentPage
         //};
 
 
-        _bluetoothService.DataReceivedFrame += frame =>
+        //_bluetoothService.DataReceivedFrame += frame =>
+        //{
+        //    MainThread.BeginInvokeOnMainThread(() =>
+        //    {
+        //        if (Frames.Count == 0)
+        //        {
+        //            Frames.Add(frame); // первый раз создаём
+        //        }
+        //        else
+        //        {
+        //            Frames[0] = frame; // потом обновляем
+        //        }
+        //    });
+        //};
+
+        // Подписка на событие DataReceivedFrame
+        _bluetoothService.DataReceivedFrame += delegate (VartaFrame frame)
         {
-            MainThread.BeginInvokeOnMainThread(() =>
+            MainThread.BeginInvokeOnMainThread(delegate
             {
-                if (Frames.Count == 0)
-                {
-                    Frames.Add(frame); // первый раз создаём
-                }
-                else
-                {
-                    Frames[0] = frame; // потом обновляем
-                }
+                // Обновление UI или выполнение других действий при получении фрейма
+                // Например, можно обновить список Frames или выполнить другую логику
+
+                if (Frames.Count == 0) Frames.Add(frame); // первый раз создаём
+                else Frames[0] = frame; // потом обновляем или перезаписываем, чтобы не дублировать
+
             });
+
         };
 
 
 
-
-        _bluetoothService.ReceiverData_Varta832();     //ReceiverData_Varta832_Old()    ReceiverData_Varta832()
+        _bluetoothService.ReceiverData_Varta832();  // Запуск задачи для приёма данных Varta 832
 
         // Подписка на событие DataReceivedVarta832
         _bluetoothService.DataReceivedVarta832 += AddTerminalText;
@@ -137,11 +151,11 @@ public partial class Varta_832 : ContentPage
             // Текст из терминала
             await  _bluetoothService?.TransmitterData(s);
 
-            await DisplayAlert("Збереження", "Файл збережено", "OK");
+            await DisplayAlert("Команда", "Отослана", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Помилка", $"Не вдалося зберегти: {ex.Message}", "OK");
+            await DisplayAlert("Помилка", $"Не вдалося : {ex.Message}", "OK");
         }
     }
 
@@ -171,6 +185,9 @@ public class VartaFrame
     // Коллекция объектов VartaValue
     public ObservableCollection<VartaValue> Values { get; set; } = new();
 
-    public string Header => $"{Index} (Sub={SubIndex})";
+    //public string Header => $"{Index} (Sub={SubIndex})";
+
+    public string Headers {get { return $"{Index} (Sub={SubIndex})"; } }
+
 }
 
