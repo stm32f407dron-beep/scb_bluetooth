@@ -29,7 +29,7 @@ namespace skb_home.Platforms.Android
                 {
                     Manifest.Permission.BluetoothScan,      // Для сканирования BLE устройств
                     Manifest.Permission.BluetoothConnect,   // Для подключения к BLE устройствам                 
-                    Manifest.Permission.AccessFineLocation   // Для сканирования BLE устройств на Android 12 и ниже
+                  //  Manifest.Permission.AccessFineLocation   // Для сканирования BLE устройств на Android 12 и ниже
                 };
 #pragma warning restore CA1416 // Проверка совместимости платформы
 

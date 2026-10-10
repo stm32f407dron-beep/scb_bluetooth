@@ -93,7 +93,7 @@
                                HorizontalOptions="Center"
                                TextColor="White"
                                FontAttributes="Bold"
-                               Margin="0,50,0,5"/>
+                               Margin="0,60,0,5"/>
 
                         <Image x:Name="rotatingImage"
                                Grid.Row="1"
