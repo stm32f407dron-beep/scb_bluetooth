@@ -62,19 +62,43 @@ public partial class Varta_832 : ContentPage
         //};
 
         // Подписка на событие DataReceivedFrame
+        //_bluetoothService.DataReceivedFrame += delegate (VartaFrame frame)
+        //{
+        //    MainThread.BeginInvokeOnMainThread(delegate
+        //    {
+        //        // Обновление UI или выполнение других действий при получении фрейма
+        //        // Например, можно обновить список Frames или выполнить другую логику
+
+        //        if (Frames.Count == 0) Frames.Add(frame); // первый раз создаём
+        //        else Frames[0] = frame; // потом обновляем или перезаписываем, чтобы не дублировать
+
+        //    });
+
+        //};
+
+
+
+        // Подписка на событие DataReceivedFrame
         _bluetoothService.DataReceivedFrame += delegate (VartaFrame frame)
         {
             MainThread.BeginInvokeOnMainThread(delegate
             {
-                // Обновление UI или выполнение других действий при получении фрейма
-                // Например, можно обновить список Frames или выполнить другую логику
-
-                if (Frames.Count == 0) Frames.Add(frame); // первый раз создаём
-                else Frames[0] = frame; // потом обновляем или перезаписываем, чтобы не дублировать
-
+                if (Frames.Count < 2)
+                {
+                    // Первый и второй раз — добавляем элементы в список (будет 2 рамки)
+                    Frames.Add(frame);
+                }
+                else
+                {
+                    // Если уже есть две рамки — обновляем вторую (или нужную по индексу)
+                    Frames[1] = frame;
+                }
             });
-
         };
+
+
+
+
 
 
 
@@ -160,8 +184,34 @@ public partial class Varta_832 : ContentPage
     }
 
 
+    private async void OnReadBsvh1Clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            string s = "010100003100012054"; // Твой текущий адрес/команда
+            await _bluetoothService?.TransmitterData(s);
+            await DisplayAlert("Команда", "БША 1: Отослана", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Помилка", $"Не вдалося зчитати БША 1: {ex.Message}", "OK");
+        }
+    }
 
-    
+    private async void OnReadBsvh2Clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            string s = "010100003100012054"; // Тот же самый адрес/команда
+            await _bluetoothService?.TransmitterData(s);
+            await DisplayAlert("Команда", "БША 2: Отослана", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Помилка", $"Не вдалося зчитати БША 2: {ex.Message}", "OK");
+        }
+    }
+
 
 
 
