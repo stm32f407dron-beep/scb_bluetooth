@@ -19,7 +19,7 @@
                         <VerticalStackLayout>
 
                             <!-- Заголовок -->
-                            <Label Text="{Binding Header}"
+                            <Label Text="{Binding Headers}"
                                    FontAttributes="Bold"
                                    FontSize="16"
                                    TextColor="#1b6fc3"
@@ -52,7 +52,7 @@
                                             <!-- Правая колонка: значение -->
                                             <Label Text="{Binding Value}"
                                                    Grid.Column="1"
-                                                   TextColor="White"/>
+                                                   TextColor="#006"/>
                                         </Grid>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>

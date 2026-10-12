@@ -180,7 +180,7 @@ public class VartaFrame
 {
     public string Index { get; set; }
     public string SubIndex { get; set; }
-    public bool Exists { get; set; }
+    public bool Exists { get; set; } // Флаг существования объекта
 
     // Коллекция объектов VartaValue
     public ObservableCollection<VartaValue> Values { get; set; } = new();

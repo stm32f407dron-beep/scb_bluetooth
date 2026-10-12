@@ -36,7 +36,7 @@ namespace skb_home.Platforms.Android
 
 
         private volatile bool _anyRxRunning = false;
-       
+
 
 
 
@@ -61,7 +61,7 @@ namespace skb_home.Platforms.Android
         //        };
 
 
-        // Реализация свойства
+        //  Справочник состояний -  реализация свойства
         public string[] TypeValue { get; } = {
             "Not Data", "Short", "Breakage", "Indefinite",
             "Logical 1", "Logical 2", "Power-off", "NORM",
@@ -1571,6 +1571,9 @@ namespace skb_home.Platforms.Android
             }
         }
 
+
+
+
         // Этап физического рождения в памяти (AndroidBluetooth.cs) - DataReceivedFrame
         // В классе реализации платформа создает скрытую ссылку (мультикаст-делегат)
         public event Action<VartaFrame> DataReceivedFrame;
@@ -1645,50 +1648,64 @@ namespace skb_home.Platforms.Android
                         int start = recvBuf.IndexOf(RESP_START);
                         // Если начало кадра не найдено — очищаем мусор и выходим из внутреннего цикла в основной цикл while (_rxRunningVarta832)
                         if (start == -1) { recvBuf.Clear(); break; }
+
                         // Ищем конец кадра после начала
-                        int stop = recvBuf.FindIndex(start + 1, b => b == FRAME_STOP);
-                        //
+                        Predicate<byte> predicate = delegate (byte b) { return b == FRAME_STOP; };
+                        int stop = recvBuf.FindIndex(start + 1, predicate);
+
+                        //  int stop = recvBuf.FindIndex(start + 1, b => b == FRAME_STOP); // аналогично, но через лямбда-выражение
+
+                        // если пока не пришел, стоп — удаляем мусор до начала кадра, а сам неполный кадр оставляем
                         if (stop == -1)
                         {
                             if (start > 0) recvBuf.RemoveRange(0, start);
                             break;
                         }
+
                         // полезная часть кадра в ASCII‑HEX,asciiLen = длина этой части.
                         int asciiLen = stop - (start + 1);
                         // Если полезная часть пустая — удаляем кадр и продолжаем разбор
                         if (asciiLen <= 0) { recvBuf.RemoveRange(0, stop + 1); continue; }
+
                         // Извлекаем ASCII-HEX часть кадра
-                        //  recvBuf.Skip(start + 1) → пропускаем все байты до позиции start + 1,nо есть игнорируем сам байт RESP_START и всё, что было до него.                       
+                        //  recvBuf.Skip(start + 1) → пропускаем все байты до позиции start + 1,то есть игнорируем сам байт RESP_START и всё, что было до него.                       
                         //.Take(asciiLen) → берём ровно asciiLen байт(это полезная часть кадра между RESP_START и FRAME_STOP).
                         //.ToArray() → превращаем выбранные байты в массив byte[].
                         byte[] asciiBytes = recvBuf.Skip(start + 1).Take(asciiLen).ToArray();
                         // Удаляем обработанный кусок из накопительного буфера, включая RESP_START и FRAME_STOP
                         recvBuf.RemoveRange(0, stop + 1);
+
                         // превращаем массив ASCII‑байтов в строку, которая содержит символы HEX‑представления.
+                        // потому что протокол таблицы - каждые 2 ASCII-символа соответствуют ровно одному байту в шестнадцатеричном представлении (HEX).
                         string asciiHex = Encoding.ASCII.GetString(asciiBytes)
                             .Replace("\r", "").Replace("\n", "")
                             .Trim().ToUpperInvariant();
-                        // Проверяем, что длина HEX-строки четная, так как пару символов стринга - это 1 байт
+
+                        // Проверяем, что длина HEX-строки четная, так как пару символов стринга - это 1 байт в формате HEX. 
                         if (asciiHex.Length % 2 != 0)
                         {
                             DataReceivedVarta832?.Invoke($"RX ERROR: odd hex length -> {asciiHex}");
-                            continue;
+                            // для плавности, вдруг  по Bluetooth прилетела склейка из двух пакетов сразу, первый он  сразу обрежет 
+                            // сдесь recvBuf.RemoveRange(0, stop + 1); и после этого continue;  - он вернется в начало цикла while (true) и будет искать новый кадр в recvBuf
+                            // а если бы был брейк, то мы сразу бы потеряли бы второй кадр, который прилетел вместе с первым.
+                            continue; 
                         }
 
                         byte[] frameBytes;
                         try
                         {
-                            frameBytes = new byte[asciiHex.Length / 2];
-                            for (int i = 0; i < frameBytes.Length; i++)
-                                frameBytes[i] = Convert.ToByte(asciiHex.Substring(i * 2, 2), 16);
+                            frameBytes = new byte[asciiHex.Length / 2]; // каждый 2 символа HEX → 1 байт
+                            for (int i = 0; i < frameBytes.Length; i++) //  парсим  каждые 2 символа HEX → 1 байт
+                            frameBytes[i] = Convert.ToByte(asciiHex.Substring(i * 2, 2), 16);
                         }
                         catch
                         {
-                            DataReceivedVarta832?.Invoke($"RX ERROR: invalid hex -> {asciiHex}");
+                            DataReceivedVarta832?.Invoke($"RX ERROR: invalid hex -> {asciiHex}"); // еили при конвертации возникла ошибка, то это значит что пришел невалидный HEX
                             continue;
                         }
 
-                        string fullHex = BitConverter.ToString(frameBytes).Replace("-", "");
+                        string fullHex = BitConverter.ToString(frameBytes).Replace("-", ""); // для вывода в журнал ошибок и логов UI.
+                        // Проверяем минимальную длину кадра, которая должна быть не меньше 9 байт (read(1) + address(1) + index(4) + subindex(1) + length(1) + chk(1) = 9 байт)
                         if (frameBytes.Length < 9)
                         {
                             DataReceivedVarta832?.Invoke($"RX ERROR: frame too short -> {fullHex}");
@@ -1702,25 +1719,29 @@ namespace skb_home.Platforms.Android
                         // Вычисляем ожидаемую контрольную сумму 
                         byte expectedChk = (byte)(sum & 0xFF);
                         // Получаем фактическую контрольную сумму из последнего байта кадра
-                        byte actualChk = frameBytes[^1];
+                        byte actualChk = frameBytes[^1];   // или так  frameBytes[frameBytes.Length - 1].
                         // Сравниваем ожидаемую и фактическую контрольные суммы
-                        bool chkOk = expectedChk == actualChk;
+                        bool chkOk = expectedChk == actualChk; // пока что так оставим не задействованным.
 
                         // Основные поля
                         byte read = frameBytes[0];
                         byte address = frameBytes[1];
-                        byte[] indexBytes = frameBytes.Skip(2).Take(4).ToArray();
+                        byte[] indexBytes = frameBytes.Skip(2).Take(4).ToArray(); // начинаем со 2 индекса и дальше берем 4 байта, которые составляют индекс.
                         byte subindex = frameBytes[6];
-                        int length = frameBytes[7];
+                        int length = frameBytes[7];  // длина полезной нагрузки
 
-                        string indexString = BitConverter.ToString(indexBytes).Replace("-", "");
-                        const int payloadStart = 8;
-                        int payloadAvailable = frameBytes.Length - payloadStart - 1;
+                        string indexString = BitConverter.ToString(indexBytes).Replace("-", ""); // индекс конвертируем в строку
+                        const int payloadStart = 8; // стартовая позиция(индекс) полезной нагрузки - data, которая начинается с 8-го байта кадра 
+                        int payloadAvailable = frameBytes.Length - payloadStart - 1; // вычисляем фактическую длину полезной нагрузки, вычитая стартовую позицию и 1 байт контрольной суммы.
 
-                        // ⚡ Если length некорректный — используем фактическую длину
-                        int safeLength = Math.Min(length, payloadAvailable);
+                        //  Если length некорректный — используем фактическую длину - безопастность для того, чтобы не выйти за пределы массива при копировании payload.
+                        int safeLength = Math.Min(length, payloadAvailable); // берем меньшее из двух значений: заявленную длину и фактическую доступную длину полезной нагрузки.
 
-                        byte[] payload = frameBytes.Skip(payloadStart).Take(safeLength).ToArray();
+                        // создаем массив payload, который содержит полезную нагрузку кадра, начиная с позиции payloadStart и длиной safeLength.
+                        // напоминание - сдесь уже место ASC!! лежат согласно протоколу таблицы правильно собранные hex байты
+                        byte[] payload = frameBytes.Skip(payloadStart).Take(safeLength).ToArray(); // массив полезной нагрузки
+
+                        //  Преобразуем payload в HEX-строку для логов и UI
                         string payloadHex = payload.Length > 0 ? BitConverter.ToString(payload).Replace("-", "") : string.Empty;
 
 
@@ -1762,17 +1783,17 @@ namespace skb_home.Platforms.Android
                             }
                             else if (indexString == "00003100")
                             {
-                                numericValue = string.Join(",", payload.Select(b => b.ToString()));
-                                hexValues = string.Join(",", payload.Select(b => b.ToString("X2")));
+                                numericValue = string.Join(",", payload.Select(b => b.ToString())); // выводим массив чисел(полезной нагрузки) через запятую
+                                hexValues = string.Join(",", payload.Select(b => b.ToString("X2"))); // выводим массив чисел(полезной нагрузки) в HEX через запятую
 
                                 var frame = new VartaFrame
                                 {
                                     Index = indexString,
                                     SubIndex = subindex.ToString("X2"),
-                                    Exists = payload.Length > 0 && payload[0] != 0x00
+                                    Exists = payload.Length > 0 && payload[0] != 0x00 // Анализ наличия блока/модуля BSVH), если первый байт payload не равен 0x00, то считаем, что блок существует.
                                 };
 
-                                int count = Math.Min(16, payload.Length - 1);
+                                int count = Math.Min(16, payload.Length - 1); // страхуем, так как обрабатывается не больше 16 параметров
 
                                 //for (int i = 1; i <= count; i++)
                                 //{
@@ -1784,17 +1805,20 @@ namespace skb_home.Platforms.Android
                                 //    frame.Values.Add(new VartaValue { Name = $"ШС{i}", Value = decoded });
                                 //}
 
-                                for (int i = 1; i <= count; i++)
+                                for (int i = 1; i <= count; i++) // payload[0] ушёл под статус Exists(BSVH), поэтому цикл стартует с индекса i = 1
                                 {
                                     byte b = payload[i];
+                                    // проверяем, что индекс b в пределах массива TypeValue, если нет — выводим Unknown(b)
                                     string decoded = b < TypeValue.Length
                                         ? TypeValue[b]
                                         : $"Unknown({b})";
-
+                                    // формируем имя параметра в зависимости от его позиции: первые 8 параметров — это "Тип ШС", а следующие 8 — "Стан ШС"
                                     string name = i <= 8
                                         ? $"Тип ШС{i}"
                                         : $"Стан ШС{i - 8}";
 
+                                    // Каждая пара помещается в frame.Values.
+                                    // Добавляем объект VartaValue в коллекцию Values кадра frame, где Name — это имя параметра, а Value — его расшифрованное значение.
                                     frame.Values.Add(new VartaValue { Name = name, Value = decoded });
                                 }
 
