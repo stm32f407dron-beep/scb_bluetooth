@@ -1840,41 +1840,41 @@ namespace skb_home.Platforms.Android
                             }
 
 
-                            else
+                            else // если индекс не известен — пробуем трактовать как текст
                             {
-                                // ⚡ По умолчанию пробуем как текст
-                                var enc = Encoding.GetEncoding(1251);
-                                payloadText = enc.GetString(payload, 0, payload.Length);
+                                
+                                // По умолчанию пробуем как текст (для всех остальных индексов)
+                                if (payload.Length > 0)
+                                {
+                                    var enc = Encoding.GetEncoding(1251);
+                                    payloadText = enc.GetString(payload, 0, payload.Length);
+                                }
                             }
                         }
                         catch { }
 
 
-                        // ⚡ Формируем расшифровку для любого payload
+                        // Формируем расшифровку для любого payload 
                         if (payload.Length > 0)
                         {
-                            decodedValues = string.Join(",", payload.Select(b =>
-                                b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})"
-                            ));
+
+                            Func<byte, string> getDecodedValue = delegate (byte b)
+                            {
+                                return b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})";  // условие ? значение если истина  : значение если ложь
+                            };
+
+                            decodedValues = string.Join(",", payload.Select(getDecodedValue));
+
+                            //decodedValues = string.Join(",", payload.Select(b =>
+                            //    b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})"
+                            //));
                         }
-
-
-
 
 
                         // ⚡ Выводим всегда, но помечаем статус
                         string status = chkOk ? "OK" : "WARN";
                         if (length > payloadAvailable) status = "ERROR";
 
-
-                        //var frame = new VartaFrame
-                        //{
-                        //    Index = indexString,
-                        //    Value = numericValue,
-                        //    Decoded = decodedValues
-                        //};
-                        //DataReceivedFrame?.Invoke(frame);
-                        //DataReceivedFrame?.Invoke(frame);
 
 
                         DataReceivedVarta832?.Invoke(
@@ -1889,9 +1889,6 @@ namespace skb_home.Platforms.Android
                        //    $"payloadHex={payloadHex} text=\"{payloadText}\"  value={numericValue} valueHex={hexValues} decoded={decodedValues} " +
                        //    $"chkExp={expectedChk:X2} chkAct={actualChk:X2}"
                        //);
-
-
-
 
                     }
                 }
