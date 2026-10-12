@@ -2,7 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="skb_home.Varta_832"
-             Title="Varta_832">
+             Title="Varta_832"
+             BackgroundColor="#40737a">
 
     <!-- Весь контент внутри ScrollView -->
     <ScrollView>
@@ -22,15 +23,18 @@
                             <Label Text="{Binding Headers}"
                                    FontAttributes="Bold"
                                    FontSize="16"
-                                   TextColor="#1b6fc3"
+                                   TextColor="#000000"
                                    Margin="0,5"/>
 
                             <!-- Первая строка: BSVH -->
                             <Grid ColumnDefinitions="Auto,*"
                                   ColumnSpacing="48"
                                   Padding="2">
-                                <Label Text="BSVH1:" FontAttributes="Bold" Grid.Column="0"/>
-                                <Label Text="{Binding Exists}" Grid.Column="1"/>
+                                <Label Text="BSVH1"  Grid.Column="0"
+                                      FontAttributes="Bold" />
+                                <Label Text="{Binding Exists}" Grid.Column="1"
+                                        FontAttributes="Bold"
+                                       />
                             </Grid>
 
                             <!-- 16 строк ШС -->
@@ -48,11 +52,12 @@
                                             <Label Text="{Binding Name}"
                                                    FontAttributes="Bold"
                                                    Grid.Column="0"
-                                                   TextColor="#1db41d"/>
+                                                   TextColor="#ffffff"/>
                                             <!-- Правая колонка: значение -->
                                             <Label Text="{Binding Value}"
+                                                   FontAttributes="Bold"
                                                    Grid.Column="1"
-                                                   TextColor="#006"/>
+                                                   TextColor="#000"/>
                                         </Grid>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>

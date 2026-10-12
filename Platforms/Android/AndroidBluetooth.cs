@@ -1704,7 +1704,7 @@ namespace skb_home.Platforms.Android
                             continue;
                         }
 
-                        string fullHex = BitConverter.ToString(frameBytes).Replace("-", ""); // для вывода в журнал ошибок и логов UI.
+                        string fullHex = BitConverter.ToString(frameBytes).Replace("-", ""); // для вывода в журнал ошибок и логов UI. - это весь кадр целиком!! - со служебными битами
                         // Проверяем минимальную длину кадра, которая должна быть не меньше 9 байт (read(1) + address(1) + index(4) + subindex(1) + length(1) + chk(1) = 9 байт)
                         if (frameBytes.Length < 9)
                         {
@@ -1742,7 +1742,7 @@ namespace skb_home.Platforms.Android
                         byte[] payload = frameBytes.Skip(payloadStart).Take(safeLength).ToArray(); // массив полезной нагрузки
 
                         //  Преобразуем payload в HEX-строку для логов и UI
-                        string payloadHex = payload.Length > 0 ? BitConverter.ToString(payload).Replace("-", "") : string.Empty;
+                        string payloadHex = payload.Length > 0 ? BitConverter.ToString(payload).Replace("-", "") : string.Empty; // это только полезные данные -data!!
 
 
 
@@ -1781,11 +1781,14 @@ namespace skb_home.Platforms.Android
                                     numericValue = string.Join(",", payload.Select(b => b.ToString()));
                                 }
                             }
+
+                            ///////////////BVSH
                             else if (indexString == "00003100")
                             {
                                 numericValue = string.Join(",", payload.Select(b => b.ToString())); // выводим массив чисел(полезной нагрузки) через запятую
                                 hexValues = string.Join(",", payload.Select(b => b.ToString("X2"))); // выводим массив чисел(полезной нагрузки) в HEX через запятую
 
+                                // Создание контейнера кадра VartaFrame: где задаем параметры: Index, SubIndex и Exists (наличие блока/модуля BSVH)
                                 var frame = new VartaFrame
                                 {
                                     Index = indexString,
@@ -1795,16 +1798,9 @@ namespace skb_home.Platforms.Android
 
                                 int count = Math.Min(16, payload.Length - 1); // страхуем, так как обрабатывается не больше 16 параметров
 
-                                //for (int i = 1; i <= count; i++)
-                                //{
-                                //    byte b = payload[i];
-                                //    string decoded = b < TypeValue.Length
-                                //        ? TypeValue[b]
-                                //        : $"Unknown({b})";
 
-                                //    frame.Values.Add(new VartaValue { Name = $"ШС{i}", Value = decoded });
-                                //}
-
+                                //Заполнение коллекции Values объектами VartaValue:
+                                // и каждый байт payload[i] безопасно расшифровывается в текст decoded через таблицу TypeValue (с защитой Unknown(b)).
                                 for (int i = 1; i <= count; i++) // payload[0] ушёл под статус Exists(BSVH), поэтому цикл стартует с индекса i = 1
                                 {
                                     byte b = payload[i];
@@ -1823,7 +1819,7 @@ namespace skb_home.Platforms.Android
                                 }
 
 
-
+                                // комментарии роботы на низкоуровневом уровне (ARM64) с точки зрения процессора:
                                 // _target (регистр X0 / аргумент 'this'):
                                 // Адрес страницы Varta_832 в памяти — контекст, чтобы метод знал, чью коллекцию Frames менять.
 
@@ -1882,12 +1878,17 @@ namespace skb_home.Platforms.Android
 
 
                         DataReceivedVarta832?.Invoke(
-                            $"index={indexString} sub={subindex:X2} len={length} " +
-                            $"payloadHex={payloadHex} text=\"{payloadText}\"  value={numericValue} valueHex={hexValues} decoded={decodedValues} " +
+                            $"index={indexString} sub={subindex:X2}" +
+                            $"payloadHex={payloadHex} value={numericValue} valueHex={hexValues} decoded={decodedValues} " +
                             $"chkExp={expectedChk:X2} chkAct={actualChk:X2}"
                         );
 
 
+                       // DataReceivedVarta832?.Invoke(
+                       //    $"index={indexString} sub={subindex:X2} len={length} " +
+                       //    $"payloadHex={payloadHex} text=\"{payloadText}\"  value={numericValue} valueHex={hexValues} decoded={decodedValues} " +
+                       //    $"chkExp={expectedChk:X2} chkAct={actualChk:X2}"
+                       //);
 
 
 
