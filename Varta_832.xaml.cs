@@ -79,25 +79,46 @@ public partial class Varta_832 : ContentPage
 
 
         // Подписка на событие DataReceivedFrame
+        //_bluetoothService.DataReceivedFrame += delegate (VartaFrame frame)
+        //{
+        //    MainThread.BeginInvokeOnMainThread(delegate
+        //    {
+        //        if (Frames.Count < 2)
+        //        {
+        //            // Первый и второй раз — добавляем элементы в список (будет 2 рамки)
+        //            Frames.Add(frame);
+        //        }
+        //        else
+        //        {
+        //            // Если уже есть две рамки — обновляем вторую (или нужную по индексу)
+        //            Frames[1] = frame;
+        //        }
+        //    });
+        //};
+
+
+        // Подписка на событие DataReceivedFrame в Varta_832
         _bluetoothService.DataReceivedFrame += delegate (VartaFrame frame)
         {
             MainThread.BeginInvokeOnMainThread(delegate
             {
-                if (Frames.Count < 2)
+                // Гарантируем, что в коллекции есть место под оба блока (Frames[0] и Frames[1])
+                while (Frames.Count < 2)
                 {
-                    // Первый и второй раз — добавляем элементы в список (будет 2 рамки)
-                    Frames.Add(frame);
+                    Frames.Add(new VartaFrame());
                 }
-                else
+
+                // В зависимости от субиндекса раскладываем по своим рамкам:
+                if (frame.SubIndex == "01")
                 {
-                    // Если уже есть две рамки — обновляем вторую (или нужную по индексу)
-                    Frames[1] = frame;
+                    Frames[0] = frame; // Левая рамка (БША 1)
+                }
+                else if (frame.SubIndex == "02")
+                {
+                    Frames[1] = frame; // Правая рамка (БША 2)
                 }
             });
         };
-
-
-
 
 
 
@@ -164,31 +185,31 @@ public partial class Varta_832 : ContentPage
 
 
 
-    private async void OnSaveTerminalClicked(object sender, EventArgs e)
-    {
-        try
-        {
-            string s = "010100003100012054";  //01010000301902FF4C   // 010100003100012054
+    //private async void OnSaveTerminalClicked(object sender, EventArgs e)
+    //{
+    //    try
+    //    {
+    //        string s = "010100003100012054";  //01010000301902FF4C   // 010100003100012054
 
 
 
-            // Текст из терминала
-            await  _bluetoothService?.TransmitterData(s);
+    //        // Текст из терминала
+    //        await  _bluetoothService?.TransmitterData(s);
 
-            await DisplayAlert("Команда", "Отослана", "OK");
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Помилка", $"Не вдалося : {ex.Message}", "OK");
-        }
-    }
+    //        await DisplayAlert("Команда", "Отослана", "OK");
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        await DisplayAlert("Помилка", $"Не вдалося : {ex.Message}", "OK");
+    //    }
+    //}
 
 
     private async void OnReadBsvh1Clicked(object sender, EventArgs e)
     {
         try
         {
-            string s = "010100003100012054"; // Твой текущий адрес/команда
+            string s = "010100003100012054"; // Твой текущий адрес/команда010100003100012054
             await _bluetoothService?.TransmitterData(s);
             await DisplayAlert("Команда", "БША 1: Отослана", "OK");
         }
@@ -202,7 +223,7 @@ public partial class Varta_832 : ContentPage
     {
         try
         {
-            string s = "010100003100012054"; // Тот же самый адрес/команда
+            string s = "010100003100022055"; // Тот же самый адрес/команда
             await _bluetoothService?.TransmitterData(s);
             await DisplayAlert("Команда", "БША 2: Отослана", "OK");
         }
