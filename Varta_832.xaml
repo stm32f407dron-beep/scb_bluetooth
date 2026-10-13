@@ -6,35 +6,36 @@
              Title="Varta_832"
              BackgroundColor="#40737a">
 
-
-
     <ContentPage.Resources>
         <ResourceDictionary>
             <local:StatusColorConverter x:Key="StatusToColor" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
-
-
     <ScrollView>
-        <VerticalStackLayout Padding="8" Spacing="10">
+        <!-- Главный контейнер: центрируется, на телефонах занимает доступную ширину, 
+             а на планшетах ограничивается максимум в 500 dp, чтобы не расползаться -->
+        <VerticalStackLayout Padding="8" 
+                             Spacing="10"
+                             MaximumWidthRequest="500"
+                             HorizontalOptions="Center">
 
-            <!-- Таблица БША: центрируем блок на экране -->
+            <!-- Таблица БША -->
             <CollectionView ItemsSource="{Binding Frames}"
                             HorizontalOptions="Center">
                 <CollectionView.ItemsLayout>
-                    <!-- Зазор между рамками делаем 8 (или 10) -->
                     <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
                 </CollectionView.ItemsLayout>
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <!-- Рамка вокруг каждого БША: ширина 175 -->
+                        <!-- Рамка: ширина 170 (влезает даже в экраны 360dp с учетом отступов),
+                             но при этом может гибко адаптироваться -->
                         <Border Stroke="#0B0101"
                                 StrokeThickness="1.5"
                                 StrokeShape="RoundRectangle 8"
                                 BackgroundColor="#E9F1F2"
-                                WidthRequest="175"
+                                WidthRequest="170"
                                 Padding="8">
 
                             <VerticalStackLayout Spacing="3">
@@ -50,7 +51,7 @@
                                 <!-- Первая строка: BSVH и статус -->
                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
                                     <Label Text="BSVH" FontAttributes="Bold" TextColor="#000000" FontSize="14" Grid.Column="0"/>
-                                    <Label Text="{Binding Exists}" HorizontalTextAlignment="End"   FontAttributes="Bold" TextColor="#0D47A1" FontSize="14" Grid.Column="1"/>
+                                    <Label Text="{Binding Exists}" HorizontalTextAlignment="End" FontAttributes="Bold" TextColor="#0D47A1" FontSize="14" Grid.Column="1"/>
                                 </Grid>
 
                                 <!-- 16 строк ШС -->
@@ -63,12 +64,12 @@
                                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
                                                 <Label Text="{Binding Name}"
                                                        FontAttributes="Bold"
-                                                       FontSize="14"
+                                                       FontSize="13"
                                                        TextColor="#752108"
                                                        Grid.Column="0"/>
                                                 <Label Text="{Binding Value}"
                                                        FontAttributes="Bold"
-                                                       FontSize="14"
+                                                       FontSize="13"
                                                        TextColor="{Binding Value, Converter={StaticResource StatusToColor}}"
                                                        HorizontalTextAlignment="End"
                                                        Grid.Column="1"/>
@@ -82,7 +83,7 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <!-- Две кнопки ровно под рамками: отцентрированы и точно такой же ширины (175) -->
+            <!-- Две кнопки ровно под рамками: ширина 170 каждая (170 + 8 + 170 = 348) -->
             <Grid ColumnDefinitions="Auto,Auto"
                   ColumnSpacing="8"
                   HorizontalOptions="Center">
@@ -92,8 +93,8 @@
                         BackgroundColor="#082044"
                         TextColor="#FFFFFF"
                         FontAttributes="Bold"
-                        FontSize="14"
-                        WidthRequest="175"
+                        FontSize="13"
+                        WidthRequest="170"
                         HeightRequest="42"
                         CornerRadius="6"
                         Clicked="OnReadBsvh1Clicked"/>
@@ -103,24 +104,23 @@
                         BackgroundColor="#082044"
                         TextColor="#FFFFFF"
                         FontAttributes="Bold"
-                        FontSize="14"
-                        WidthRequest="175"
+                        FontSize="13"
+                        WidthRequest="170"
                         HeightRequest="42"
                         CornerRadius="6"
                         Clicked="OnReadBsvh2Clicked"/>
             </Grid>
 
-            <!-- Переключатель терминала -->
-            <Grid ColumnDefinitions="Auto,*,Auto"
-                  ColumnSpacing="10"
+            <!-- Переключатель терминала: ширина ровно под блок кнопок (348 dp) -->
+            <Grid ColumnDefinitions="*,Auto"
                   HeightRequest="50"
-                  WidthRequest="358"
+                  WidthRequest="348"
                   HorizontalOptions="Center">
                 <Label Grid.Column="0"
-                       Margin="4,15,0,0"
+                       Margin="0,15,0,0"
                        Text="Включити термінал"
                        TextColor="#FFFFFF"
-                       FontSize="22"
+                       FontSize="20"
                        FontAttributes="Bold"
                        VerticalOptions="Center"
                        HorizontalOptions="Start">
@@ -129,17 +129,17 @@
                     </Label.Shadow>
                 </Label>
 
-                <Switch Grid.Column="2"
+                <Switch Grid.Column="1"
                         x:Name="TerminalSwitch"
                         OnColor="#1046B0"
                         ThumbColor="White"
-                        Margin="0,15,4,0"
+                        Margin="0,15,0,0"
                         VerticalOptions="Center"
                         HorizontalOptions="End"
                         Toggled="OnTerminalToggled"/>
             </Grid>
 
-            <!-- Терминал -->
+            <!-- Терминал: ширина точно 348 dp, идеально совпадает с колонками -->
             <Border x:Name="TerminalBorder"
                     IsVisible="False"
                     Stroke="#0B0101"
@@ -149,7 +149,7 @@
                     Padding="10"
                     Margin="0,10,0,10"
                     HeightRequest="510"
-                    WidthRequest="358"
+                    WidthRequest="348"
                     HorizontalOptions="Center">
 
                 <Grid RowDefinitions="Auto,*">
@@ -165,7 +165,7 @@
                                 TextColor="#000000"
                                 FontAttributes="Bold"
                                 FontSize="14"
-                                Padding="5,2"
+                                Padding="8,2"
                                 CornerRadius="5"
                                 Clicked="OnClearTerminalClicked"/>
                     </HorizontalStackLayout>
@@ -174,7 +174,7 @@
                         <Label x:Name="label4"
                                Text="Empty text to receive data"
                                FontAttributes="Bold"
-                               FontSize="18"
+                               FontSize="16"
                                TextColor="Black"
                                LineBreakMode="WordWrap"
                                VerticalTextAlignment="Start"

@@ -1863,11 +1863,16 @@ namespace skb_home.Platforms.Android
                                 return b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})";  // условие ? значение если истина  : значение если ложь
                             };
 
-                            decodedValues = string.Join(",", payload.Select(getDecodedValue));
+                            string s = payload[0] == 0x11 ? "true" : "false";
 
-                            //decodedValues = string.Join(",", payload.Select(b =>
-                            //    b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})"
-                            //));
+                            string zones = string.Join(",", payload.Skip(1).Select(getDecodedValue));
+
+                            decodedValues = $"BSVH={s}, Zones=[{zones}]"; 
+                           
+                        }
+                        else
+                        {
+                            decodedValues = "Empty";
                         }
 
 
@@ -1879,8 +1884,8 @@ namespace skb_home.Platforms.Android
 
                         DataReceivedVarta832?.Invoke(
                             $"index={indexString} sub={subindex:X2}" +
-                            $"payloadHex={payloadHex} value={numericValue} valueHex={hexValues} decoded={decodedValues} " +
-                            $"chkExp={expectedChk:X2} chkAct={actualChk:X2}"
+                            $"payloadHex={payloadHex} decoded={decodedValues} " +
+                            $"chk_sumaExp={expectedChk:X2} chk_sumAct={actualChk:X2}"
                         );
 
 
