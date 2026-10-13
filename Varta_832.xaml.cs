@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace skb_home;
 
@@ -262,3 +263,28 @@ public class VartaFrame
 
 }
 
+public class StatusColorConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is string status)
+        {
+            return status switch
+            {
+                "Fire" or "Alarm" => Color.FromArgb("#D32F2F"),       // Красный (тревога / пожар)
+                "Breakage" or "Short" => Color.FromArgb("#B78103"),   // Оранжевый (обрыв / кз)
+                "ATTENTION" => Color.FromArgb("#F57F17"),              // Янтарный (внимание)
+                "NORM" or "ON" => Color.FromArgb("#2E7D32"),          // Зеленый (норма / включено)
+                "Not Data" or "Power-off" or "LOST" => Color.FromArgb("#757575"), // Серый
+                _ => Color.FromArgb("#103381")                        // Темно-синий по умолчанию (Indefinite, Logical и др.)
+            };
+        }
+
+        return Color.FromArgb("#103381");
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

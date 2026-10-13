@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:skb_home"
              x:Class="skb_home.Varta_832"
              Title="Varta_832"
              BackgroundColor="#40737a">
+
+
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <local:StatusColorConverter x:Key="StatusToColor" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+
 
     <ScrollView>
         <VerticalStackLayout Padding="8" Spacing="10">
@@ -38,7 +49,7 @@
 
                                 <!-- Первая строка: BSVH и статус -->
                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
-                                    <Label Text="BSVH:" FontAttributes="Bold" TextColor="#000000" FontSize="14" Grid.Column="0"/>
+                                    <Label Text="BSVH" FontAttributes="Bold" TextColor="#000000" FontSize="14" Grid.Column="0"/>
                                     <Label Text="{Binding Exists}" HorizontalTextAlignment="End"   FontAttributes="Bold" TextColor="#0D47A1" FontSize="14" Grid.Column="1"/>
                                 </Grid>
 
@@ -53,12 +64,12 @@
                                                 <Label Text="{Binding Name}"
                                                        FontAttributes="Bold"
                                                        FontSize="14"
-                                                       TextColor="#0EAA0E"
+                                                       TextColor="#752108"
                                                        Grid.Column="0"/>
                                                 <Label Text="{Binding Value}"
                                                        FontAttributes="Bold"
                                                        FontSize="14"
-                                                       TextColor="#103381"
+                                                       TextColor="{Binding Value, Converter={StaticResource StatusToColor}}"
                                                        HorizontalTextAlignment="End"
                                                        Grid.Column="1"/>
                                             </Grid>
@@ -77,22 +88,22 @@
                   HorizontalOptions="Center">
 
                 <Button Grid.Column="0"
-                        Text="Зчитати БША 1"
+                        Text="Зчитати BSVH 1"
                         BackgroundColor="#082044"
                         TextColor="#FFFFFF"
                         FontAttributes="Bold"
-                        FontSize="12"
+                        FontSize="14"
                         WidthRequest="175"
                         HeightRequest="42"
                         CornerRadius="6"
                         Clicked="OnReadBsvh1Clicked"/>
 
                 <Button Grid.Column="1"
-                        Text="Зчитати БША 2"
+                        Text="Зчитати BSVH 2"
                         BackgroundColor="#082044"
                         TextColor="#FFFFFF"
                         FontAttributes="Bold"
-                        FontSize="12"
+                        FontSize="14"
                         WidthRequest="175"
                         HeightRequest="42"
                         CornerRadius="6"
