@@ -235,7 +235,41 @@ public partial class Varta_832 : ContentPage
     }
 
 
+    // Кнопка ⚙ (Настройки)
+    [Obsolete("Используйте OnSettingsClickedAsync вместо этого метода.")]
+    private async void OnSettingsClicked(object sender, EventArgs e) // Обработчик нажатия кнопки "Настройки" OnSettingsClicked
+    {
 
+       
+        string choice = await DisplayActionSheet(
+            "Вібір",
+            "Назад",
+            null,
+            "Налаштування",
+            "Конфігурація",
+            "Струми шлейфів",
+            "Коди подій",
+            "Коди відновлення",
+            "Індифікатор шлейфів",
+            "Струми шлейфів",
+            "Параметри реле",
+            "Стан шлейфа",
+            "Про програму"
+        );
+
+        switch (choice)
+        {
+            case "Налаштування":
+                await DisplayAlert("Загальні", "Загальні налаштування", "OK");
+                break;
+
+    
+            case "Про програму":
+                await DisplayAlert("Про програму", "Версія 1.0\nРозробник: Ваше ім'я", "OK");
+                break;
+        }
+
+    }
 
 
 }
@@ -271,12 +305,38 @@ public class StatusColorConverter : IValueConverter
         {
             return status switch
             {
-                "Fire" or "Alarm" => Color.FromArgb("#D32F2F"),       // Красный (тревога / пожар)
-                "Breakage" or "Short" => Color.FromArgb("#B78103"),   // Оранжевый (обрыв / кз)
-                "ATTENTION" => Color.FromArgb("#F57F17"),              // Янтарный (внимание)
-                "NORM" or "ON" => Color.FromArgb("#2E7D32"),          // Зеленый (норма / включено)
-                "Not Data" or "Power-off" or "LOST" => Color.FromArgb("#757575"), // Серый
-                _ => Color.FromArgb("#103381")                        // Темно-синий по умолчанию (Indefinite, Logical и др.)
+                // Пожар и тревоги
+                "Fire" => Color.FromArgb("#D32F2F"), // Ярко-красный
+                "Alarm" => Color.FromArgb("#D32F2F"), // Красный
+
+                // Неисправности линии
+                "Breakage" => Color.FromArgb("#B78103"), // Оранжевый (обрыв)
+                "Short" => Color.FromArgb("#D84315"), // Красно-оранжевый (короткое замыкание)
+
+                // Предупреждения
+                "ATTENTION" => Color.FromArgb("#F57F17"), // Янтарный (внимание)
+
+                // Норма и включение
+                "NORM" => Color.FromArgb("#2E7D32"), // Зеленый (норма)
+                "ON" => Color.FromArgb("#2E7D32"), // Зеленый (включено / активен)
+                "OFF" => Color.FromArgb("#757575"), // Серый (выключен)
+
+                // Отсутствие связи и питания
+                "Not Data" => Color.FromArgb("#757575"), // Серый (нет данных)
+                "Power-off" => Color.FromArgb("#616161"), // Темно-серый (нет питания)
+                "LOST" => Color.FromArgb("#9E9E9E"), // Светло-серый (потерян)
+
+                // Блокировки
+                "BLOCKING" => Color.FromArgb("#8E24AA"), // Фиолетовый (блокировка)
+                "Deblocking" => Color.FromArgb("#3949AB"), // Индиго (разблокировка)
+
+                // Неопределенные и логические состояния
+                "Indefinite" => Color.FromArgb("#103381"), // Темно-синий (не определено)
+                "Logical 1" => Color.FromArgb("#00838F"), // Бирюзовый
+                "Logical 2" => Color.FromArgb("#00695C"), // Морской
+
+                // Любой другой неизвестный текст
+                _ => Color.FromArgb("#000000")  // Черный по умолчанию
             };
         }
 

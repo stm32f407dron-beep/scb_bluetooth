@@ -34,7 +34,7 @@
                     <!-- Вторая строка: Scan -->
                     <Label Text="Scan" 
                        FontSize="22"
-                       TextColor="#22b27a"
+                       TextColor="#197E19"
                        FontAttributes="Bold"
                        VerticalOptions="Center"
                        Grid.Row="1"

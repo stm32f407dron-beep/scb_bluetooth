@@ -6,6 +6,16 @@
              Title="Varta_832"
              BackgroundColor="#40737a">
 
+
+
+    <ContentPage.ToolbarItems>
+        <!--<ToolbarItem Text="🔄" Order="Primary" Priority="0" Clicked="OnRefreshClicked"/>-->
+        <ToolbarItem Text="⚙" Order="Primary" Priority="1" Clicked="OnSettingsClicked"/>
+    </ContentPage.ToolbarItems>
+
+
+
+
     <ContentPage.Resources>
         <ResourceDictionary>
             <local:StatusColorConverter x:Key="StatusToColor" />
