@@ -24,62 +24,104 @@ namespace skb_home
 
 
 
-#pragma warning disable CS8765 // Допустимость значений NULL для типа параметра не соответствует переопределенному элементу (возможно, из-за атрибутов допустимости значений NULL).
+//#pragma warning disable CS8765 // Допустимость значений NULL для типа параметра не соответствует переопределенному элементу (возможно, из-за атрибутов допустимости значений NULL).
+//        protected override async void OnCreate(Bundle savedInstanceState)
+//#pragma warning restore CS8765 // Допустимость значений NULL для типа параметра не соответствует переопределенному элементу (возможно, из-за атрибутов допустимости значений NULL).
+//        {
+//            base.OnCreate(savedInstanceState);
+
+
+//            // Сохраняем ссылку на текущий экземпляр
+//            Instance = this;
+//            Android.Util.Log.Info("MainActivity", "MainActivity OnCreate called. Instance initialized.");
+
+          
+//            // Фиксируем ориентацию в портретном режиме при запуске приложения
+//            SetRequestedOrientation(Android.Content.PM.ScreenOrientation.Portrait);
+
+
+
+
+//            // Создаём NotificationChannel
+//            // CreateNotificationChannel();
+
+
+
+//            // Ждём, пока пользователь ответит на запрос разрешений
+//            bool granted = await BluetoothPermissionsHelper.RequestBluetoothPermissionsAsync(this);
+//            // INSERT LOG HERE (optional)
+//            Android.Util.Log.Info("BTPerms", $"MainActivity: RequestBluetoothPermissionsAsync returned: {granted}");
+
+//            if (granted)
+//            {
+//                try
+//                {
+//                    // Можно работать с Bluetooth
+//#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
+//                    Toast.MakeText(this, "Bluetooth разрешения получены!", ToastLength.Short).Show();
+//#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
+
+//                }
+//                catch (Exception ex) { Android.Util.Log.Info("Error", $"MainActivity: {ex.Message}"); }
+//                // Можно работать с Bluetooth
+//                //#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
+//                //                Toast.MakeText(this, "Bluetooth разрешения получены!", ToastLength.Short).Show();
+//                //#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
+
+//            }
+//            else
+//            {
+//                // Пользователь отказал — покажи предупреждение или ограничь функционал
+//#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
+//                Toast.MakeText(this, "Bluetooth разрешения НЕ получены!", ToastLength.Short).Show();
+//#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
+//            }
+//        }
+
+        // вариант 2
+        // вариант 2
+#pragma warning disable CS8765
         protected override async void OnCreate(Bundle savedInstanceState)
-#pragma warning restore CS8765 // Допустимость значений NULL для типа параметра не соответствует переопределенному элементу (возможно, из-за атрибутов допустимости значений NULL).
+#pragma warning restore CS8765
         {
             base.OnCreate(savedInstanceState);
 
-
-            // Сохраняем ссылку на текущий экземпляр
             Instance = this;
             Android.Util.Log.Info("MainActivity", "MainActivity OnCreate called. Instance initialized.");
 
-          
-            // Фиксируем ориентацию в портретном режиме при запуске приложения
+            // Фіксуємо портретну орієнтацію
             SetRequestedOrientation(Android.Content.PM.ScreenOrientation.Portrait);
 
-
-
-
-            // Создаём NotificationChannel
-            // CreateNotificationChannel();
-
-
-
-            // Ждём, пока пользователь ответит на запрос разрешений
+            // Запитуємо дозволи
             bool granted = await BluetoothPermissionsHelper.RequestBluetoothPermissionsAsync(this);
-            // INSERT LOG HERE (optional)
             Android.Util.Log.Info("BTPerms", $"MainActivity: RequestBluetoothPermissionsAsync returned: {granted}");
 
-            if (granted)
+            // Безпечний показ сповіщень
+            ShowSafeToast(granted ? "Bluetooth разрешения получены!" : "Bluetooth разрешения НЕ получены!");
+        }
+
+        private void ShowSafeToast(string message)
+        {
+            // На Android 7.1 і нижче (API <= 25) Toast викидає фатальний BadTokenException при навантаженні UI
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.O) // Android 8.0+ (API 26+)
             {
                 try
                 {
-                    // Можно работать с Bluetooth
-#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-                    Toast.MakeText(this, "Bluetooth разрешения получены!", ToastLength.Short).Show();
-#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
-
+                    Toast.MakeText(Android.App.Application.Context, message, ToastLength.Short)?.Show();
                 }
-                catch (Exception ex) { Android.Util.Log.Info("Error", $"MainActivity: {ex.Message}"); }
-                // Можно работать с Bluetooth
-                //#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-                //                Toast.MakeText(this, "Bluetooth разрешения получены!", ToastLength.Short).Show();
-                //#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
-
+                catch (Exception ex)
+                {
+                    Android.Util.Log.Warn("ToastError", $"Не вдалося показати Toast: {ex.Message}");
+                }
             }
             else
             {
-                // Пользователь отказал — покажи предупреждение или ограничь функционал
-#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-                Toast.MakeText(this, "Bluetooth разрешения НЕ получены!", ToastLength.Short).Show();
-#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
+                // Для Android 7 просто записуємо в логcat, щоб не ризикувати вильотом процесу
+                Android.Util.Log.Info("ToastBypass", $"[Android < 8]: {message}");
             }
         }
 
-
-
+        //
 
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
