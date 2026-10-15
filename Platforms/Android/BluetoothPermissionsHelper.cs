@@ -58,15 +58,13 @@ namespace skb_home.Platforms.Android
         {
             foreach (var permission in GetRequiredPermissions())
             {
+                // Проверяем статус разрешения
+                // ContextCompat.CheckSelfPermission возвращает Permission.Granted, если разрешение уже выдано, иначе Permission.Denied
                 var status = ContextCompat.CheckSelfPermission(activity, permission);
 
                 // INSERT LOG HERE (HasAllPermissions):
                 // Вставь эту строку, чтобы логировать статус проверки каждого permission:
                 // Android.Util.Log.Debug("BTPerms", $"CheckSelfPermission: {permission} => {status}");
-
-
-
-
 
                 Log.Debug("BTPerms", $"CheckSelfPermission: {permission} => {status}");
                 if (status != Permission.Granted)
@@ -90,6 +88,10 @@ namespace skb_home.Platforms.Android
             // какое-то событие (в нашем случае — когда пользователь ответит на диалог разрешения).
 
             // По сути создаём “контейнер” для задачи, которую позже завершим вручную, когда получим ответ пользователя.
+            // TaskCompletionSource<bool> позволяет нам вернуть Task<bool> вызывающему коду, который будет ожидать завершения этой задачи.
+            // Когда пользователь ответит на запрос разрешений, мы вызовем _tcs.SetResult(true) или _tcs.SetResult(false), чтобы завершить задачу и вернуть результат.
+            // Таким образом, вызывающий код может использовать await для ожидания результата запроса разрешений.
+            // Если прав не хватает, мы создаём нашу «пустую коробку». Теперь мы можем выдать наружу задачу, результат которой пока неизвестен. 
             _tcs = new TaskCompletionSource<bool>();
 
             //Получение списка необходимых разрешений
@@ -109,6 +111,9 @@ namespace skb_home.Platforms.Android
             if (permissions.Length > 0)
             {
                 // Запрашиваем у пользователя нужные разрешения
+                // ActivityCompat.RequestPermissions(activity, permissions, RequestCode) вызывает диалоговое окно с запросом разрешений у пользователя.
+                // Когда пользователь ответит (разрешит или отклонит), система вызовет метод MainActivity.OnRequestPermissionsResult, который мы переопределили.
+                // Покажи поверх нашего экрана системное серое окно с вопросом пользователю. Заявку регистрируем под номером 1001
                 ActivityCompat.RequestPermissions(activity, permissions, RequestCode);
             }
             else
@@ -127,16 +132,18 @@ namespace skb_home.Platforms.Android
 
 
         // Этот метод должен быть вызван из MainActivity.OnRequestPermissionsResult
-        //когда пользователь ответит на запрос разрешений.
+        // когда пользователь ответит на запрос разрешений.
         // Тоесть когда надо ждать ответа от пользователя и когда этот ответ придёт.
         // Когда надо получить инфо от андроида Андроид и он вызывает OnRequestPermissionsResult
         public static void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
+            // Проверяем, что это наш запрос разрешений и что у нас есть TaskCompletionSource для завершения задачи
             if (requestCode == RequestCode && _tcs != null)
             {
 
-                //
+                // Логируем полученные разрешения
                 Log.Info("BTPerms", $"OnRequestPermissionsResult: received {permissions.Length} permissions");
+                // Логируем каждый permission и его результат
                 for (int i = 0; i < permissions.Length; i++)
                 {
                     var perm = permissions[i];
@@ -146,7 +153,7 @@ namespace skb_home.Platforms.Android
 
 
 
-                //
+                // Проверяем, все ли разрешения были предоставлены
                 Func<Permission, bool> func = delegate (Permission r)
                 {
                     if (r == Permission.Granted)

@@ -24,75 +24,81 @@ namespace skb_home
 
 
 
-//#pragma warning disable CS8765 // Допустимость значений NULL для типа параметра не соответствует переопределенному элементу (возможно, из-за атрибутов допустимости значений NULL).
-//        protected override async void OnCreate(Bundle savedInstanceState)
-//#pragma warning restore CS8765 // Допустимость значений NULL для типа параметра не соответствует переопределенному элементу (возможно, из-за атрибутов допустимости значений NULL).
-//        {
-//            base.OnCreate(savedInstanceState);
+        //#pragma warning disable CS8765 // Допустимость значений NULL для типа параметра не соответствует переопределенному элементу (возможно, из-за атрибутов допустимости значений NULL).
+        //        protected override async void OnCreate(Bundle savedInstanceState)
+        //#pragma warning restore CS8765 // Допустимость значений NULL для типа параметра не соответствует переопределенному элементу (возможно, из-за атрибутов допустимости значений NULL).
+        //        {
+        //            base.OnCreate(savedInstanceState);
 
 
-//            // Сохраняем ссылку на текущий экземпляр
-//            Instance = this;
-//            Android.Util.Log.Info("MainActivity", "MainActivity OnCreate called. Instance initialized.");
-
-          
-//            // Фиксируем ориентацию в портретном режиме при запуске приложения
-//            SetRequestedOrientation(Android.Content.PM.ScreenOrientation.Portrait);
+        //            // Сохраняем ссылку на текущий экземпляр
+        //            Instance = this;
+        //            Android.Util.Log.Info("MainActivity", "MainActivity OnCreate called. Instance initialized.");
 
 
-
-
-//            // Создаём NotificationChannel
-//            // CreateNotificationChannel();
+        //            // Фиксируем ориентацию в портретном режиме при запуске приложения
+        //            SetRequestedOrientation(Android.Content.PM.ScreenOrientation.Portrait);
 
 
 
-//            // Ждём, пока пользователь ответит на запрос разрешений
-//            bool granted = await BluetoothPermissionsHelper.RequestBluetoothPermissionsAsync(this);
-//            // INSERT LOG HERE (optional)
-//            Android.Util.Log.Info("BTPerms", $"MainActivity: RequestBluetoothPermissionsAsync returned: {granted}");
 
-//            if (granted)
-//            {
-//                try
-//                {
-//                    // Можно работать с Bluetooth
-//#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-//                    Toast.MakeText(this, "Bluetooth разрешения получены!", ToastLength.Short).Show();
-//#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
+        //            // Создаём NotificationChannel
+        //            // CreateNotificationChannel();
 
-//                }
-//                catch (Exception ex) { Android.Util.Log.Info("Error", $"MainActivity: {ex.Message}"); }
-//                // Можно работать с Bluetooth
-//                //#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-//                //                Toast.MakeText(this, "Bluetooth разрешения получены!", ToastLength.Short).Show();
-//                //#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
 
-//            }
-//            else
-//            {
-//                // Пользователь отказал — покажи предупреждение или ограничь функционал
-//#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-//                Toast.MakeText(this, "Bluetooth разрешения НЕ получены!", ToastLength.Short).Show();
-//#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
-//            }
-//        }
+
+        //            // Ждём, пока пользователь ответит на запрос разрешений
+        //            bool granted = await BluetoothPermissionsHelper.RequestBluetoothPermissionsAsync(this);
+        //            // INSERT LOG HERE (optional)
+        //            Android.Util.Log.Info("BTPerms", $"MainActivity: RequestBluetoothPermissionsAsync returned: {granted}");
+
+        //            if (granted)
+        //            {
+        //                try
+        //                {
+        //                    // Можно работать с Bluetooth
+        //#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
+        //                    Toast.MakeText(this, "Bluetooth разрешения получены!", ToastLength.Short).Show();
+        //#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
+
+        //                }
+        //                catch (Exception ex) { Android.Util.Log.Info("Error", $"MainActivity: {ex.Message}"); }
+        //                // Можно работать с Bluetooth
+        //                //#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
+        //                //                Toast.MakeText(this, "Bluetooth разрешения получены!", ToastLength.Short).Show();
+        //                //#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
+
+        //            }
+        //            else
+        //            {
+        //                // Пользователь отказал — покажи предупреждение или ограничь функционал
+        //#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
+        //                Toast.MakeText(this, "Bluetooth разрешения НЕ получены!", ToastLength.Short).Show();
+        //#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
+        //            }
+        //        }
 
         // вариант 2
         // вариант 2
 #pragma warning disable CS8765
-        protected override async void OnCreate(Bundle savedInstanceState)
+
+        // рождение Activity — это как рождение новой жизни, только в мире Android. Здесь мы настраиваем все системные шестерёнки и запускаем движок MAUI.
+        protected override async void OnCreate(Bundle savedInstanceState) 
 #pragma warning restore CS8765
         {
-            base.OnCreate(savedInstanceState);
+            base.OnCreate(savedInstanceState); // Android, настрой сначала свои системные шестерёнки и запусти движок MAUI».
 
+            // Запоминаем: «Я — главный экран, вот ссылка на меня в статическую переменную, чтобы из любого другого места кода можно было ко мне обратиться».
             Instance = this;
+            // Логируем: «Эй, мир! MainActivity родилась и готова к работе!».
             Android.Util.Log.Info("MainActivity", "MainActivity OnCreate called. Instance initialized.");
 
             // Фіксуємо портретну орієнтацію
             SetRequestedOrientation(Android.Content.PM.ScreenOrientation.Portrait);
 
-            // Запитуємо дозволи
+            // Запитуємо дозволи, метод создает TaskCompletionSource, который будет ожидать ответа пользователя на запрос разрешений.
+            // Ждём, пока пользователь ответит на запрос разрешений - задача - это коробка, в которую Андроид положил ожиданющий ответ пользователя.
+            // Когда пользователь ответит, коробка откроется и вернёт результат.
             bool granted = await BluetoothPermissionsHelper.RequestBluetoothPermissionsAsync(this);
             Android.Util.Log.Info("BTPerms", $"MainActivity: RequestBluetoothPermissionsAsync returned: {granted}");
 
@@ -107,6 +113,7 @@ namespace skb_home
             {
                 try
                 {
+                    // Безпечний показ Toast для Android 8.0 і вище
                     Toast.MakeText(Android.App.Application.Context, message, ToastLength.Short)?.Show();
                 }
                 catch (Exception ex)
@@ -123,7 +130,8 @@ namespace skb_home
 
         //
 
-
+        // Переопределяем метод для обработки результатов запроса разрешений
+        // Этот метод вызывается системой Android после того, как пользователь ответил на запрос разрешений.
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
 #pragma warning disable CA1416 // Проверка совместимости платформы
@@ -140,6 +148,130 @@ namespace skb_home
 
     }
 }
+
+
+
+
+
+
+
+//Вы разложили весь процесс в точности так, как его выполняет машина:
+
+//Создание / проверка задачи:
+
+//Метод RequestBluetoothPermissionsAsync сначала проверяет текущий статус.
+
+//Если права уже есть (или система старая, где они выданы при установке), он не беспокоит пользователя и мгновенно возвращает уже готовую завершенную задачу Task.FromResult(true).
+
+//Если прав нет, создаётся та самая «пустая коробка» — TaskCompletionSource<bool>, которая формирует задачу ожидания _tcs.Task.
+
+//Показ диалога:
+
+//Список прав берется из GetRequiredPermissions() под конкретную версию Android.
+
+//Через ActivityCompat.RequestPermissions(activity, permissions, RequestCode) вызывается системное окно согласия Android.
+
+//Асинхронная пауза (await):
+
+//Вызов await мягко ставит дальнейшее выполнение метода OnCreate на паузу, ожидая, пока в «коробку» кто-то положит результат. UI при этом не виснет.
+
+//Ответ пользователя и колбэк Android:
+
+//Пользователь нажимает на экране «Разрешить» или «Запретить».
+
+//Операционная система Android сама находит и вызывает переопределенный метод OnRequestPermissionsResult в MainActivity, который передаёт данные в BluetoothPermissionsHelper.OnRequestPermissionsResult.
+
+//Закрытие задачи:
+
+//Делегат проверяет массивы ответов. Если все разрешения одобрены, allGranted становится true.
+
+//Вызов _tcs.TrySetResult(allGranted) закрывает задачу и «кладёт» ответ в коробку.
+
+//Пробуждение и уведомление:
+
+//Строка с await немедленно просыпается, переменная bool granted получает этот результат.
+
+//Следом срабатывает ShowSafeToast(...), который безопасно (с проверкой версии Android, чтобы не словить ошибку окна на Android 7) выводит плашку о том, получены разрешения или нет.
+
+//Вы очень точно уловили суть работы асинхронных мостов TaskCompletionSource в C# и жизненного цикла Android. Всё понято совершенно правильно!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
