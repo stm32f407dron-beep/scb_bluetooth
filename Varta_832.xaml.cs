@@ -335,6 +335,13 @@ public class StatusColorConverter : IValueConverter
                 "Logical 1" => Color.FromArgb("#00838F"), // Бирюзовый
                 "Logical 2" => Color.FromArgb("#00695C"), // Морской
 
+                "FIRE_ZONE1" => Color.FromArgb("#103381"), // Красный (пожарная зона 1)
+                "FIRE_ZONE2" => Color.FromArgb("#103381"), // Красный (пожарная зона 2)
+                "LOG1" => Color.FromArgb("#103381"), // Бирюзовый (логическая зона 1)
+                "LOG2" => Color.FromArgb("#103381"), // Морской (логическая зона 2)
+                "SECURETY" => Color.FromArgb("#103381"), // Зеленый (охрана)
+                "N/D" => Color.FromArgb("#103381"), // Серый (нет данных)
+
                 // Любой другой неизвестный текст
                 _ => Color.FromArgb("#000000")  // Черный по умолчанию
             };

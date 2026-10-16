@@ -71,7 +71,10 @@
                                     </CollectionView.ItemsLayout>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+
+                                            <VerticalStackLayout>
+
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
                                                 <Label Text="{Binding Name}"
                                                        FontAttributes="Bold"
                                                        FontSize="13"
@@ -83,7 +86,26 @@
                                                        TextColor="{Binding Value, Converter={StaticResource StatusToColor}}"
                                                        HorizontalTextAlignment="End"
                                                        Grid.Column="1"/>
-                                            </Grid>
+                                                </Grid>
+
+                                                <!-- Полоска: включается через триггер XAML только для "Тип ШС8" -->
+                                                <BoxView HeightRequest="1"
+                                                      Color="#000000"
+                                                      HorizontalOptions="Fill"
+                                                      Margin="0,4,0,3"
+                                                      IsVisible="False">
+                                                        <BoxView.Triggers>
+                                                        <DataTrigger TargetType="BoxView"
+                                                           Binding="{Binding Name}"
+                                                            Value="Тип ШС8">        
+                                                            <Setter Property="IsVisible" Value="True" />
+                                                        </DataTrigger>
+                                                    </BoxView.Triggers> 
+                                                </BoxView>
+
+
+                                            </VerticalStackLayout>
+
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>

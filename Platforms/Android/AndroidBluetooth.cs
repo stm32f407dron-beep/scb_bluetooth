@@ -38,7 +38,7 @@ namespace skb_home.Platforms.Android
         private volatile bool _anyRxRunning = false;
 
 
-
+        // dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormat=apk
 
 
         //public string[] TypeValue = {
@@ -61,7 +61,7 @@ namespace skb_home.Platforms.Android
         //        };
 
 
-        //  Справочник состояний -  реализация свойства
+        //  Справочник состояний -  реализация свойства для Стан ШС
         public string[] TypeValue { get; } = {
             "Not Data", "Short", "Breakage", "Indefinite",
             "Logical 1", "Logical 2", "Power-off", "NORM",
@@ -69,7 +69,7 @@ namespace skb_home.Platforms.Android
             "Fire", "BLOCKING", "Deblocking", "LOST"
         };
 
-        //  Справочник состояний2 -  реализация свойства
+        //  Справочник состояний2 -  реализация свойства - для Тип ШС
         // 1 - ЛОГИЧЕСКИЙ1( переход на L2 при УВЕЛИЧЕНИИ тока ! ) ; 2-ОХРАННЫЙ; 3-ПОЖАРНЫЙ 1: 4-ПОЖАРНЫЙ2; 5 - ЛОГИЧЕСКИЙ2 ( переход на L2 при УМЕНЬШЕНИИ тока ! )
 
         public string[] TypeValue2 { get; } = { "N/D", "LOG1", "SECURETY", "FIRE_ZONE1", "FIRE_ZONE2", "LOG2"};
@@ -1799,6 +1799,10 @@ namespace skb_home.Platforms.Android
                                 int count = Math.Min(16, payload.Length - 1); // страхуем, так как обрабатывается не больше 16 параметров
 
 
+
+                                string decoded = string.Empty;
+                                string name = string.Empty;
+
                                 //Заполнение коллекции Values объектами VartaValue:
                                 // и каждый байт payload[i] безопасно расшифровывается в текст decoded через таблицу TypeValue (с защитой Unknown(b)).
                                 for (int i = 1; i <= count; i++) // payload[0] ушёл под статус Exists(BSVH), поэтому цикл стартует с индекса i = 1
@@ -1809,18 +1813,16 @@ namespace skb_home.Platforms.Android
                                     // тернарный оператор:  условие ? значение если истина  : значение если ложь
 
                                     //
-                                 //   string decoded2 = b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})";
+                                    //   string decoded2 = b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})";
 
                                     //
+                                    if (i <= 8) { decoded = b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})"; }
+                                    else { decoded = b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})"; }
+                                     
 
-                                    string decoded = b < TypeValue.Length
-                                        ? TypeValue[b]
-                                        : $"Unknown({b})";
                                     // формируем имя параметра в зависимости от его позиции: первые 8 параметров — это "Тип ШС", а следующие 8 — "Стан ШС"
                                     // условие ? выражение_если_true : выражение_если_false;  string name = i <= 8 ? $"Тип ШС{i}" : $"Стан ШС{i - 8}";
-                                    string name = i <= 8
-                                        ? $"Тип ШС{i}"
-                                        : $"Стан ШС{i - 8}";
+                                     name = i <= 8 ? $"Тип ШС{i}" : $"Стан ШС{i - 8}";
 
                                     // Каждая пара помещается в frame.Values.
                                     // Добавляем объект VartaValue в коллекцию Values кадра frame, где Name — это имя параметра, а Value — его расшифрованное значение.
@@ -1866,41 +1868,21 @@ namespace skb_home.Platforms.Android
                         // Формируем расшифровку для любого payload 
                         if (payload.Length > 0)
                         {
+                         
+                            string bvsh = payload[0] == 0x11 ? "true" : "false";
+                            //Тип
+                            Func<byte, string> ZoneValue = delegate (byte b) { return b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})"; };
 
-                            //string name = i <= 8
-                            // index: 0..7 (первые 8 байт после пропуска) -> TypeValue2
-                            // index >= 8 (последующие байты) -> TypeValue
-                            Func<byte, int, string> getDecodedValue2 = (b, index) =>
-                            {
-                                // index идет от 0 (так как мы уже сделали Skip(1))
-                                // index < 8 соответствует байтам с 1 по 8 исходного payload
-                                if (index < 8)
-                                {
-                                    return b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})";
-                                }
-                                else
-                                {
-                                    return b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})";
-                                }
-                            };
+                            string zone = string.Join(",",payload.Skip(1).Take(8).Select(ZoneValue));
 
-                          //  string zones = string.Join(",", payload.Skip(1).Select(getDecodedValue2));
+                            //Состояние
+                            Func<byte,string> ConditionValue = delegate (byte b) { return b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})"; };
+
+                            string condition = string.Join(",", payload.Skip(9).Take(8).Select(ConditionValue));
 
 
-                            //
+                            decodedValues = $"BSVH={bvsh}, Zones=[{zone}], Conditions=[{condition}]";
 
-                            Func<byte, string> getDecodedValue = delegate (byte b)
-                            {
-
-                                return b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})";  // условие ? значение если истина  : значение если ложь
-                            };
-
-                            string s = payload[0] == 0x11 ? "true" : "false";
-
-                            string zones = string.Join(",", payload.Skip(1).Take(16).Select(getDecodedValue2));
-
-                            decodedValues = $"BSVH={s}, Zones=[{zones}]"; 
-                           
                         }
                         else
                         {
@@ -1914,18 +1896,22 @@ namespace skb_home.Platforms.Android
 
 
 
+
                         DataReceivedVarta832?.Invoke(
-                            $"index={indexString} sub={subindex:X2}" +
-                            $"payloadHex={payloadHex} decoded={decodedValues} " +
-                            $"chk_sumaExp={expectedChk:X2} chk_sumAct={actualChk:X2}"
-                        );
+                           $"Rx -> index={indexString} subindex={subindex:X2}; " +
+                           $"payloadHex={payloadHex};  decoded={decodedValues}");
 
 
-                       // DataReceivedVarta832?.Invoke(
-                       //    $"index={indexString} sub={subindex:X2} len={length} " +
-                       //    $"payloadHex={payloadHex} text=\"{payloadText}\"  value={numericValue} valueHex={hexValues} decoded={decodedValues} " +
-                       //    $"chkExp={expectedChk:X2} chkAct={actualChk:X2}"
-                       //);
+                        //DataReceivedVarta832?.Invoke(
+                        //    $"index={indexString} subindex={subindex:X2}; " +
+                        //    $"payloadHex={payloadHex}  decoded= {decodedValues}");
+
+
+                        // DataReceivedVarta832?.Invoke(
+                        //    $"index={indexString} sub={subindex:X2} len={length} " +
+                        //    $"payloadHex={payloadHex} text=\"{payloadText}\"  value={numericValue} valueHex={hexValues} decoded={decodedValues} " +
+                        //    $"chkExp={expectedChk:X2} chkAct={actualChk:X2}"
+                        //);
 
                     }
                 }
