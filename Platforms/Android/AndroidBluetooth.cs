@@ -69,10 +69,10 @@ namespace skb_home.Platforms.Android
             "Fire", "BLOCKING", "Deblocking", "LOST"
         };
 
+        //  Справочник состояний2 -  реализация свойства
+        // 1 - ЛОГИЧЕСКИЙ1( переход на L2 при УВЕЛИЧЕНИИ тока ! ) ; 2-ОХРАННЫЙ; 3-ПОЖАРНЫЙ 1: 4-ПОЖАРНЫЙ2; 5 - ЛОГИЧЕСКИЙ2 ( переход на L2 при УМЕНЬШЕНИИ тока ! )
 
-
-
-
+        public string[] TypeValue2 { get; } = { "N/D", "LOG1", "SECURETY", "FIRE_ZONE1", "FIRE_ZONE2", "LOG2"};
 
 
         public AndroidBluetooth()
@@ -1805,10 +1805,19 @@ namespace skb_home.Platforms.Android
                                 {
                                     byte b = payload[i];
                                     // проверяем, что индекс b в пределах массива TypeValue, если нет — выводим Unknown(b)
+                                    // string decoded = b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})";
+                                    // тернарный оператор:  условие ? значение если истина  : значение если ложь
+
+                                    //
+                                 //   string decoded2 = b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})";
+
+                                    //
+
                                     string decoded = b < TypeValue.Length
                                         ? TypeValue[b]
                                         : $"Unknown({b})";
                                     // формируем имя параметра в зависимости от его позиции: первые 8 параметров — это "Тип ШС", а следующие 8 — "Стан ШС"
+                                    // условие ? выражение_если_true : выражение_если_false;  string name = i <= 8 ? $"Тип ШС{i}" : $"Стан ШС{i - 8}";
                                     string name = i <= 8
                                         ? $"Тип ШС{i}"
                                         : $"Стан ШС{i - 8}";
@@ -1858,14 +1867,37 @@ namespace skb_home.Platforms.Android
                         if (payload.Length > 0)
                         {
 
+                            //string name = i <= 8
+                            // index: 0..7 (первые 8 байт после пропуска) -> TypeValue2
+                            // index >= 8 (последующие байты) -> TypeValue
+                            Func<byte, int, string> getDecodedValue2 = (b, index) =>
+                            {
+                                // index идет от 0 (так как мы уже сделали Skip(1))
+                                // index < 8 соответствует байтам с 1 по 8 исходного payload
+                                if (index < 8)
+                                {
+                                    return b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})";
+                                }
+                                else
+                                {
+                                    return b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})";
+                                }
+                            };
+
+                          //  string zones = string.Join(",", payload.Skip(1).Select(getDecodedValue2));
+
+
+                            //
+
                             Func<byte, string> getDecodedValue = delegate (byte b)
                             {
+
                                 return b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})";  // условие ? значение если истина  : значение если ложь
                             };
 
                             string s = payload[0] == 0x11 ? "true" : "false";
 
-                            string zones = string.Join(",", payload.Skip(1).Select(getDecodedValue));
+                            string zones = string.Join(",", payload.Skip(1).Take(16).Select(getDecodedValue2));
 
                             decodedValues = $"BSVH={s}, Zones=[{zones}]"; 
                            

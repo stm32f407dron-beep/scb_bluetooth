@@ -64,6 +64,8 @@ namespace skb_home
         // ⚡ Новое свойство для таблицы кодов
         string[] TypeValue { get; }
 
+        string[] TypeValue2 { get; }
+
     }
 }
 
