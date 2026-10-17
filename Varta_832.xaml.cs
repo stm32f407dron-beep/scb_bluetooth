@@ -41,61 +41,32 @@ public partial class Varta_832 : ContentPage
         InitializeComponent();
         BindingContext = this;
 
-        //_bluetoothService.DataReceivedFrame += frame =>
-        //{
-        //    MainThread.BeginInvokeOnMainThread(() => Frames.Add(frame));
-        //};
+       
 
 
-        //_bluetoothService.DataReceivedFrame += frame =>
-        //{
-        //    MainThread.BeginInvokeOnMainThread(() =>
-        //    {
-        //        if (Frames.Count == 0)
-        //        {
-        //            Frames.Add(frame); // первый раз создаём
-        //        }
-        //        else
-        //        {
-        //            Frames[0] = frame; // потом обновляем
-        //        }
-        //    });
-        //};
-
-        // Подписка на событие DataReceivedFrame
+        // Подписка на событие DataReceivedFrame в Varta_832
         //_bluetoothService.DataReceivedFrame += delegate (VartaFrame frame)
         //{
         //    MainThread.BeginInvokeOnMainThread(delegate
         //    {
-        //        // Обновление UI или выполнение других действий при получении фрейма
-        //        // Например, можно обновить список Frames или выполнить другую логику
-
-        //        if (Frames.Count == 0) Frames.Add(frame); // первый раз создаём
-        //        else Frames[0] = frame; // потом обновляем или перезаписываем, чтобы не дублировать
-
-        //    });
-
-        //};
-
-
-
-        // Подписка на событие DataReceivedFrame
-        //_bluetoothService.DataReceivedFrame += delegate (VartaFrame frame)
-        //{
-        //    MainThread.BeginInvokeOnMainThread(delegate
-        //    {
-        //        if (Frames.Count < 2)
+        //        // Гарантируем, что в коллекции есть место под оба блока (Frames[0] и Frames[1])
+        //        while (Frames.Count < 2)
         //        {
-        //            // Первый и второй раз — добавляем элементы в список (будет 2 рамки)
-        //            Frames.Add(frame);
+        //            Frames.Add(new VartaFrame());
         //        }
-        //        else
+
+        //        // В зависимости от субиндекса раскладываем по своим рамкам:
+        //        if (frame.SubIndex == "01")
         //        {
-        //            // Если уже есть две рамки — обновляем вторую (или нужную по индексу)
-        //            Frames[1] = frame;
+        //            Frames[0] = frame; // Левая рамка (БША 1)
+        //        }
+        //        else if (frame.SubIndex == "02")
+        //        {
+        //            Frames[1] = frame; // Правая рамка (БША 2)
         //        }
         //    });
         //};
+
 
 
         // Подписка на событие DataReceivedFrame в Varta_832
@@ -103,8 +74,8 @@ public partial class Varta_832 : ContentPage
         {
             MainThread.BeginInvokeOnMainThread(delegate
             {
-                // Гарантируем, что в коллекции есть место под оба блока (Frames[0] и Frames[1])
-                while (Frames.Count < 2)
+                // Гарантируем, что в коллекции есть место под все 4 блока (Frames[0]..Frames[3])
+                while (Frames.Count < 4)
                 {
                     Frames.Add(new VartaFrame());
                 }
@@ -112,14 +83,27 @@ public partial class Varta_832 : ContentPage
                 // В зависимости от субиндекса раскладываем по своим рамкам:
                 if (frame.SubIndex == "01")
                 {
-                    Frames[0] = frame; // Левая рамка (БША 1)
+                    Frames[0] = frame; // БША 1
                 }
                 else if (frame.SubIndex == "02")
                 {
-                    Frames[1] = frame; // Правая рамка (БША 2)
+                    Frames[1] = frame; // БША 2
+                }
+                else if (frame.SubIndex == "03")
+                {
+                    Frames[2] = frame; // БША 3
+                }
+                else if (frame.SubIndex == "04")
+                {
+                    Frames[3] = frame; // БША 4
                 }
             });
         };
+
+
+
+
+
 
 
 
@@ -233,6 +217,38 @@ public partial class Varta_832 : ContentPage
             await DisplayAlert("Помилка", $"Не вдалося зчитати БША 2: {ex.Message}", "OK");
         }
     }
+
+
+    private async void OnReadBsvh3Clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            string s = "010100003100032056"; // Команда для субиндекса 03
+            await _bluetoothService?.TransmitterData(s);
+            await DisplayAlert("Команда", "БША 3: Отослана", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Помилка", $"Не вдалося зчитати БША 3: {ex.Message}", "OK");
+        }
+    }
+
+    private async void OnReadBsvh4Clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            string s = "010100003100042057"; // Команда для субиндекса 04
+            await _bluetoothService?.TransmitterData(s);
+            await DisplayAlert("Команда", "БША 4: Отослана", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Помилка", $"Не вдалося зчитати БША 4: {ex.Message}", "OK");
+        }
+    }
+
+
+
 
 
     // Кнопка ⚙ (Настройки)
