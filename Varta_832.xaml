@@ -49,14 +49,14 @@
                                 Padding="8">
 
                             <VerticalStackLayout Spacing="3">
-                                <!-- Заголовок -->
+                                <!-- Заголовок --><!--
                                 <Label Text="{Binding Headers}"
                                        FontAttributes="Bold"
                                        FontSize="13"
                                        TextColor="#752108"
                                        HorizontalOptions="Center" />
 
-                                <BoxView HeightRequest="1" Color="#B0BEC5" Margin="0,2,0,4"/>
+                                <BoxView HeightRequest="1" Color="#B0BEC5" Margin="0,2,0,4"/>-->
 
                                 <!-- Первая строка: BSVH и статус --><!--
                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
@@ -67,18 +67,30 @@
 
                                 <!-- Первая строка: BSVH + номер субиндекса и статус -->
                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
-                                        <Label Text="{Binding SubIndex, StringFormat='BSVH{0}'}" 
+                                        <Label Text="{Binding SubIndex, StringFormat='БВШ №{0}'}" 
                                            FontAttributes="Bold" 
                                            TextColor="#000000" 
                                            FontSize="14" 
                                            Grid.Column="0"/>
-                                        <Label Text="{Binding Exists}" 
+                                    
+                                        <!--<Label Text="{Binding Exists}" 
                                            HorizontalTextAlignment="End" 
                                            FontAttributes="Bold" 
                                            TextColor="#0D47A1" 
                                            FontSize="14" 
-                                           Grid.Column="1"/>
-                                 </Grid>     
+                                           Grid.Column="1"/>-->
+
+                                        <Label Text="{Binding Adress, StringFormat='адреса-{0}'}" 
+                                            HorizontalTextAlignment="End" 
+                                            FontAttributes="Bold" 
+                                            TextColor="#149C14" 
+                                            FontSize="14" 
+                                            Grid.Column="1"/>           
+
+
+
+
+                                </Grid>     
 
 
 
@@ -97,7 +109,7 @@
                                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
                                                 <Label Text="{Binding Name}"
                                                        FontAttributes="Bold"
-                                                       FontSize="13"
+                                                       FontSize="12"
                                                        TextColor="#752108"
                                                        Grid.Column="0"/>
                                                 <Label Text="{Binding Value}"

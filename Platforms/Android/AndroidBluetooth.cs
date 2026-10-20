@@ -41,24 +41,48 @@ namespace skb_home.Platforms.Android
         // dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormat=apk
 
 
+        //public string[] TypeValue { get; } = {
+        //                "NO_STATUS", // 0
+        //                "SHORT",     // 1
+        //                "BRAKE",     // 2
+        //                "INDEF",     // 3
+        //                "L1",        // 4
+        //                "L2",        // 5
+        //                "L3",        // 6
+        //                "NORMA",     // 7
+        //                "DELAY1",    // 8
+        //                "DELAY2",    // 9
+        //                "ALARM",     // 10
+        //                "ATTENT",    // 11
+        //                "FIRE",      // 12
+        //                "LOCK",      // 13
+        //                "UNLOCK",    // 14
+        //                "OFF"        // 15
+        //            };
+
+
         public string[] TypeValue { get; } = {
-                        "NO_STATUS", // 0
-                        "SHORT",     // 1
-                        "BRAKE",     // 2
-                        "INDEF",     // 3
-                        "L1",        // 4
-                        "L2",        // 5
-                        "L3",        // 6
-                        "NORMA",     // 7
-                        "DELAY1",    // 8
-                        "DELAY2",    // 9
-                        "ALARM",     // 10
-                        "ATTENT",    // 11
-                        "FIRE",      // 12
-                        "LOCK",      // 13
-                        "UNLOCK",    // 14
-                        "OFF"        // 15
-                    };
+            "Н.Д.", // 0  (NO_STATUS)
+            "К.З.",         // 1  (SHORT — коротке замикання)
+            "ОБРИВ.",      // 2  (BRAKE — обрив лінії)
+            "ІНДЕФІК.",   // 3  (INDEF — невизначений стан)
+            "Л1",         // 4  (L1 — логічна 1)
+            "Л2",         // 5  (L2 — логічна 2)
+            "Л3",         // 6  (L3 — логічна 3)
+            "НОРМА",      // 7  (NORMA)
+            "ЗАТР. 1",     // 8  (DELAY1 — затримка 1)
+            "ЗАТР. 2",     // 9  (DELAY2 — затримка 2)
+            "ТРИВОГА",    // 10 (ALARM)
+            "УВАГА",      // 11 (ATTENT)
+            "ПОЖЕЖА",     // 12 (FIRE)
+            "БЛОК.",       // 13 (LOCK — блокування)
+            "РОЗБЛОК.",    // 14 (UNLOCK — розблокування)
+            "ВІДКЛЮЧ."     // 15 (OFF — відключено)
+        };
+
+
+
+
 
 
         //public string[] TypeValue { get; } = {
@@ -94,9 +118,9 @@ namespace skb_home.Platforms.Android
         //  Справочник состояний2 -  реализация свойства - для Тип ШС
         // 1 - ЛОГИЧЕСКИЙ1( переход на L2 при УВЕЛИЧЕНИИ тока ! ) ; 2-ОХРАННЫЙ; 3-ПОЖАРНЫЙ 1: 4-ПОЖАРНЫЙ2; 5 - ЛОГИЧЕСКИЙ2 ( переход на L2 при УМЕНЬШЕНИИ тока ! )
 
-        public string[] TypeValue2 { get; } = { "N/D", "LOG1", "SECURETY", "FIRE_ZONE1", "FIRE_ZONE2", "LOG2"};
+        //  public string[] TypeValue2 { get; } = { "N/D", "LOG1", "SECURETY", "FIRE_ZONE1", "FIRE_ZONE2", "LOG2"};
 
-      //  public string[] TypeValue2 { get; } = { "Стартовий", "Логічний1", "Охоронний", "Пожежний1", "Пожежний2", "Логічний2" };
+        public string[] TypeValue2 { get; } = { "Н/Д", "ЛОГ. 1", "ОХОР.", "ПОЖ. 1", "ПОЖ. 2", "ЛОГ. 2" };
         public AndroidBluetooth()
         {
             _adapter = BluetoothAdapter.DefaultAdapter;// Получаем BluetoothAdapter по умолчанию. Это точка входа для всех операций Bluetooth.
@@ -1815,7 +1839,8 @@ namespace skb_home.Platforms.Android
                                 {
                                     Index = indexString,
                                     SubIndex = subindex.ToString("X2"),
-                                    Exists = payload.Length > 0 && payload[0] != 0x00 // Анализ наличия блока/модуля BSVH), если первый байт payload не равен 0x00, то считаем, что блок существует.
+                                    Exists = payload.Length > 0 && payload[0] != 0x00, // Анализ наличия блока/модуля BSVH), если первый байт payload не равен 0x00, то считаем, что блок существует.
+                                    Adress = address.ToString("X2"),
                                 };
 
                                 int count = Math.Min(16, payload.Length - 1); // страхуем, так как обрабатывается не больше 16 параметров
@@ -1920,8 +1945,15 @@ namespace skb_home.Platforms.Android
 
 
                         DataReceivedVarta832?.Invoke(
-                           $"Rx -> index={indexString} subindex={subindex:X2}; " +
-                           $"payloadHex={payloadHex};  decoded={decodedValues}");
+                           
+                           $"Rx->{payloadHex}");
+
+
+
+                        //DataReceivedVarta832?.Invoke(
+                        //   $"Rx -> index={indexString} subindex={subindex:X2}; " +
+                        //   $"payloadHex={payloadHex};  decoded={decodedValues}");
+
 
 
                         //DataReceivedVarta832?.Invoke(
