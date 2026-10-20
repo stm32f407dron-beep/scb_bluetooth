@@ -41,40 +41,62 @@ namespace skb_home.Platforms.Android
         // dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormat=apk
 
 
-        //public string[] TypeValue = {
-        //            "Not Data",   // 0
-        //            "Short",      // 1
-        //            "Breakage",   // 2
-        //            "Indefinite", // 3
-        //            "Logical 1",  // 4
-        //            "Logical 2",  // 5
-        //            "Power-off",  // 6
-        //            "NORM",       // 7
-        //            "ON",         // 8
-        //            "OFF",        // 9
-        //            "Alarm",      // A (10)
-        //            "ATTENTION",  // B (11)
-        //            "Fire",       // C (12)
-        //            "BLOCKING",   // D (13)
-        //            "Deblocking", // E (14)
-        //            "LOST"        // F (15)
-        //        };
+        public string[] TypeValue { get; } = {
+                        "NO_STATUS", // 0
+                        "SHORT",     // 1
+                        "BRAKE",     // 2
+                        "INDEF",     // 3
+                        "L1",        // 4
+                        "L2",        // 5
+                        "L3",        // 6
+                        "NORMA",     // 7
+                        "DELAY1",    // 8
+                        "DELAY2",    // 9
+                        "ALARM",     // 10
+                        "ATTENT",    // 11
+                        "FIRE",      // 12
+                        "LOCK",      // 13
+                        "UNLOCK",    // 14
+                        "OFF"        // 15
+                    };
+
+
+        //public string[] TypeValue { get; } = {
+        //    "Немає даних",  // 0 (NO_STATUS)
+        //    "К.З.",           // 1 (SHORT — коротке замикання)
+        //    "Обрив",        // 2 (BRAKE/BREAK — обрив лінії)
+        //    "Невизначено",  // 3 (INDEF)
+        //    "Л1",           // 4 (L1 — логічна 1)
+        //    "Л2",           // 5 (L2 — логічна 2)
+        //    "Л3",           // 6 (L3 — логічна 3)
+        //    "Норма",        // 7 (NORMA)
+        //    "Затримка 1",   // 8 (DELAY1)
+        //    "Затримка 2",   // 9 (DELAY2)
+        //    "Тривога",      // 10 (ALARM)
+        //    "Увага",        // 11 (ATTENT)
+        //    "Пожежа",       // 12 (FIRE)
+        //    "Блокування",   // 13 (LOCK)
+        //    "Розблок.",     // 14 (UNLOCK)
+        //    "Відключено"    // 15 (OFF)
+        //};
+
+
 
 
         //  Справочник состояний -  реализация свойства для Стан ШС
-        public string[] TypeValue { get; } = {
-            "Not Data", "Short", "Breakage", "Indefinite",
-            "Logical 1", "Logical 2", "Power-off", "NORM",
-            "ON", "OFF", "Alarm", "ATTENTION",
-            "Fire", "BLOCKING", "Deblocking", "LOST"
-        };
+        //public string[] TypeValue { get; } = {
+        //    "Not Data", "Short", "Breakage", "Indefinite",
+        //    "Logical 1", "Logical 2", "Power-off", "NORM",
+        //    "ON", "OFF", "Alarm", "ATTENTION",
+        //    "Fire", "BLOCKING", "Deblocking", "LOST"
+        //};
 
         //  Справочник состояний2 -  реализация свойства - для Тип ШС
         // 1 - ЛОГИЧЕСКИЙ1( переход на L2 при УВЕЛИЧЕНИИ тока ! ) ; 2-ОХРАННЫЙ; 3-ПОЖАРНЫЙ 1: 4-ПОЖАРНЫЙ2; 5 - ЛОГИЧЕСКИЙ2 ( переход на L2 при УМЕНЬШЕНИИ тока ! )
 
         public string[] TypeValue2 { get; } = { "N/D", "LOG1", "SECURETY", "FIRE_ZONE1", "FIRE_ZONE2", "LOG2"};
 
-
+      //  public string[] TypeValue2 { get; } = { "Стартовий", "Логічний1", "Охоронний", "Пожежний1", "Пожежний2", "Логічний2" };
         public AndroidBluetooth()
         {
             _adapter = BluetoothAdapter.DefaultAdapter;// Получаем BluetoothAdapter по умолчанию. Это точка входа для всех операций Bluetooth.

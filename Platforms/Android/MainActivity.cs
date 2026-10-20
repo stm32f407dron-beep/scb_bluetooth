@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Widget;
@@ -24,61 +25,28 @@ namespace skb_home
 
 
 
-        //#pragma warning disable CS8765 // Допустимость значений NULL для типа параметра не соответствует переопределенному элементу (возможно, из-за атрибутов допустимости значений NULL).
-        //        protected override async void OnCreate(Bundle savedInstanceState)
-        //#pragma warning restore CS8765 // Допустимость значений NULL для типа параметра не соответствует переопределенному элементу (возможно, из-за атрибутов допустимости значений NULL).
-        //        {
-        //            base.OnCreate(savedInstanceState);
+        protected override void AttachBaseContext(Android.Content.Context? @base)
+        {
+            if (@base != null)
+            {
+                // Явно указываем Android.Content.Res.Configuration
+                var configuration = new Android.Content.Res.Configuration(@base.Resources?.Configuration);
 
+                // Фиксируем системный масштаб шрифта в 1.0 (100%)
+                configuration.FontScale = 1.0f;
 
-        //            // Сохраняем ссылку на текущий экземпляр
-        //            Instance = this;
-        //            Android.Util.Log.Info("MainActivity", "MainActivity OnCreate called. Instance initialized.");
+                var configContext = @base.CreateConfigurationContext(configuration);
+                base.AttachBaseContext(configContext);
+                return;
+            }
 
-
-        //            // Фиксируем ориентацию в портретном режиме при запуске приложения
-        //            SetRequestedOrientation(Android.Content.PM.ScreenOrientation.Portrait);
-
-
-
-
-        //            // Создаём NotificationChannel
-        //            // CreateNotificationChannel();
+            base.AttachBaseContext(@base);
+        }
 
 
 
-        //            // Ждём, пока пользователь ответит на запрос разрешений
-        //            bool granted = await BluetoothPermissionsHelper.RequestBluetoothPermissionsAsync(this);
-        //            // INSERT LOG HERE (optional)
-        //            Android.Util.Log.Info("BTPerms", $"MainActivity: RequestBluetoothPermissionsAsync returned: {granted}");
 
-        //            if (granted)
-        //            {
-        //                try
-        //                {
-        //                    // Можно работать с Bluetooth
-        //#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-        //                    Toast.MakeText(this, "Bluetooth разрешения получены!", ToastLength.Short).Show();
-        //#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
 
-        //                }
-        //                catch (Exception ex) { Android.Util.Log.Info("Error", $"MainActivity: {ex.Message}"); }
-        //                // Можно работать с Bluetooth
-        //                //#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-        //                //                Toast.MakeText(this, "Bluetooth разрешения получены!", ToastLength.Short).Show();
-        //                //#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
-
-        //            }
-        //            else
-        //            {
-        //                // Пользователь отказал — покажи предупреждение или ограничь функционал
-        //#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-        //                Toast.MakeText(this, "Bluetooth разрешения НЕ получены!", ToastLength.Short).Show();
-        //#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
-        //            }
-        //        }
-
-        // вариант 2
         // вариант 2
 #pragma warning disable CS8765
 
