@@ -47,7 +47,7 @@
                            VerticalOptions="Center"
                            Margin="4,0,0,0"/>
 
-                    <Border Grid.Column="3"
+                    <!--<Border Grid.Column="3"
                             Stroke="#7F9DB9"
                             StrokeThickness="1"
                             BackgroundColor="White"
@@ -66,7 +66,42 @@
                                 </x:Array>
                             </Picker.ItemsSource>
                         </Picker>
-                    </Border>
+                    </Border>-->
+
+                    <!-- Выбор адреса (Picker) -->
+                    <Border Grid.Column="3"
+                        Stroke="#7F9DB9"
+                        StrokeThickness="1"
+                        BackgroundColor="White"
+                        HeightRequest="38"
+                        Padding="4,0"
+                        VerticalOptions="Center">
+                                    <Picker x:Name="DeviceAddressPicker"
+                            TextColor="#000000"
+                            FontSize="13"
+                            FontAttributes="Bold"               
+                            Margin="0"
+                            VerticalOptions="Fill"
+                            HorizontalOptions="Fill">
+                                        <Picker.ItemsSource>
+                                            <x:Array Type="{x:Type x:String}">
+                                                <x:String>1 - ВАРТА832 1</x:String>
+                                                <x:String>2 - ВАРТА832 2</x:String>
+                                                <x:String>3 - ВАРТА832 3</x:String>
+                                            </x:Array>
+                                        </Picker.ItemsSource>
+                                    </Picker>
+                    </Border>       
+
+
+
+
+
+
+
+
+
+
                 </Grid>
             </Border>
 
@@ -136,7 +171,7 @@
             <!-- Кнопка считывания текущего выбранного блока -->
             <Button x:Name="BtnReadCurrent"
                     Text="Зчитати поточний БВШ 1"
-                    BackgroundColor="#002171"
+                    BackgroundColor="#082044"
                     TextColor="White"
                     FontAttributes="Bold"
                     FontSize="13"
