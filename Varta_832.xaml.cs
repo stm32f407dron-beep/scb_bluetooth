@@ -375,7 +375,7 @@ public class StatusColorConverter : IValueConverter
                 "Н.Д" => Color.FromArgb("#757575"), // Серый (нет данных)
                 "K.З." => Color.FromArgb("#D32F2F"), // Красно-оранжевый (короткое замыкание)
                 "ОБРИВ." => Color.FromArgb("#8E24AA"), // Оранжевый (обрыв)
-                "ІНДЕФІК." => Color.FromArgb("#F57F17"), // Янтарный (внимание)
+                "НЕВИЗН." => Color.FromArgb("#F57F17"), // Янтарный (внимание)
                 "Л1" => Color.FromArgb("#F57F17"), // Зеленый (включено / активен)
                 "Л2" => Color.FromArgb("#F57F17"), // Зеленый (включено / активен)
                 "Л3" => Color.FromArgb("#F57F17"), // Зеленый (включено / активен)
