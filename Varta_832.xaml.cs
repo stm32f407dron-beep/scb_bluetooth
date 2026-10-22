@@ -1,39 +1,21 @@
 using System.Collections.ObjectModel;
-using System.Globalization;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace skb_home;
 
 public partial class Varta_832 : ContentPage
 {
-
     private readonly IBluetooth_service _bluetoothService;
 
+    // Все 32 шлейфа в памяти
+    private readonly List<LoopRowModel> _allLoops = new();
 
-    private readonly Dictionary<string, string> _commands = new()
-    {
-        ["1|Device_Name"] = "010100003001001447",
-        ["2|CodeObject1"] = "010100002200010429",
-        ["2|AccessPoint1"] = "01010000220002183E",
-        ["2|AccessPoint2"] = "01010000220003183F",
-        ["2|ServerPort1"] = "010100002200040830",
-        ["2|ServerPort2"] = "010100002200050831",
-        ["2|ipServer1"] = "01010000220006103A",
-        ["2|ipServer2"] = "01010000220007103B",
-        ["2|SMSPhone1"] = "010100002200081844",
-        ["2|UDP1"] = "0101000022000A012F",
-        ["2|UDP2"] = "0101000022000B0130",
-        ["2|ACK1"] = "0101000022000C0131",
-        ["2|ACK2"] = "0101000022000D0132",
-        ["2|Hours1"] = "010100002200100135",
-        ["2|Minutes1"] = "010100002200110136",
-        ["2|Hours2"] = "010100002200120137",
-        ["2|Minutes2"] = "010100002200130138",
+    // 8 строк, которые отображаются прямо сейчас на экране
+    public ObservableCollection<LoopRowModel> CurrentBlockLoops { get; set; } = new();
 
-    };
-
-    public ObservableCollection<VartaFrame> Frames { get; set; } = new(); // Коллекция фреймов Varta
-
-    //010100003001001447
+    // Текущий выбранный блок (1..4)
+    private int _selectedBlock = 1;
 
     public Varta_832(IBluetooth_service bluetoothService)
     {
@@ -41,400 +23,285 @@ public partial class Varta_832 : ContentPage
         InitializeComponent();
         BindingContext = this;
 
-       
+        DeviceAddressPicker.SelectedIndex = 0;
 
+        // Создаем все 32 шлейфа и загружаем первые 8 (БВШ 1)
+        InitializeAllLoops();
+        ShowBlock(1);
+        LoopsCollectionView.ItemsSource = CurrentBlockLoops;
 
-        // Подписка на событие DataReceivedFrame в Varta_832
-        //_bluetoothService.DataReceivedFrame += delegate (VartaFrame frame)
-        //{
-        //    MainThread.BeginInvokeOnMainThread(delegate
-        //    {
-        //        // Гарантируем, что в коллекции есть место под оба блока (Frames[0] и Frames[1])
-        //        while (Frames.Count < 2)
-        //        {
-        //            Frames.Add(new VartaFrame());
-        //        }
-
-        //        // В зависимости от субиндекса раскладываем по своим рамкам:
-        //        if (frame.SubIndex == "01")
-        //        {
-        //            Frames[0] = frame; // Левая рамка (БША 1)
-        //        }
-        //        else if (frame.SubIndex == "02")
-        //        {
-        //            Frames[1] = frame; // Правая рамка (БША 2)
-        //        }
-        //    });
-        //};
-
-
-
-        // Подписка на событие DataReceivedFrame в Varta_832
+        // Прием кадра от Bluetooth
         _bluetoothService.DataReceivedFrame += delegate (VartaFrame frame)
         {
-            MainThread.BeginInvokeOnMainThread(delegate
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                // Гарантируем, что в коллекции есть место под все 4 блока (Frames[0]..Frames[3])
-                while (Frames.Count < 4)
-                {
-                    Frames.Add(new VartaFrame());
-                }
-
-                // В зависимости от субиндекса раскладываем по своим рамкам:
-                if (frame.SubIndex == "01")
-                {
-                    Frames[0] = frame; // БША 1
-                }
-                else if (frame.SubIndex == "02")
-                {
-                    Frames[1] = frame; // БША 2
-                }
-                else if (frame.SubIndex == "03")
-                {
-                    Frames[2] = frame; // БША 3
-                }
-                else if (frame.SubIndex == "04")
-                {
-                    Frames[3] = frame; // БША 4
-                }
+                UpdateDataFromFrame(frame);
             });
         };
 
-
-
-
-
-
-
-
-
-        _bluetoothService.ReceiverData_Varta832();  // Запуск задачи для приёма данных Varta 832
-
-        // Подписка на событие DataReceivedVarta832
+        _bluetoothService.ReceiverData_Varta832();
         _bluetoothService.DataReceivedVarta832 += AddTerminalText;
     }
 
+    private void InitializeAllLoops()
+    {
+        _allLoops.Clear();
+        int total = 1;
+        for (int bsh = 1; bsh <= 4; bsh++)
+        {
+            for (int loop = 1; loop <= 8; loop++)
+            {
+                _allLoops.Add(new LoopRowModel
+                {
+                    Number = total,
+                    Address = bsh,
+                    LoopNumber = loop,
+                    Identifier = $"ШС №{total:D2}",
+                    TypeText = "Пожежний 1",
+                    TypeCode = "03",
+                    StatusText = "НОРМА",
+                    StatusCode = "07"
+                });
+                total++;
+            }
+        }
+    }
 
+    // Переключение отображаемого блока (1, 2, 3 или 4)
+    private void ShowBlock(int blockIndex)
+    {
+        _selectedBlock = blockIndex;
+        CurrentBlockLoops.Clear();
 
+        int startIndex = (_selectedBlock - 1) * 8;
+        for (int i = 0; i < 8; i++)
+        {
+            CurrentBlockLoops.Add(_allLoops[startIndex + i]);
+        }
 
-    // Обработка полученных данных Varta 832
+        // Обновляем визуальный вид кнопок переключения
+        UpdateBlockButtonsUI();
+    }
 
+    private void UpdateBlockButtonsUI()
+    {
+        BtnBsh1.BackgroundColor = _selectedBlock == 1 ? Color.FromArgb("#082044") : Color.FromArgb("#E0DFD8");
+        BtnBsh1.TextColor = _selectedBlock == 1 ? Colors.White : Color.FromArgb("#333333");
+
+        BtnBsh2.BackgroundColor = _selectedBlock == 2 ? Color.FromArgb("#082044") : Color.FromArgb("#E0DFD8");
+        BtnBsh2.TextColor = _selectedBlock == 2 ? Colors.White : Color.FromArgb("#333333");
+
+        BtnBsh3.BackgroundColor = _selectedBlock == 3 ? Color.FromArgb("#082044") : Color.FromArgb("#E0DFD8");
+        BtnBsh3.TextColor = _selectedBlock == 3 ? Colors.White : Color.FromArgb("#333333");
+
+        BtnBsh4.BackgroundColor = _selectedBlock == 4 ? Color.FromArgb("#082044") : Color.FromArgb("#E0DFD8");
+        BtnBsh4.TextColor = _selectedBlock == 4 ? Colors.White : Color.FromArgb("#333333");
+
+        BtnReadCurrent.Text = $"Зчитати поточний БВШ {_selectedBlock}";
+    }
+
+    // Обработчик нажатия на кнопки «БВШ 1» ... «БВШ 4»
+    private void OnSelectBshClicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn)
+        {
+            if (btn == BtnBsh1) ShowBlock(1);
+            else if (btn == BtnBsh2) ShowBlock(2);
+            else if (btn == BtnBsh3) ShowBlock(3);
+            else if (btn == BtnBsh4) ShowBlock(4);
+        }
+    }
+
+    // Обновление данных при получении кадра
+    private void UpdateDataFromFrame(VartaFrame frame)
+    {
+        if (frame == null || frame.Values == null) return;
+        if (!int.TryParse(frame.SubIndex, out int bshNumber)) return;
+
+        int startIndex = (bshNumber - 1) * 8;
+        if (startIndex < 0 || startIndex + 7 >= _allLoops.Count) return;
+
+        for (int i = 0; i < 8; i++)
+        {
+            var row = _allLoops[startIndex + i];
+
+            // Первые 8 значений — тип
+            if (i < frame.Values.Count)
+            {
+                row.TypeText = frame.Values[i].Value;
+                row.TypeCode = frame.Values[i].Code;
+            }
+
+            // Следующие 8 значений — стан
+            int statusIdx = i + 8;
+            if (statusIdx < frame.Values.Count)
+            {
+                row.StatusText = frame.Values[statusIdx].Value;
+                row.StatusCode = frame.Values[statusIdx].Code;
+            }
+        }
+
+        // Если пришедший кадр относится к текущему открытому блоку — обновляем вид на экране
+        if (bshNumber == _selectedBlock)
+        {
+            ShowBlock(_selectedBlock);
+        }
+    }
+
+    // Считывание выбранного блока
+    private async void OnReadCurrentBshClicked(object sender, EventArgs e)
+    {
+        // Команды для субиндексов 01, 02, 03, 04
+        string cmd = _selectedBlock switch
+        {
+            1 => "010100003100012054",
+            2 => "010100003100022055",
+            3 => "010100003100032056",
+            4 => "010100003100042057",
+            _ => "010100003100012054"
+        };
+
+        try
+        {
+            await _bluetoothService?.TransmitterData(cmd);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Помилка", $"Не вдалося зчитати БВШ {_selectedBlock}: {ex.Message}", "OK");
+        }
+    }
+
+    // Тулбар
+    private async void OnAddressConfigClicked(object sender, EventArgs e)
+    {
+        string result = await DisplayPromptAsync("Адреса приладу", "Введіть мережеву адресу:", initialValue: "1", keyboard: Keyboard.Numeric);
+        if (!string.IsNullOrWhiteSpace(result))
+        {
+            await DisplayAlert("Адреса", $"Виставлено: {result}", "OK");
+        }
+    }
+
+    private async void OnSaveClicked(object sender, EventArgs e) => await DisplayAlert("Збереження", "Збережено успішно", "OK");
+
+    private async void OnStubTabClicked(object sender, EventArgs e)
+    {
+        if (sender is Button b) await DisplayAlert("Вкладка", $"Розділ '{b.Text}' у розробці", "OK");
+    }
+
+    // Терминал
     private async void OnTerminalToggled(object sender, ToggledEventArgs e)
     {
         if (e.Value)
         {
-            // Включаем терминал
             TerminalBorder.IsVisible = true;
             TerminalBorder.Opacity = 0;
-            await TerminalBorder.FadeTo(1, 300);
-
-            // Приветственное сообщение
+            await TerminalBorder.FadeTo(1, 200);
             label4.Text = $"[{DateTime.Now:HH:mm:ss}] Термінал активовано\n";
         }
         else
         {
-            // Выключаем терминал
-            label4.Text += $"[{DateTime.Now:HH:mm:ss}] Термінал вимкнено\n";
-
-            await Task.Delay(300);
-            await TerminalBorder.FadeTo(0, 300);
+            await TerminalBorder.FadeTo(0, 200);
             TerminalBorder.IsVisible = false;
         }
     }
 
+    private void OnClearTerminalClicked(object sender, EventArgs e) => label4.Text = "";
 
-    // Очистить терминал
-    private void OnClearTerminalClicked(object sender, EventArgs e)
-    {
-        label4.Text = $"[{DateTime.Now:HH:mm:ss}] Термінал очищено\n";
-    }
-
-
-    // Метод для добавления текста в терминал с проверкой на включение
     public void AddTerminalText(string text)
     {
-        // ✅ Проверка на null
         if (TerminalSwitch?.IsToggled != true) return;
-
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            // ✅ Дополнительная проверка внутри UI-потока
             if (label4 == null || scrollView == null) return;
-
-            //  label4.Text += $"[{DateTime.Now:HH:mm:ss}]{Environment.NewLine}{text}";
             label4.Text += $"[{DateTime.Now:HH:mm:ss}] {text}\n";
             scrollView.ScrollToAsync(label4, ScrollToPosition.End, animated: true);
         });
     }
 
-
-
-
-    //private async void OnSaveTerminalClicked(object sender, EventArgs e)
-    //{
-    //    try
-    //    {
-    //        string s = "010100003100012054";  //01010000301902FF4C   // 010100003100012054
-
-
-
-    //        // Текст из терминала
-    //        await  _bluetoothService?.TransmitterData(s);
-
-    //        await DisplayAlert("Команда", "Отослана", "OK");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        await DisplayAlert("Помилка", $"Не вдалося : {ex.Message}", "OK");
-    //    }
-    //}
-
-
-    private async void OnReadBsvh1Clicked(object sender, EventArgs e)
-    {
-        try
-        {
-            string s = "010100003100012054"; // Твой текущий адрес/команда010100003100012054
-            await _bluetoothService?.TransmitterData(s);
-            await DisplayAlert("Команда", "БША 1: Отослана", "OK");
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Помилка", $"Не вдалося зчитати БША 1: {ex.Message}", "OK");
-        }
-    }
-
-    private async void OnReadBsvh2Clicked(object sender, EventArgs e)
-    {
-        try
-        {
-            string s = "010100003100022055"; // Тот же самый адрес/команда
-            await _bluetoothService?.TransmitterData(s);
-            await DisplayAlert("Команда", "БША 2: Отослана", "OK");
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Помилка", $"Не вдалося зчитати БША 2: {ex.Message}", "OK");
-        }
-    }
-
-
-    private async void OnReadBsvh3Clicked(object sender, EventArgs e)
-    {
-        try
-        {
-            string s = "010100003100032056"; // Команда для субиндекса 03
-            await _bluetoothService?.TransmitterData(s);
-            await DisplayAlert("Команда", "БША 3: Отослана", "OK");
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Помилка", $"Не вдалося зчитати БША 3: {ex.Message}", "OK");
-        }
-    }
-
-    private async void OnReadBsvh4Clicked(object sender, EventArgs e)
-    {
-        try
-        {
-            string s = "010100003100042057"; // Команда для субиндекса 04
-            await _bluetoothService?.TransmitterData(s);
-            await DisplayAlert("Команда", "БША 4: Отослана", "OK");
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Помилка", $"Не вдалося зчитати БША 4: {ex.Message}", "OK");
-        }
-    }
-
-
-
-
-
-    // Кнопка ⚙ (Настройки)
-    [Obsolete("Используйте OnSettingsClickedAsync вместо этого метода.")]
-    private async void OnSettingsClicked(object sender, EventArgs e) // Обработчик нажатия кнопки "Настройки" OnSettingsClicked
-    {
-
-       
-        string choice = await DisplayActionSheet(
-            "Вібір",
-            "Назад",
-            null,
-            "Налаштування",
-            "Конфігурація",
-            "Струми шлейфів",
-            "Коди подій",
-            "Коди відновлення",
-            "Індифікатор шлейфів",
-            "Струми шлейфів",
-            "Параметри реле",
-            "Стан шлейфа",
-            "Про програму"
-        );
-
-        switch (choice)
-        {
-            case "Налаштування":
-                await DisplayAlert("Загальні", "Загальні налаштування", "OK");
-                break;
-
-    
-            case "Про програму":
-                await DisplayAlert("Про програму", "Версія 1.0\nРозробник: Ваше ім'я", "OK");
-                break;
-        }
-
-    }
-
-
+    [Obsolete]
+    private async void OnSettingsClicked(object sender, EventArgs e) => await DisplayAlert("Налаштування", "Меню", "OK");
 }
 
+public class LoopRowModel : INotifyPropertyChanged
+{
+    private string _typeText = "Пожежний 1";
+    private string _typeCode = "03";
+    private string _statusText = "НОРМА";
+    private string _statusCode = "07";
+    private Color _rowBackgroundColor = Color.FromArgb("#C8E6C9");
 
+    public int Number { get; set; }
+    public int Address { get; set; }
+    public int LoopNumber { get; set; }
+    public string Identifier { get; set; }
+
+    public string TypeText
+    {
+        get => _typeText;
+        set { _typeText = value; OnPropertyChanged(); }
+    }
+
+    public string TypeCode
+    {
+        get => _typeCode;
+        set { _typeCode = value; OnPropertyChanged(); }
+    }
+
+    public string StatusText
+    {
+        get => _statusText;
+        set
+        {
+            _statusText = value;
+            OnPropertyChanged();
+            UpdateRowColor();
+        }
+    }
+
+    public string StatusCode
+    {
+        get => _statusCode;
+        set { _statusCode = value; OnPropertyChanged(); }
+    }
+
+    public Color RowBackgroundColor
+    {
+        get => _rowBackgroundColor;
+        set { _rowBackgroundColor = value; OnPropertyChanged(); }
+    }
+
+    private void UpdateRowColor()
+    {
+        if (StatusText.Contains("Пожежа", StringComparison.OrdinalIgnoreCase) ||
+            StatusText.Contains("ПОЖЕЖА", StringComparison.OrdinalIgnoreCase) ||
+            StatusText.Contains("ТРИВОГА", StringComparison.OrdinalIgnoreCase) ||
+            StatusCode == "0C" || StatusCode == "12")
+        {
+            RowBackgroundColor = Color.FromArgb("#FF8A80");
+        }
+        else
+        {
+            RowBackgroundColor = Color.FromArgb("#C8E6C9");
+        }
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string propName = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+}
 
 public class VartaValue
 {
-    public string Name { get; set; }   // Название колонки ("ШС1", "ШС2" ...)
-    public string Value { get; set; }  // Расшифрованное значение
+    public string Name { get; set; }
+    public string Value { get; set; }
+    public string Code { get; set; }
 }
 
 public class VartaFrame
 {
     public string Index { get; set; }
     public string SubIndex { get; set; }
-    public bool Exists { get; set; } // Флаг существования объекта
-
-    public string Adress { get; set; } // Статус объекта (например, "NORM", "FIRE", "ALARM" и т.д.)
-
-    // Коллекция объектов VartaValue
+    public bool Exists { get; set; }
+    public string Adress { get; set; }
     public ObservableCollection<VartaValue> Values { get; set; } = new();
-
-    //public string Header => $"{Index} (Sub={SubIndex})";
-
-    public string Headers {get { return $"{Index} (Sub={SubIndex})"; } }
-
-}
-
-public class StatusColorConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is string status)
-        {
-            return status switch
-            {
-                // Пожар и тревоги
-                "Fire" => Color.FromArgb("#D32F2F"), // Ярко-красный
-                "Alarm" => Color.FromArgb("#D32F2F"), // Красный
-
-                // Неисправности линии
-                "Breakage" => Color.FromArgb("#B78103"), // Оранжевый (обрыв)
-                "Short" => Color.FromArgb("#D84315"), // Красно-оранжевый (короткое замыкание)
-
-                // Предупреждения
-                "ATTENTION" => Color.FromArgb("#F57F17"), // Янтарный (внимание)
-
-                // Норма и включение
-                "NORM" => Color.FromArgb("#2E7D32"), // Зеленый (норма)
-                "ON" => Color.FromArgb("#2E7D32"), // Зеленый (включено / активен)
-                "OFF" => Color.FromArgb("#757575"), // Серый (выключен)
-
-                // Отсутствие связи и питания
-                "Not Data" => Color.FromArgb("#757575"), // Серый (нет данных)
-                "Power-off" => Color.FromArgb("#616161"), // Темно-серый (нет питания)
-                "LOST" => Color.FromArgb("#9E9E9E"), // Светло-серый (потерян)
-
-                // Блокировки
-                "BLOCKING" => Color.FromArgb("#8E24AA"), // Фиолетовый (блокировка)
-                "Deblocking" => Color.FromArgb("#3949AB"), // Индиго (разблокировка)
-
-                // Неопределенные и логические состояния
-                "Indefinite" => Color.FromArgb("#103381"), // Темно-синий (не определено)
-                "Logical 1" => Color.FromArgb("#00838F"), // Бирюзовый
-                "Logical 2" => Color.FromArgb("#00695C"), // Морской
-
-                "FIRE_ZONE1" => Color.FromArgb("#103381"), // Красный (пожарная зона 1)
-                "FIRE_ZONE2" => Color.FromArgb("#103381"), // Красный (пожарная зона 2)
-                "LOG1" => Color.FromArgb("#103381"), // Бирюзовый (логическая зона 1)
-                "LOG2" => Color.FromArgb("#103381"), // Морской (логическая зона 2)
-                "SECURETY" => Color.FromArgb("#103381"), // Зеленый (охрана)
-                "N/D" => Color.FromArgb("#103381"), // Серый (нет данных)
-
-                //"Пожежний1" => Color.FromArgb("#D32F2F"), // Ярко-красный (пожарная зона 1)
-                //"Пожежний2" => Color.FromArgb("#D32F2F"), // Ярко-красный (пожарная зона 2)
-                //"Логічний1" => Color.FromArgb("#00838F"), // Бирюзовый (логическая зона 1)
-                //"Логічний2" => Color.FromArgb("#00838F"), // Морской (логическая зона 2)
-                //"Охоронний" => Color.FromArgb("#2E7D32"), // Зеленый (охрана)
-                "ПОЖ. 1" => Color.FromArgb("#002171"), // темносиний (пожарная зона 1)
-                "ПОЖ. 2" => Color.FromArgb("#002171"), // Ярко-красный (пожарная зона 2)
-                "ЛОГ. 1" => Color.FromArgb("#002171"), // Бирюзовый (логическая зона 1)
-                "ЛОГ. 2" => Color.FromArgb("#002171"), // Бирюзовый (логическая зона 1)
-                "ОХОР." => Color.FromArgb("#002171"), // Зеленый (охрана)
-                "Н/Д" => Color.FromArgb("#757575"), // Серый (нет данных)
-
-                "Н.Д" => Color.FromArgb("#757575"), // Серый (нет данных)
-                "K.З." => Color.FromArgb("#D32F2F"), // Красно-оранжевый (короткое замыкание)
-                "ОБРИВ." => Color.FromArgb("#8E24AA"), // Оранжевый (обрыв)
-                "НЕВИЗН." => Color.FromArgb("#F57F17"), // Янтарный (внимание)
-                "Л1" => Color.FromArgb("#F57F17"), // Зеленый (включено / активен)
-                "Л2" => Color.FromArgb("#F57F17"), // Зеленый (включено / активен)
-                "Л3" => Color.FromArgb("#F57F17"), // Зеленый (включено / активен)
-                "НОРМА" => Color.FromArgb("#2E7D32"), // Зеленый (норма)
-                "ЗАТР.1" => Color.FromArgb("#F57F17"), // Янтарный (внимание)
-                "ЗАТР.2" => Color.FromArgb("#F57F17"), // Янтарный (внимание)
-                "ТРИВОГА" => Color.FromArgb("#D32F2F"), // Красный (тревога)
-                "ПОЖЕЖА" => Color.FromArgb("#D32F2F"), // Красный (пожар)
-                "УВАГА" => Color.FromArgb("#F57F17"), // Янтарный (внимание)
-                "БЛОК." => Color.FromArgb("#8E24AA"), // Фиолетовый (блокировка)
-                "РОЗБЛОК." => Color.FromArgb("#3949AB"), // Индиго (разблокировка)
-                "ВІДКЛЮЧ." => Color.FromArgb("#616161"), // Темно-серый (нет питания)
-
-
-                //"Н.Д" => Color.FromArgb("#757575"), // Серый (НД)
-                //"K.З." => Color.FromArgb("#D32F2F"), // Красный (КЗ)
-                //"ОБРИВ." => Color.FromArgb("#F57F17"), // Синий (обрыв)
-                //"НЕВИЗНАЧ." => Color.FromArgb("#757575"), // Серый (невызначено)
-                //"Л1" => Color.FromArgb("#0D47A1"), // Синий (L1)
-                //"Л2" => Color.FromArgb("#0D47A1"), // Синий (L2)
-                //"Л3" => Color.FromArgb("#0D47A1"), // Синий (L3)
-                //"НОРМА" => Color.FromArgb("#2E7D32"), // Зеленый (норма)
-
-
-
-
-
-                //"НЕМА ДАНИХ" => Color.FromArgb("#FBC02D"), // Жёлтый (НД)
-                //"КЗ" => Color.FromArgb("#757575"), // Серый
-                //"ОБРИВ" => Color.FromArgb("#FBC02D"), // Жёлтый
-                //"НЕВИЗНАЧ" => Color.FromArgb("#757575"), // Серый
-                //"Л1" => Color.FromArgb("#0D47A1"), // Синий
-                //"Л2" => Color.FromArgb("#0D47A1"), // Синий
-                //"Л3" => Color.FromArgb("#0D47A1"), // Синий
-                //"НОРМА" => Color.FromArgb("#2E7D32"), // Зелёный
-                //"ЗАТР 1" => Color.FromArgb("#FBC02D"), // Жёлтый (затримка 1)
-                //"ЗАТР 2" => Color.FromArgb("#FBC02D"), // Жёлтый (затримка 2)
-                //"ТРИВОГА" => Color.FromArgb("#FBC02D"), // Жёлтый
-                //"УВАГА" => Color.FromArgb("#FBC02D"), // Жёлтый (внимание)
-                //"ПОЖЕЖА" => Color.FromArgb("#D32F2F"), // Красный
-                //"БЛОК" => Color.FromArgb("#8E24AA"), // Фиолетовый
-                //"РОЗБЛОК" => Color.FromArgb("#3949AB"), // Индиго
-                //"ВІДКЛЮЧ" => Color.FromArgb("#616161"), // Тёмно-серый
-
-
-
-
-
-
-                // Любой другой неизвестный текст
-                _ => Color.FromArgb("#000000")  // Черный по умолчанию
-            };
-        }
-
-        return Color.FromArgb("#103381");
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
 }

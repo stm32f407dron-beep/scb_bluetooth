@@ -41,25 +41,6 @@ namespace skb_home.Platforms.Android
         // dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormat=apk
 
 
-        //public string[] TypeValue { get; } = {
-        //                "NO_STATUS", // 0
-        //                "SHORT",     // 1
-        //                "BRAKE",     // 2
-        //                "INDEF",     // 3
-        //                "L1",        // 4
-        //                "L2",        // 5
-        //                "L3",        // 6
-        //                "NORMA",     // 7
-        //                "DELAY1",    // 8
-        //                "DELAY2",    // 9
-        //                "ALARM",     // 10
-        //                "ATTENT",    // 11
-        //                "FIRE",      // 12
-        //                "LOCK",      // 13
-        //                "UNLOCK",    // 14
-        //                "OFF"        // 15
-        //            };
-
         //для Стан ШС
         public string[] TypeValue { get; } = {
             "Н.Д.", // 0  (NO_STATUS)
@@ -83,42 +64,6 @@ namespace skb_home.Platforms.Android
 
 
 
-
-
-        //public string[] TypeValue { get; } = {
-        //    "Немає даних",  // 0 (NO_STATUS)
-        //    "К.З.",           // 1 (SHORT — коротке замикання)
-        //    "Обрив",        // 2 (BRAKE/BREAK — обрив лінії)
-        //    "Невизначено",  // 3 (INDEF)
-        //    "Л1",           // 4 (L1 — логічна 1)
-        //    "Л2",           // 5 (L2 — логічна 2)
-        //    "Л3",           // 6 (L3 — логічна 3)
-        //    "Норма",        // 7 (NORMA)
-        //    "Затримка 1",   // 8 (DELAY1)
-        //    "Затримка 2",   // 9 (DELAY2)
-        //    "Тривога",      // 10 (ALARM)
-        //    "Увага",        // 11 (ATTENT)
-        //    "Пожежа",       // 12 (FIRE)
-        //    "Блокування",   // 13 (LOCK)
-        //    "Розблок.",     // 14 (UNLOCK)
-        //    "Відключено"    // 15 (OFF)
-        //};
-
-
-
-
-        //  Справочник состояний -  реализация свойства для Стан ШС
-        //public string[] TypeValue { get; } = {
-        //    "Not Data", "Short", "Breakage", "Indefinite",
-        //    "Logical 1", "Logical 2", "Power-off", "NORM",
-        //    "ON", "OFF", "Alarm", "ATTENTION",
-        //    "Fire", "BLOCKING", "Deblocking", "LOST"
-        //};
-
-        //  Справочник состояний2 -  реализация свойства - для Тип ШС
-        // 1 - ЛОГИЧЕСКИЙ1( переход на L2 при УВЕЛИЧЕНИИ тока ! ) ; 2-ОХРАННЫЙ; 3-ПОЖАРНЫЙ 1: 4-ПОЖАРНЫЙ2; 5 - ЛОГИЧЕСКИЙ2 ( переход на L2 при УМЕНЬШЕНИИ тока ! )
-
-        //  public string[] TypeValue2 { get; } = { "N/D", "LOG1", "SECURETY", "FIRE_ZONE1", "FIRE_ZONE2", "LOG2"};
 
         public string[] TypeValue2 { get; } = { "Н/Д", "ЛОГ. 1", "ОХОР.", "ПОЖ. 1", "ПОЖ. 2", "ЛОГ. 2" };
         public AndroidBluetooth()
@@ -1831,72 +1776,50 @@ namespace skb_home.Platforms.Android
                             ///////////////BVSH
                             else if (indexString == "00003100")
                             {
-                                numericValue = string.Join(",", payload.Select(b => b.ToString())); // выводим массив чисел(полезной нагрузки) через запятую
-                                hexValues = string.Join(",", payload.Select(b => b.ToString("X2"))); // выводим массив чисел(полезной нагрузки) в HEX через запятую
+                                numericValue = string.Join(",", payload.Select(b => b.ToString()));
+                                hexValues = string.Join(",", payload.Select(b => b.ToString("X2")));
 
-                                // Создание контейнера кадра VartaFrame: где задаем параметры: Index, SubIndex и Exists (наличие блока/модуля BSVH)
+                                // Создание контейнера кадра VartaFrame
                                 var frame = new VartaFrame
                                 {
                                     Index = indexString,
                                     SubIndex = subindex.ToString("X2"),
-                                    Exists = payload.Length > 0 && payload[0] != 0x00, // Анализ наличия блока/модуля BSVH), если первый байт payload не равен 0x00, то считаем, что блок существует.
+                                    Exists = payload.Length > 0 && payload[0] != 0x00,
                                     Adress = address.ToString("X2"),
                                 };
 
-                                int count = Math.Min(16, payload.Length - 1); // страхуем, так как обрабатывается не больше 16 параметров
-
-
+                                int count = Math.Min(16, payload.Length - 1);
 
                                 string decoded = string.Empty;
                                 string name = string.Empty;
 
-                                //Заполнение коллекции Values объектами VartaValue:
-                                // и каждый байт payload[i] безопасно расшифровывается в текст decoded через таблицу TypeValue (с защитой Unknown(b)).
-                                for (int i = 1; i <= count; i++) // payload[0] ушёл под статус Exists(BSVH), поэтому цикл стартует с индекса i = 1
+                                for (int i = 1; i <= count; i++)
                                 {
                                     byte b = payload[i];
-                                    // проверяем, что индекс b в пределах массива TypeValue, если нет — выводим Unknown(b)
-                                    // string decoded = b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})";
-                                    // тернарный оператор:  условие ? значение если истина  : значение если ложь
 
-                                    //
-                                    //   string decoded2 = b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})";
+                                    // Первые 8 байт — Тип ШС (из TypeValue2), следующие 8 байт — Стан ШС (из TypeValue)
+                                    if (i <= 8)
+                                    {
+                                        decoded = b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})";
+                                        name = $"Тип ШС{i}";
+                                    }
+                                    else
+                                    {
+                                        decoded = b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})";
+                                        name = $"Стан ШС{i - 8}";
+                                    }
 
-                                    //
-                                    if (i <= 8) { decoded = b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})"; }
-                                    else { decoded = b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})"; }
-                                     
-
-                                    // формируем имя параметра в зависимости от его позиции: первые 8 параметров — это "Тип ШС", а следующие 8 — "Стан ШС"
-                                    // условие ? выражение_если_true : выражение_если_false;  string name = i <= 8 ? $"Тип ШС{i}" : $"Стан ШС{i - 8}";
-                                     name = i <= 8 ? $"Тип ШС{i}" : $"Стан ШС{i - 8}";
-
-                                    // Каждая пара помещается в frame.Values.
-                                    // Добавляем объект VartaValue в коллекцию Values кадра frame, где Name — это имя параметра, а Value — его расшифрованное значение.
-                                    frame.Values.Add(new VartaValue { Name = name, Value = decoded });
+                                    // Сохраняем не только текст Value, но и HEX-код байта в Code
+                                    frame.Values.Add(new VartaValue
+                                    {
+                                        Name = name,
+                                        Value = decoded,
+                                        Code = b.ToString("X2") // <--- 03, 07, 0C и т.д. для колонок таблицы
+                                    });
                                 }
-
-
-                                // комментарии роботы на низкоуровневом уровне (ARM64) с точки зрения процессора:
-                                // _target (регистр X0 / аргумент 'this'):
-                                // Адрес страницы Varta_832 в памяти — контекст, чтобы метод знал, чью коллекцию Frames менять.
-
-                                // Аргумент frame (регистр X1):
-                                // Полезные данные — адрес созданного кадра с шлейфами, переданный из класса Android.
-
-                                // _methodPtr:
-                                // Адрес машинного кода — точка входа в само скомпилированное тело метода-обработчика.
-                                // В момент выполнения этой строчки процессор:
-                                //Итог:
-                                //Кладёт _target(страницу Varta_832) в регистр первого аргумента(X0).
-
-                                //Кладёт frame(полезную нагрузку) в регистр второго аргумента(X1).
-
-                                //Делает прыжок по адресу _methodPtr, запуская тело твоего метода уже с готовыми аргументами на руках.
 
                                 DataReceivedFrame?.Invoke(frame);
                             }
-
 
                             else // если индекс не известен — пробуем трактовать как текст
                             {
@@ -1950,22 +1873,6 @@ namespace skb_home.Platforms.Android
 
 
 
-                        //DataReceivedVarta832?.Invoke(
-                        //   $"Rx -> index={indexString} subindex={subindex:X2}; " +
-                        //   $"payloadHex={payloadHex};  decoded={decodedValues}");
-
-
-
-                        //DataReceivedVarta832?.Invoke(
-                        //    $"index={indexString} subindex={subindex:X2}; " +
-                        //    $"payloadHex={payloadHex}  decoded= {decodedValues}");
-
-
-                        // DataReceivedVarta832?.Invoke(
-                        //    $"index={indexString} sub={subindex:X2} len={length} " +
-                        //    $"payloadHex={payloadHex} text=\"{payloadText}\"  value={numericValue} valueHex={hexValues} decoded={decodedValues} " +
-                        //    $"chkExp={expectedChk:X2} chkAct={actualChk:X2}"
-                        //);
 
                     }
                 }

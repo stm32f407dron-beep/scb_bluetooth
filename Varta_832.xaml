@@ -1,275 +1,163 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:skb_home"
              x:Class="skb_home.Varta_832"
-             Title="Varta_832"
-             BackgroundColor="#40737a">
-
-
+             Title="Таблиця параметрів і станів шлейфів"
+             BackgroundColor="#ECE9D8">
 
     <ContentPage.ToolbarItems>
-        <!--<ToolbarItem Text="🔄" Order="Primary" Priority="0" Clicked="OnRefreshClicked"/>-->
         <ToolbarItem Text="⚙" Order="Primary" Priority="1" Clicked="OnSettingsClicked"/>
     </ContentPage.ToolbarItems>
 
-
-
-
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <local:StatusColorConverter x:Key="StatusToColor" />
-        </ResourceDictionary>
-    </ContentPage.Resources>
-
     <ScrollView>
-        <!-- Главный контейнер: центрируется, на телефонах занимает доступную ширину, 
-             а на планшетах ограничивается максимум в 500 dp, чтобы не расползаться -->
-        <VerticalStackLayout Padding="8" 
-                             Spacing="10"
-                             MaximumWidthRequest="500"
-                             HorizontalOptions="Center">
+        <VerticalStackLayout Padding="4" Spacing="6" HorizontalOptions="Center" MaximumWidthRequest="720">
 
-            <!-- Таблица БША -->
-            <CollectionView ItemsSource="{Binding Frames}"
-                            HorizontalOptions="Center">
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
-                </CollectionView.ItemsLayout>
+            <!-- 1. ВЕРХНЯЯ ПАНЕЛЬ -->
+            <Border Stroke="#7F9DB9" StrokeThickness="1" BackgroundColor="#EBF2FA" Padding="6,4">
+                <Grid ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="6" VerticalOptions="Center">
+                    <Button Grid.Column="0"
+                            Text="❌"
+                            FontSize="13"
+                            WidthRequest="34"
+                            HeightRequest="30"
+                            Padding="0"
+                            BackgroundColor="#DDE7F5"
+                            BorderColor="#7F9DB9"
+                            BorderWidth="1"
+                            CornerRadius="3"
+                            Clicked="OnAddressConfigClicked"/>
 
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <!-- Рамка: ширина 170 (влезает даже в экраны 360dp с учетом отступов),
-                             но при этом может гибко адаптироваться -->
-                        <Border Stroke="#0B0101"
-                                StrokeThickness="1.5"
-                                StrokeShape="RoundRectangle 8"
-                                BackgroundColor="#E9F1F2"
-                                WidthRequest="170"
-                                Padding="8">
+                    <Button Grid.Column="1"
+                            Text="💾"
+                            FontSize="13"
+                            WidthRequest="34"
+                            HeightRequest="30"
+                            Padding="0"
+                            BackgroundColor="#DDE7F5"
+                            BorderColor="#7F9DB9"
+                            BorderWidth="1"
+                            CornerRadius="3"
+                            Clicked="OnSaveClicked"/>
 
-                            <VerticalStackLayout Spacing="3">
-                                <!-- Заголовок --><!--
-                                <Label Text="{Binding Headers}"
-                                       FontAttributes="Bold"
-                                       FontSize="13"
-                                       TextColor="#752108"
-                                       HorizontalOptions="Center" />
+                    <Label Grid.Column="2"
+                           Text="Адреса приладу"
+                           TextColor="#000080"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           VerticalOptions="Center"
+                           Margin="4,0,0,0"/>
 
-                                <BoxView HeightRequest="1" Color="#B0BEC5" Margin="0,2,0,4"/>-->
-
-                                <!-- Первая строка: BSVH и статус --><!--
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
-                                    <Label Text="BSVH" FontAttributes="Bold" TextColor="#000000" FontSize="14" Grid.Column="0"/>
-                                    <Label Text="{Binding Exists}" HorizontalTextAlignment="End" FontAttributes="Bold" TextColor="#0D47A1" FontSize="14" Grid.Column="1"/>
-                                </Grid>-->
-
-
-                                <!-- Первая строка: BSVH + номер субиндекса и статус -->
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
-                                        <Label Text="{Binding SubIndex, StringFormat='БВШ №{0}'}" 
-                                           FontAttributes="Bold" 
-                                           TextColor="#000000" 
-                                           FontSize="14" 
-                                           Grid.Column="0"/>
-                                    
-                                        <!--<Label Text="{Binding Exists}" 
-                                           HorizontalTextAlignment="End" 
-                                           FontAttributes="Bold" 
-                                           TextColor="#0D47A1" 
-                                           FontSize="14" 
-                                           Grid.Column="1"/>-->
-
-                                        <Label Text="{Binding Adress, StringFormat='адреса-{0}'}" 
-                                            HorizontalTextAlignment="End" 
-                                            FontAttributes="Bold" 
-                                            TextColor="#149C14" 
-                                            FontSize="14" 
-                                            Grid.Column="1"/>           
-
-
-
-
-                                </Grid>     
-
-
-
-
-
-                                <!-- 16 строк ШС -->
-                                <CollectionView ItemsSource="{Binding Values}">
-                                    <CollectionView.ItemsLayout>
-                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="2"/>
-                                    </CollectionView.ItemsLayout>
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate>
-
-                                            <VerticalStackLayout>
-
-                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
-                                                <Label Text="{Binding Name}"
-                                                       FontAttributes="Bold"
-                                                       FontSize="12"
-                                                       TextColor="#752108"
-                                                       Grid.Column="0"/>
-                                                <Label Text="{Binding Value}"
-                                                       FontAttributes="Bold"
-                                                       FontSize="13"
-                                                       TextColor="{Binding Value, Converter={StaticResource StatusToColor}}"
-                                                       HorizontalTextAlignment="End"
-                                                       Grid.Column="1"/>
-                                                </Grid>
-
-                                                <!-- Полоска: включается через триггер XAML только для "Тип ШС8" -->
-                                                <BoxView HeightRequest="1"
-                                                      Color="#000000"
-                                                      HorizontalOptions="Fill"
-                                                      Margin="0,4,0,3"
-                                                      IsVisible="False">
-                                                        <BoxView.Triggers>
-                                                        <DataTrigger TargetType="BoxView"
-                                                           Binding="{Binding Name}"
-                                                            Value="Тип ШС8">        
-                                                            <Setter Property="IsVisible" Value="True" />
-                                                        </DataTrigger>
-                                                    </BoxView.Triggers> 
-                                                </BoxView>
-
-
-                                            </VerticalStackLayout>
-
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
-                            </VerticalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
-            <!-- Две кнопки ровно под рамками: ширина 170 каждая (170 + 8 + 170 = 348) -->
-            <!-- 4 кнопки под рамками: ровно по вашему стилю с Auto,Auto -->
-            <Grid ColumnDefinitions="Auto,Auto"
-      RowDefinitions="Auto,Auto"
-      ColumnSpacing="8"
-      RowSpacing="8"
-      HorizontalOptions="Center">
-
-                <!-- Ряд 0: БША 1 и БША 2 -->
-                <Button Grid.Row="0" Grid.Column="0"
-            Text="Зчитати BSVH 1"
-            BackgroundColor="#082044"
-            TextColor="#FFFFFF"
-            FontAttributes="Bold"
-            FontSize="13"
-            WidthRequest="170"
-            HeightRequest="42"
-            CornerRadius="6"
-            Clicked="OnReadBsvh1Clicked"/>
-
-                <Button Grid.Row="0" Grid.Column="1"
-            Text="Зчитати BSVH 2"
-            BackgroundColor="#082044"
-            TextColor="#FFFFFF"
-            FontAttributes="Bold"
-            FontSize="13"
-            WidthRequest="170"
-            HeightRequest="42"
-            CornerRadius="6"
-            Clicked="OnReadBsvh2Clicked"/>
-
-                <!-- Ряд 1: БША 3 и БША 4 -->
-                <Button Grid.Row="1" Grid.Column="0"
-            Text="Зчитати BSVH 3"
-            BackgroundColor="#082044"
-            TextColor="#FFFFFF"
-            FontAttributes="Bold"
-            FontSize="13"
-            WidthRequest="170"
-            HeightRequest="42"
-            CornerRadius="6"
-            Clicked="OnReadBsvh3Clicked"/>
-
-                <Button Grid.Row="1" Grid.Column="1"
-            Text="Зчитати BSVH 4"
-            BackgroundColor="#082044"
-            TextColor="#FFFFFF"
-            FontAttributes="Bold"
-            FontSize="13"
-            WidthRequest="170"
-            HeightRequest="42"
-            CornerRadius="6"
-            Clicked="OnReadBsvh4Clicked"/>
-            </Grid>
-
-            <!-- Переключатель терминала: ширина ровно под блок кнопок (348 dp) -->
-            <Grid ColumnDefinitions="*,Auto"
-                  HeightRequest="50"
-                  WidthRequest="348"
-                  HorizontalOptions="Center">
-                <Label Grid.Column="0"
-                       Margin="0,15,0,0"
-                       Text="Включити термінал"
-                       TextColor="#FFFFFF"
-                       FontSize="20"
-                       FontAttributes="Bold"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Start">
-                    <Label.Shadow>
-                        <Shadow Brush="Black" Radius="8" Offset="2,2" Opacity="0.6"/>
-                    </Label.Shadow>
-                </Label>
-
-                <Switch Grid.Column="1"
-                        x:Name="TerminalSwitch"
-                        OnColor="#1046B0"
-                        ThumbColor="White"
-                        Margin="0,15,0,0"
-                        VerticalOptions="Center"
-                        HorizontalOptions="End"
-                        Toggled="OnTerminalToggled"/>
-            </Grid>
-
-            <!-- Терминал: ширина точно 348 dp, идеально совпадает с колонками -->
-            <Border x:Name="TerminalBorder"
-                    IsVisible="False"
-                    Stroke="#0B0101"
-                    StrokeThickness="2"
-                    StrokeShape="RoundRectangle 10"
-                    BackgroundColor="#4A9192"
-                    Padding="10"
-                    Margin="0,10,0,10"
-                    HeightRequest="510"
-                    WidthRequest="348"
-                    HorizontalOptions="Center">
-
-                <Grid RowDefinitions="Auto,*">
-                    <HorizontalStackLayout Grid.Row="0" Spacing="10" Margin="0,0,0,5">
-                        <Label Text="🖥️ Термінал"
-                               FontAttributes="Bold"
-                               FontSize="16"
-                               TextColor="#000000"
-                               VerticalOptions="Center"/>
-
-                        <Button Text="🗑️ Очистити"
-                                BackgroundColor="#FFFFFF"
+                    <Border Grid.Column="3"
+                            Stroke="#7F9DB9"
+                            StrokeThickness="1"
+                            BackgroundColor="White"
+                            HeightRequest="30"
+                            Padding="4,0"
+                            VerticalOptions="Center">
+                        <Picker x:Name="DeviceAddressPicker"
                                 TextColor="#000000"
-                                FontAttributes="Bold"
-                                FontSize="14"
-                                Padding="8,2"
-                                CornerRadius="5"
-                                Clicked="OnClearTerminalClicked"/>
-                    </HorizontalStackLayout>
+                                FontSize="13"
+                                VerticalOptions="Center">
+                            <Picker.ItemsSource>
+                                <x:Array Type="{x:Type x:String}">
+                                    <x:String>1 - ВАРТА832 1</x:String>
+                                    <x:String>2 - ВАРТА832 2</x:String>
+                                    <x:String>3 - ВАРТА832 3</x:String>
+                                </x:Array>
+                            </Picker.ItemsSource>
+                        </Picker>
+                    </Border>
+                </Grid>
+            </Border>
 
-                    <ScrollView Grid.Row="1" x:Name="scrollView" VerticalOptions="Fill">
-                        <Label x:Name="label4"
-                               Text="Empty text to receive data"
-                               FontAttributes="Bold"
-                               FontSize="16"
-                               TextColor="Black"
-                               LineBreakMode="WordWrap"
-                               VerticalTextAlignment="Start"
-                               HorizontalTextAlignment="Start"/>
+            <!-- 2. ВКЛАДКИ СТРАНИЦ -->
+            <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                <HorizontalStackLayout Spacing="2">
+                    <Button Text="БВШ" FontAttributes="Bold" FontSize="11" BackgroundColor="#FFFFFF" TextColor="#000000" BorderColor="#7F9DB9" BorderWidth="1" CornerRadius="2" HeightRequest="26" Padding="8,0"/>
+                    <Button Text="БКН" FontSize="11" BackgroundColor="#E0DFD8" TextColor="#444" BorderColor="#A0A0A0" BorderWidth="1" CornerRadius="2" HeightRequest="26" Padding="8,0" Clicked="OnStubTabClicked"/>
+                    <Button Text="BVK" FontSize="11" BackgroundColor="#E0DFD8" TextColor="#444" BorderColor="#A0A0A0" BorderWidth="1" CornerRadius="2" HeightRequest="26" Padding="8,0" Clicked="OnStubTabClicked"/>
+                    <Button Text="БВК-8" FontSize="11" BackgroundColor="#E0DFD8" TextColor="#444" BorderColor="#A0A0A0" BorderWidth="1" CornerRadius="2" HeightRequest="26" Padding="8,0" Clicked="OnStubTabClicked"/>
+                    <Button Text="Реле" FontSize="11" BackgroundColor="#E0DFD8" TextColor="#444" BorderColor="#A0A0A0" BorderWidth="1" CornerRadius="2" HeightRequest="26" Padding="8,0" Clicked="OnStubTabClicked"/>
+                    <Button Text="Віртуальні ключі" FontSize="11" BackgroundColor="#E0DFD8" TextColor="#444" BorderColor="#A0A0A0" BorderWidth="1" CornerRadius="2" HeightRequest="26" Padding="8,0" Clicked="OnStubTabClicked"/>
+                    <Button Text="CIE" FontSize="11" BackgroundColor="#E0DFD8" TextColor="#444" BorderColor="#A0A0A0" BorderWidth="1" CornerRadius="2" HeightRequest="26" Padding="8,0" Clicked="OnStubTabClicked"/>
+                    <Button Text="Configuration of loops from a file" FontSize="11" BackgroundColor="#E0DFD8" TextColor="#444" BorderColor="#A0A0A0" BorderWidth="1" CornerRadius="2" HeightRequest="26" Padding="8,0" Clicked="OnStubTabClicked"/>
+                </HorizontalStackLayout>
+            </ScrollView>
+
+            <!-- 3. ТАБЛИЦА БВШ НА 8 СТРОК -->
+            <Border Stroke="#7F9DB9" StrokeThickness="1" BackgroundColor="White">
+                <ScrollView Orientation="Horizontal">
+                    <VerticalStackLayout WidthRequest="680">
+
+                        <!-- Шапка таблицы -->
+                        <Grid ColumnDefinitions="32,46,46,180,110,44,110,44" BackgroundColor="#DDE7F5" HeightRequest="26">
+                            <Label Grid.Column="0" Text="№" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                            <Label Grid.Column="1" Text="Адреса" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                            <Label Grid.Column="2" Text="Шлейф" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                            <Label Grid.Column="3" Text="Ідентифікатор" FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
+                            <Label Grid.Column="4" Text="Тип ШС" FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
+                            <Label Grid.Column="5" Text="Код" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                            <Label Grid.Column="6" Text="Стан" FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
+                            <Label Grid.Column="7" Text="Код" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="#7F9DB9"/>
+
+                        <!-- 8 строк текущего блока -->
+                        <CollectionView x:Name="LoopsCollectionView">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="32,46,46,180,110,44,110,44" HeightRequest="24" BackgroundColor="{Binding RowBackgroundColor}">
+                                        <Label Grid.Column="0" Text="{Binding Number}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="1" Text="{Binding Address}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="2" Text="{Binding LoopNumber}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="3" Text="{Binding Identifier}" LineBreakMode="TailTruncation" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="4" Text="{Binding TypeText}" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="5" Text="{Binding TypeCode}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="6" Text="{Binding StatusText}" FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="7" Text="{Binding StatusCode}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Border>
+
+            <!-- 4. ПЕРЕКЛЮЧАТЕЛЬ БЛОКОВ (БВШ 1..4) -->
+            <Label Text="Вибір блоку БВШ:" FontAttributes="Bold" FontSize="13" TextColor="#000080" Margin="2,4,0,0"/>
+            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="4">
+                <Button x:Name="BtnBsh1" Grid.Column="0" Text="БВШ 1" BackgroundColor="#082044" TextColor="White" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
+                <Button x:Name="BtnBsh2" Grid.Column="1" Text="БВШ 2" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
+                <Button x:Name="BtnBsh3" Grid.Column="2" Text="БВШ 3" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
+                <Button x:Name="BtnBsh4" Grid.Column="3" Text="БВШ 4" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
+            </Grid>
+
+            <!-- Кнопка считывания текущего выбранного блока -->
+            <Button x:Name="BtnReadCurrent"
+                    Text="Зчитати поточний БВШ 1"
+                    BackgroundColor="#002171"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    FontSize="13"
+                    HeightRequest="40"
+                    CornerRadius="4"
+                    Clicked="OnReadCurrentBshClicked"/>
+
+            <!-- 5. ТЕРМИНАЛ -->
+            <Grid ColumnDefinitions="*,Auto" HeightRequest="36" Margin="0,2,0,0">
+                <Label Grid.Column="0" Text="Термінал Bluetooth" TextColor="#000000" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+                <Switch Grid.Column="1" x:Name="TerminalSwitch" OnColor="#1046B0" VerticalOptions="Center" Toggled="OnTerminalToggled"/>
+            </Grid>
+
+            <Border x:Name="TerminalBorder" IsVisible="False" Stroke="#7F9DB9" StrokeThickness="1" BackgroundColor="#4A9192" Padding="8" HeightRequest="250">
+                <Grid RowDefinitions="Auto,*">
+                    <HorizontalStackLayout Grid.Row="0" Spacing="8" Margin="0,0,0,4">
+                        <Label Text="🖥️ Дані обміну" FontAttributes="Bold" FontSize="13" TextColor="Black" VerticalOptions="Center"/>
+                        <Button Text="🗑️ Очистити" BackgroundColor="White" TextColor="Black" FontSize="12" Padding="8,2" CornerRadius="4" Clicked="OnClearTerminalClicked"/>
+                    </HorizontalStackLayout>
+                    <ScrollView Grid.Row="1" x:Name="scrollView">
+                        <Label x:Name="label4" Text="" FontAttributes="Bold" FontSize="12" TextColor="Black" LineBreakMode="WordWrap"/>
                     </ScrollView>
                 </Grid>
             </Border>
