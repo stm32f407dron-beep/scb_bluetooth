@@ -1784,16 +1784,17 @@ namespace skb_home.Platforms.Android
                                 {
                                     Index = indexString,
                                     SubIndex = subindex.ToString("X2"),
-                                    Exists = payload.Length > 0 && payload[0] != 0x00,
+                                    Exists = payload.Length > 0 && payload[0] != 0x00,// Анализ наличия блока/модуля BSVH), если первый байт payload не равен 0x00, то считаем, что блок существует.
                                     Adress = address.ToString("X2"),
                                 };
+                                
 
-                                int count = Math.Min(16, payload.Length - 1);
+                                int count = Math.Min(16, payload.Length - 1); // страхуем, так как обрабатывается не больше 16 параметров 
 
                                 string decoded = string.Empty;
                                 string name = string.Empty;
 
-                                for (int i = 1; i <= count; i++)
+                                for (int i = 1; i <= count; i++) // перебор массив полезной нагрузки
                                 {
                                     byte b = payload[i];
 
@@ -1809,12 +1810,13 @@ namespace skb_home.Platforms.Android
                                         name = $"Стан ШС{i - 8}";
                                     }
 
-                                    // Сохраняем не только текст Value, но и HEX-код байта в Code
+                                    // Сохраняем не только текст Value, но и HEX-код байта в Code, обьекты типа VartaValue в коллекцию - Values
                                     frame.Values.Add(new VartaValue
                                     {
                                         Name = name,
                                         Value = decoded,
-                                        Code = b.ToString("X2") // <--- 03, 07, 0C и т.д. для колонок таблицы
+                                        Code = b.ToString("X2"),// <--- 03, 07, 0C и т.д. для колонок таблицы
+                                        Adress = address.ToString("X2")
                                     });
                                 }
 

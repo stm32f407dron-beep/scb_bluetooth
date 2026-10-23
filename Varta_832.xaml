@@ -47,26 +47,7 @@
                            VerticalOptions="Center"
                            Margin="4,0,0,0"/>
 
-                    <!--<Border Grid.Column="3"
-                            Stroke="#7F9DB9"
-                            StrokeThickness="1"
-                            BackgroundColor="White"
-                            HeightRequest="30"
-                            Padding="4,0"
-                            VerticalOptions="Center">
-                        <Picker x:Name="DeviceAddressPicker"
-                                TextColor="#000000"
-                                FontSize="13"
-                                VerticalOptions="Center">
-                            <Picker.ItemsSource>
-                                <x:Array Type="{x:Type x:String}">
-                                    <x:String>1 - ВАРТА832 1</x:String>
-                                    <x:String>2 - ВАРТА832 2</x:String>
-                                    <x:String>3 - ВАРТА832 3</x:String>
-                                </x:Array>
-                            </Picker.ItemsSource>
-                        </Picker>
-                    </Border>-->
+                  
 
                     <!-- Выбор адреса (Picker) -->
                     <Border Grid.Column="3"
@@ -92,13 +73,6 @@
                                         </Picker.ItemsSource>
                                     </Picker>
                     </Border>       
-
-
-
-
-
-
-
 
 
 
