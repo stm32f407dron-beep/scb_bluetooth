@@ -49,30 +49,6 @@
 
                   
 
-                    <!-- Выбор адреса (Picker) -->
-                    <!--<Border Grid.Column="3"
-                        Stroke="#7F9DB9"
-                        StrokeThickness="1"
-                        BackgroundColor="White"
-                        HeightRequest="38"
-                        Padding="4,0"
-                        VerticalOptions="Center">
-                                    <Picker x:Name="DeviceAddressPicker"
-                            TextColor="#000000"
-                            FontSize="13"
-                            FontAttributes="Bold"               
-                            Margin="0"
-                            VerticalOptions="Fill"
-                            HorizontalOptions="Fill">
-                                        <Picker.ItemsSource>
-                                            <x:Array Type="{x:Type x:String}">
-                                                <x:String>1 - ВАРТА832 1</x:String>
-                                                <x:String>2 - ВАРТА832 2</x:String>
-                                                <x:String>3 - ВАРТА832 3</x:String>
-                                            </x:Array>
-                                        </Picker.ItemsSource>
-                                    </Picker>
-                    </Border>-->
 
                     <Border Grid.Column="3"
                             Stroke="#7F9DB9"
@@ -132,14 +108,14 @@
                             <CollectionView.ItemTemplate>
                                 <DataTemplate>
                                     <Grid ColumnDefinitions="32,46,46,180,110,44,110,44" HeightRequest="24" BackgroundColor="{Binding RowBackgroundColor}">
-                                        <Label Grid.Column="0" Text="{Binding Number}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
-                                        <Label Grid.Column="1" Text="{Binding Address}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
-                                        <Label Grid.Column="2" Text="{Binding LoopNumber}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
-                                        <Label Grid.Column="3" Text="{Binding Identifier}" LineBreakMode="TailTruncation" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
-                                        <Label Grid.Column="4" Text="{Binding TypeText}" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
-                                        <Label Grid.Column="5" Text="{Binding TypeCode}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="0" Text="{Binding Number}" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="1" Text="{Binding Address}"  FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="2" Text="{Binding LoopNumber}" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="3" Text="{Binding Identifier}"  FontAttributes="Bold" LineBreakMode="TailTruncation" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="4" Text="{Binding TypeText}"  FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="5" Text="{Binding TypeCode}"  FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
                                         <Label Grid.Column="6" Text="{Binding StatusText}" FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
-                                        <Label Grid.Column="7" Text="{Binding StatusCode}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
+                                        <Label Grid.Column="7" Text="{Binding StatusCode}"  FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
                                     </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
@@ -149,7 +125,7 @@
             </Border>
 
             <!-- 4. ПЕРЕКЛЮЧАТЕЛЬ БЛОКОВ (БВШ 1..4) -->
-            <Label Text="Вибір блоку БВШ:" FontAttributes="Bold" FontSize="13" TextColor="#000080" Margin="2,4,0,0"/>
+            <Label Text="Вибір блоку БВШ:" FontAttributes="Bold" FontSize="13" TextColor="#2C2305" Margin="2,4,0,0"/>
             <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="4">
                 <Button x:Name="BtnBsh1" Grid.Column="0" Text="БВШ 1" BackgroundColor="#2C2305" TextColor="White" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
                 <Button x:Name="BtnBsh2" Grid.Column="1" Text="БВШ 2" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>

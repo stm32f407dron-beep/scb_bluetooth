@@ -45,8 +45,8 @@ public partial class Varta_832 : ContentPage
         }
 
 
-
-        DeviceAddressPicker.SelectedIndex = 1;
+        //Начальный выбор адреса №1
+        DeviceAddressPicker.SelectedIndex = 0;
 
         // Создаем все 32 шлейфа и загружаем первые 8 (БВШ 1)
         InitializeAllLoops();
@@ -198,20 +198,39 @@ public partial class Varta_832 : ContentPage
     }
 
     // Считывание выбранного блока
+    //private async void OnReadCurrentBshClicked(object sender, EventArgs e)
+    //{
+    //    // Команды для субиндексов 01, 02, 03, 04
+    //    string cmd = _selectedBlock switch
+    //    {
+    //        1 => "010100003100012054",
+    //        2 => "010100003100022055",
+    //        3 => "010100003100032056",
+    //        4 => "010100003100042057",
+    //        _ => "010100003100012054"
+    //    };
+
+    //    try
+    //    {
+    //        await _bluetoothService?.TransmitterData(cmd);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        await DisplayAlert("Помилка", $"Не вдалося зчитати БВШ {_selectedBlock}: {ex.Message}", "OK");
+    //    }
+    //}
+
+    // Тулбар
+
+
+
     private async void OnReadCurrentBshClicked(object sender, EventArgs e)
     {
-        // Команды для субиндексов 01, 02, 03, 04
-        string cmd = _selectedBlock switch
-        {
-            1 => "010100003100012054",
-            2 => "010100003100022055",
-            3 => "010100003100032056",
-            4 => "010100003100042057",
-            _ => "010100003100012054"
-        };
-
         try
         {
+            // Передаем значения внутрь метода через аргументы
+            string cmd = BuildCommand(_currentDeviceAddress, _selectedBlock);
+
             await _bluetoothService?.TransmitterData(cmd);
         }
         catch (Exception ex)
@@ -220,7 +239,9 @@ public partial class Varta_832 : ContentPage
         }
     }
 
-    // Тулбар
+
+
+
     private async void OnAddressConfigClicked(object sender, EventArgs e)
     {
         //string result = await DisplayPromptAsync("Адреса приладу", "Введіть мережеву адресу:", initialValue: "1", keyboard: Keyboard.Numeric);
@@ -243,6 +264,40 @@ public partial class Varta_832 : ContentPage
             _currentDeviceAddress = DeviceAddressPicker.SelectedIndex + 1;
         }
     }
+
+    // подготовка к отсылке команды
+    private string BuildCommand(int deviceAddress, int bshNumber)
+    {
+        // 1. Внутренний фрейм по протоколу CV1500 (строго по таблице)
+        byte[] frameBytes = new byte[]
+        {
+        0x01,                        // 1. Read (тип операции: чтение = 0x01)
+        (byte)deviceAddress,         // 2. Address (сетевой адрес прибора 1..16 из Picker-а)
+        0x00, 0x00, 0x31, 0x00,      // 3. Index (запрос шлейфов БВШ)
+        (byte)bshNumber,             // 4. Subindex (номер блока БВШ: 1, 2, 3 или 4)
+        0x20                         // 5. Length (длина данных)
+        };
+
+        // 2. Считаем контрольную сумму по этим байтам
+        int sum = 0;
+        foreach (var b in frameBytes)
+        {
+            sum += b;
+        }
+        byte checksum = (byte)(sum & 0xFF);
+
+        // 3. Добавляем чексумму в конец массива
+        byte[] fullPacket = new byte[frameBytes.Length + 1];
+        Array.Copy(frameBytes, fullPacket, frameBytes.Length);
+        fullPacket[fullPacket.Length - 1] = checksum;
+
+        // 4. Переводим в ASCII-HEX строку (которая пойдёт в TransmitterData)
+        return BitConverter.ToString(fullPacket).Replace("-", "");
+    }
+
+
+
+
 
     //
     private async void OnSaveClicked(object sender, EventArgs e) => await DisplayAlert("Збереження", "Збережено успішно", "OK");
@@ -465,7 +520,7 @@ public class LoopRowModel : INotifyPropertyChanged
         }
         else
         {
-            RowBackgroundColor = Color.FromArgb("#C8E6C9");
+            RowBackgroundColor = Color.FromArgb("#82E0AA");
         }
     }
 
