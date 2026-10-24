@@ -21,13 +21,32 @@ public partial class Varta_832 : ContentPage
     // Текущий выбранный блок (1..4)
     private int _selectedBlock = 1;
 
+
+
+
+    // Храним текущий выбранный сетевой адрес прибора (число от 1 до 16)
+    private int _currentDeviceAddress = 1;
+
+
+
     public Varta_832(IBluetooth_service bluetoothService)
     {
         _bluetoothService = bluetoothService;
         InitializeComponent();
         BindingContext = this;
 
-        DeviceAddressPicker.SelectedIndex = 0;
+
+
+        // Заполняем адреса от 1 до 16
+        DeviceAddressPicker.Items.Clear();
+        for (int addr = 1; addr <= 16; addr++)
+        {
+            DeviceAddressPicker.Items.Add($"{addr} - ВАРТА832");
+        }
+
+
+
+        DeviceAddressPicker.SelectedIndex = 1;
 
         // Создаем все 32 шлейфа и загружаем первые 8 (БВШ 1)
         InitializeAllLoops();
@@ -99,7 +118,7 @@ public partial class Varta_832 : ContentPage
         int startIndex = (_selectedBlock - 1) * 8;
         for (int i = 0; i < 8; i++)
         {
-            CurrentBlockLoops.Add(_allLoops[startIndex + i]);
+            CurrentBlockLoops.Add(_allLoops[startIndex + i]); // делаем перезапись из List
         }
 
         // Обновляем визуальный вид кнопок переключения
@@ -108,16 +127,16 @@ public partial class Varta_832 : ContentPage
 
     private void UpdateBlockButtonsUI()
     {
-        BtnBsh1.BackgroundColor = _selectedBlock == 1 ? Color.FromArgb("#082044") : Color.FromArgb("#E0DFD8");
+        BtnBsh1.BackgroundColor = _selectedBlock == 1 ? Color.FromArgb("#2C2305") : Color.FromArgb("#E0DFD8");
         BtnBsh1.TextColor = _selectedBlock == 1 ? Colors.White : Color.FromArgb("#333333");
 
-        BtnBsh2.BackgroundColor = _selectedBlock == 2 ? Color.FromArgb("#082044") : Color.FromArgb("#E0DFD8");
+        BtnBsh2.BackgroundColor = _selectedBlock == 2 ? Color.FromArgb("#2C2305") : Color.FromArgb("#E0DFD8");
         BtnBsh2.TextColor = _selectedBlock == 2 ? Colors.White : Color.FromArgb("#333333");
 
-        BtnBsh3.BackgroundColor = _selectedBlock == 3 ? Color.FromArgb("#082044") : Color.FromArgb("#E0DFD8");
+        BtnBsh3.BackgroundColor = _selectedBlock == 3 ? Color.FromArgb("#2C2305") : Color.FromArgb("#E0DFD8");
         BtnBsh3.TextColor = _selectedBlock == 3 ? Colors.White : Color.FromArgb("#333333");
 
-        BtnBsh4.BackgroundColor = _selectedBlock == 4 ? Color.FromArgb("#082044") : Color.FromArgb("#E0DFD8");
+        BtnBsh4.BackgroundColor = _selectedBlock == 4 ? Color.FromArgb("#2C2305") : Color.FromArgb("#E0DFD8");
         BtnBsh4.TextColor = _selectedBlock == 4 ? Colors.White : Color.FromArgb("#333333");
 
         BtnReadCurrent.Text = $"Зчитати поточний БВШ {_selectedBlock}";
@@ -153,6 +172,7 @@ public partial class Varta_832 : ContentPage
             // Первые 8 значений — тип
             if (i < frame.Values.Count)
             {
+                // Вызов этих свойст трегерит события OnPropertyChanged(); и обновляет таблицу хамл
                 row.TypeText = frame.Values[i].Value;
                 row.TypeCode = frame.Values[i].Code;
                 row.Address = frame.Values[i].Adress;
@@ -203,13 +223,28 @@ public partial class Varta_832 : ContentPage
     // Тулбар
     private async void OnAddressConfigClicked(object sender, EventArgs e)
     {
-        string result = await DisplayPromptAsync("Адреса приладу", "Введіть мережеву адресу:", initialValue: "1", keyboard: Keyboard.Numeric);
-        if (!string.IsNullOrWhiteSpace(result))
+        //string result = await DisplayPromptAsync("Адреса приладу", "Введіть мережеву адресу:", initialValue: "1", keyboard: Keyboard.Numeric);
+        //if (!string.IsNullOrWhiteSpace(result))
+        //{
+        //    await DisplayAlert("Адреса", $"Виставлено: {result}", "OK");
+        //}
+        await DisplayAlert("Видалення", "Виделено успішно", "OK");
+
+
+    }
+
+
+    //
+    private void OnDeviceAddressChanged(object sender, EventArgs e)
+    {
+        if (DeviceAddressPicker.SelectedIndex >= 0)
         {
-            await DisplayAlert("Адреса", $"Виставлено: {result}", "OK");
+            // Индекс 0 соответствует адресу 1, индекс 1 — адресу 2 и т.д.
+            _currentDeviceAddress = DeviceAddressPicker.SelectedIndex + 1;
         }
     }
 
+    //
     private async void OnSaveClicked(object sender, EventArgs e) => await DisplayAlert("Збереження", "Збережено успішно", "OK");
 
     private async void OnStubTabClicked(object sender, EventArgs e)

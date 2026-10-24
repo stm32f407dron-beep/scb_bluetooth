@@ -50,7 +50,7 @@
                   
 
                     <!-- Выбор адреса (Picker) -->
-                    <Border Grid.Column="3"
+                    <!--<Border Grid.Column="3"
                         Stroke="#7F9DB9"
                         StrokeThickness="1"
                         BackgroundColor="White"
@@ -72,9 +72,24 @@
                                             </x:Array>
                                         </Picker.ItemsSource>
                                     </Picker>
-                    </Border>       
+                    </Border>-->
 
-
+                    <Border Grid.Column="3"
+                            Stroke="#7F9DB9"
+                            StrokeThickness="1"
+                            BackgroundColor="White"
+                            HeightRequest="38"
+                            Padding="4,0"
+                            VerticalOptions="Center">
+                        <Picker x:Name="DeviceAddressPicker"
+                            TextColor="#000000"
+                            FontSize="12"
+                            FontAttributes="Bold"               
+                            Margin="0"
+                            VerticalOptions="Fill"
+                            HorizontalOptions="Fill"
+                            SelectedIndexChanged="OnDeviceAddressChanged" />        
+                    </Border>
 
                 </Grid>
             </Border>
@@ -136,7 +151,7 @@
             <!-- 4. ПЕРЕКЛЮЧАТЕЛЬ БЛОКОВ (БВШ 1..4) -->
             <Label Text="Вибір блоку БВШ:" FontAttributes="Bold" FontSize="13" TextColor="#000080" Margin="2,4,0,0"/>
             <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="4">
-                <Button x:Name="BtnBsh1" Grid.Column="0" Text="БВШ 1" BackgroundColor="#082044" TextColor="White" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
+                <Button x:Name="BtnBsh1" Grid.Column="0" Text="БВШ 1" BackgroundColor="#2C2305" TextColor="White" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
                 <Button x:Name="BtnBsh2" Grid.Column="1" Text="БВШ 2" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
                 <Button x:Name="BtnBsh3" Grid.Column="2" Text="БВШ 3" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
                 <Button x:Name="BtnBsh4" Grid.Column="3" Text="БВШ 4" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
@@ -145,7 +160,7 @@
             <!-- Кнопка считывания текущего выбранного блока -->
             <Button x:Name="BtnReadCurrent"
                     Text="Зчитати поточний БВШ 1"
-                    BackgroundColor="#082044"
+                    BackgroundColor="#2C2305"
                     TextColor="White"
                     FontAttributes="Bold"
                     FontSize="13"
