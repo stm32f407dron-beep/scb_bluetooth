@@ -146,7 +146,7 @@
 
             <!-- 5. ТЕРМИНАЛ -->
             <Grid ColumnDefinitions="*,Auto" HeightRequest="36" Margin="0,2,0,0">
-                <Label Grid.Column="0" Text="Термінал Bluetooth" TextColor="#000000" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+                <Label Grid.Column="0" Text="Термінал " TextColor="#000000" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
                 <Switch Grid.Column="1" x:Name="TerminalSwitch" OnColor="#1046B0" VerticalOptions="Center" Toggled="OnTerminalToggled"/>
             </Grid>
 

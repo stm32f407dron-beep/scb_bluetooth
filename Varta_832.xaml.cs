@@ -11,14 +11,14 @@ public partial class Varta_832 : ContentPage
 {
     private readonly IBluetooth_service _bluetoothService;
 
-    // Все 32 шлейфа в памяти - список типа LoopRowModel
+    // Все 32 шлейфа в памяти - список типа LoopRowModel - память  для перезаписи обьекта ObservableCollection<LoopRowModel> CurrentBlockLoops
     private readonly List<LoopRowModel> _allLoops = new();
 
     // 8 строк, которые отображаются прямо сейчас на экране
     // Это корзина (источник данных) в памяти C#. В ней лежат 8 объектов LoopRowModel.
     public ObservableCollection<LoopRowModel> CurrentBlockLoops { get; set; } = new();
 
-    // Текущий выбранный блок (1..4)
+    // Текущий выбранный блок БША (1..4)
     private int _selectedBlock = 1;
 
 
@@ -33,14 +33,19 @@ public partial class Varta_832 : ContentPage
     {
         _bluetoothService = bluetoothService;
         InitializeComponent();
-        BindingContext = this;
+        BindingContext = this; // взаимодействие этой страницы Varta_832 с хамл разметкой - привязка
 
 
 
-        // Заполняем адреса от 1 до 16
-        DeviceAddressPicker.Items.Clear();
-        for (int addr = 1; addr <= 16; addr++)
+        // Заполняем адреса от 1 до 15
+        DeviceAddressPicker.Items.Clear(); // Очищает список перед заполнением, чтобы элементы не дублировались, если этот метод вызывается повторно.
+        for (int addr = 1; addr <= 15; addr++)
         {
+            //Хотя сама рамка и сам компонент Picker объявлены в XAML-разметке (Varta_832.xaml),
+            //его содержимое (элементы списка от 1 до 16) динамически формируется и
+            //добавляется с помощью кода на C#. В .NET MAUI это стандартный подход,
+            //когда элементы выпадающего списка генерируются программно (через цикл for),
+            //а не прописываются вручную статично в XAML.
             DeviceAddressPicker.Items.Add($"{addr} - ВАРТА832");
         }
 
@@ -300,7 +305,7 @@ public partial class Varta_832 : ContentPage
 
 
     //
-    private async void OnSaveClicked(object sender, EventArgs e) => await DisplayAlert("Збереження", "Збережено успішно", "OK");
+    private async void OnSaveClicked(object sender, EventArgs e) => await DisplayAlert("Збереження", "Функція у розробці", "OK");
 
     private async void OnStubTabClicked(object sender, EventArgs e)
     {
@@ -339,7 +344,7 @@ public partial class Varta_832 : ContentPage
     }
 
     [Obsolete]
-    private async void OnSettingsClicked(object sender, EventArgs e) => await DisplayAlert("Налаштування", "Меню", "OK");
+    private async void OnSettingsClicked(object sender, EventArgs e) => await DisplayAlert("Налаштування", "Функція у розробці", "OK");
 }
 
 
@@ -511,15 +516,22 @@ public class LoopRowModel : INotifyPropertyChanged
 
     private void UpdateRowColor()
     {
-        if (StatusText.Contains("Пожежа", StringComparison.OrdinalIgnoreCase) ||
-            StatusText.Contains("ПОЖЕЖА", StringComparison.OrdinalIgnoreCase) ||
-            StatusText.Contains("ТРИВОГА", StringComparison.OrdinalIgnoreCase) ||
-            StatusCode == "0C" || StatusCode == "12")
+        if (StatusText.Contains("ПОЖЕЖА", StringComparison.OrdinalIgnoreCase) || StatusText.Contains("УВАГА", StringComparison.OrdinalIgnoreCase))
         {
+            // Критична пожежна тривога -> Червоний фон  ВІДКЛЮЧ.
             RowBackgroundColor = Color.FromArgb("#FF8A80");
+        }
+        else if (StatusText.Contains("К.З.", StringComparison.OrdinalIgnoreCase) ||
+                 StatusText.Contains("ОБРИВ", StringComparison.OrdinalIgnoreCase) ||              
+                 StatusText.Contains("ВІДКЛЮЧ.", StringComparison.OrdinalIgnoreCase) ||
+                 StatusText.Contains("ТРИВОГА", StringComparison.OrdinalIgnoreCase))
+        {
+            // Попередження / Несправність -> Жовтий фон
+            RowBackgroundColor = Color.FromArgb("#FFD54F");
         }
         else
         {
+            // Нормальні / робочі стани -> Зелений фон
             RowBackgroundColor = Color.FromArgb("#82E0AA");
         }
     }

@@ -45,7 +45,7 @@ namespace skb_home.Platforms.Android
         public string[] TypeValue { get; } = {
             "Н.Д.", // 0  (NO_STATUS)
             "К.З.",         // 1  (SHORT — коротке замикання)
-            "ОБРИВ.",      // 2  (BRAKE — обрив лінії)
+            "ОБРИВ",      // 2  (BRAKE — обрив лінії)
             "НЕВИЗН.",   // 3  (INDEF — невизначений стан)
             "Л1",         // 4  (L1 — логічна 1)
             "Л2",         // 5  (L2 — логічна 2)
