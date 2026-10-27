@@ -1,3 +1,4 @@
+
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -22,7 +23,7 @@ public partial class Varta_832 : ContentPage
     private int _selectedBlock = 1;
 
 
-
+ 
 
     // Храним текущий выбранный сетевой адрес прибора (число от 1 до 16)
     private int _currentDeviceAddress = 1;
@@ -54,8 +55,8 @@ public partial class Varta_832 : ContentPage
         DeviceAddressPicker.SelectedIndex = 0;
 
         // Создаем все 32 шлейфа и загружаем первые 8 (БВШ 1)
-        InitializeAllLoops();
-        ShowBlock(1);
+        InitializeAllLoops();// Здесь _allLoops наполняется 32-мя объектами через new LoopRowModel
+        ShowBlock(1); // А вот здесь данные попадают на экран
 
 
         //Смысл этой команды:
@@ -78,6 +79,26 @@ public partial class Varta_832 : ContentPage
         _bluetoothService.ReceiverData_Varta832();
         // подписка на вывод строки данных в терминал
         _bluetoothService.DataReceivedVarta832 += AddTerminalText;
+
+
+        //подписка для индетификатора
+        _bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif) 
+        {
+            MainThread.BeginInvokeOnMainThread( delegate {
+
+              
+                 var row = _allLoops[0];
+
+              //  row.Identifier = identif.Values[0].Identifier;
+
+                row.Identifier = identif.Identifier;
+            });
+        
+        
+        };
+
+
+
     }
     // начальная иницилизация
     // Используем List<LoopRowModel> _allLoops  как кэш для начальной иницилизации
@@ -98,7 +119,7 @@ public partial class Varta_832 : ContentPage
                     Number = total,
                     Address = "null",
                     LoopNumber = loop,
-                    Identifier = $"ШС №{total:D2}",
+                    Identifier = "null",
                     TypeText = "null",
                     TypeCode = "null",
                     StatusText = "null",
@@ -123,7 +144,7 @@ public partial class Varta_832 : ContentPage
         int startIndex = (_selectedBlock - 1) * 8;
         for (int i = 0; i < 8; i++)
         {
-            CurrentBlockLoops.Add(_allLoops[startIndex + i]); // делаем перезапись из List
+            CurrentBlockLoops.Add(_allLoops[startIndex + i]); // делаем перезапись из List / ⚡ ВОТ ЗДЕСЬ ОБЪЕКТ ИЗ СУШЕСТВУЮЩЕГО СПИСКА ДОБАВЛЯЕТСЯ В ЭКРАННУЮ КОЛЛЕКЦИЮ!
         }
 
         // Обновляем визуальный вид кнопок переключения
@@ -159,7 +180,7 @@ public partial class Varta_832 : ContentPage
         }
     }
 
-    // Обновление данных при получении кадра
+    // Обновление данных при получении кадра - обработчик событий
     private void UpdateDataFromFrame(VartaFrame frame)
     {
         if (frame == null || frame.Values == null) return; // При налл  выходим
@@ -254,13 +275,52 @@ public partial class Varta_832 : ContentPage
         //{
         //    await DisplayAlert("Адреса", $"Виставлено: {result}", "OK");
         //}
-        await DisplayAlert("Видалення", "Виделено успішно", "OK");
+
+       
+        int block = _selectedBlock; // текущий блок
+        if (block >= 1 && block <= 4) // защита
+        {
+            int startIndex = (block - 1) * 8;//выясняем стартовый индекс блока
+            switch (block)
+            {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+
+                    CurrentBlockLoops.Clear();
+                    for (int i = 0; i < 8; i++)
+                    {
+             
+                        // Обращаемся к существующему объекту в хранилище по правильному индексу (+ i)
+                        _allLoops[startIndex + i].Address = "null";
+                        _allLoops[startIndex + i].TypeText = "null";
+                        _allLoops[startIndex + i].TypeCode = "null";
+                        _allLoops[startIndex + i].StatusText = "null";
+                        _allLoops[startIndex + i].StatusCode = "null";
+
+                        // Докладываем в коллекцию для экрана для отображения изменений
+                        CurrentBlockLoops.Add(_allLoops[startIndex + i]);
+                       
+                    }
+                    await DisplayAlert("Видалення", $"Виделено успішно, блоку{block}", "OK");
+                    break;
+
+                    default:
+                    // Якщо значення поза межами 1-4
+                    break;
+            }
+
+
+        }
+        else { await DisplayAlert("Видалення", "НЕ Виделено,блок по замежами", "OK"); }
+
 
 
     }
 
 
-    //
+    // запись адреса
     private void OnDeviceAddressChanged(object sender, EventArgs e)
     {
         if (DeviceAddressPicker.SelectedIndex >= 0)
@@ -345,6 +405,25 @@ public partial class Varta_832 : ContentPage
 
     [Obsolete]
     private async void OnSettingsClicked(object sender, EventArgs e) => await DisplayAlert("Налаштування", "Функція у розробці", "OK");
+
+
+    // Индетификатор
+    private async void OnHeaderIdentifierClicked(object sender, EventArgs e) 
+    {
+        try
+        {
+            // Передаем значения внутрь метода через аргументы
+            string cmd = "01010000301401145B";
+
+            await _bluetoothService?.TransmitterData(cmd);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Помилка", "Не вдалося зчитати Indef", "OK");
+        }
+    }
+
+
 }
 
 
@@ -461,9 +540,13 @@ public class LoopRowModel : INotifyPropertyChanged
     private string _statusCode = "07";
 
     private string? _address = "null";
+
+    private string _identifier = "null";
     private Color _rowBackgroundColor = Color.FromArgb("#C8E6C9");
 
+    // номер
     public int Number { get; set; }
+    // адресс
     public string? Address
     {
         get { return _address; }
@@ -471,10 +554,15 @@ public class LoopRowModel : INotifyPropertyChanged
         set { _address = value; OnPropertyChanged(); }
     }
 
-
-    //  public string? Address { get; set; }
+    // номер шлейфа
     public int LoopNumber { get; set; }
-    public string Identifier { get; set; }
+    //Ідентіфікатор
+    public string Identifier 
+    {
+        get { return _identifier; }
+
+        set { _identifier = value; OnPropertyChanged(); }
+    }
 
 
     
@@ -566,6 +654,8 @@ public class VartaValue
     public string Code { get; set; }
 
     public string Adress { get; set; }
+
+    public string Identifier { get; set; }
 }
 
 public class VartaFrame
@@ -574,6 +664,8 @@ public class VartaFrame
     public string SubIndex { get; set; }
     public bool Exists { get; set; }
     public string Adress { get; set; }
+
+    public string Identifier { get; set; }
 
     // Создаем контейнер  для коллекции, Values - это коллекция (ObservableCollection<...>), список.
     public ObservableCollection<VartaValue> Values { get; set; } = new();

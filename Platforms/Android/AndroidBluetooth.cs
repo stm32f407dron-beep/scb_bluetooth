@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using static Android.Views.TextClassifiers.TextLinks;
+using static Java.Util.Jar.Attributes;
 using static Microsoft.Maui.ApplicationModel.Permissions;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -1568,6 +1569,9 @@ namespace skb_home.Platforms.Android
         // Этап физического рождения в памяти (AndroidBluetooth.cs) - DataReceivedFrame
         // В классе реализации платформа создает скрытую ссылку (мультикаст-делегат)
         public event Action<VartaFrame> DataReceivedFrame;
+
+        //  событие для индетификатора
+        public event Action<VartaFrame> DataReceivedIdentifier;
         public async Task ReceiverData_Varta832()
         {
             // Если прием уже запущен — второй раз не стартуем 
@@ -1756,6 +1760,51 @@ namespace skb_home.Platforms.Android
                                 // Преобразуем байты payload в строку с использованием кодировки CP1251, начиная с нулевого индекса и длиной textLen.
                                 payloadText = enc.GetString(payload, 0, textLen);
                             }
+
+                            else if (indexString == "00003014")//  Индекс 00003014 → трактуем как строку (идентификатор / наименование шлейфа)
+                            {
+                                
+                                // Ищем в массиве payload первый байт 0x00 - как терминатор строки (конец текста)
+                                int nulIndex = Array.IndexOf(payload, (byte)0x00);
+
+                                // Если терминатор найден, то длина текста до него, иначе длина всего payload
+                                //если нашли ноль, то берем длину строго до него. Если нуля нет (текст занимает весь массив без остатка), берем всю длину payload.Length.
+                                int textLen = nulIndex >= 0 ? nulIndex : payload.Length;
+
+                                // Создаём объект кодировки Windows-1251 (CP1251)
+                                var enc = Encoding.GetEncoding(1251); // CP1251
+
+                                // Преобразуем байты payload в строку с использованием кодировки CP1251, начиная с нулевого индекса и длиной textLen
+                                payloadText = enc.GetString(payload, 0, textLen).Trim();
+
+                                // Субиндекс 
+                                int loopNumber = subindex;
+
+                                // Подготавливаем сводную строку для логов, отладки или отправки дальше
+                                string resultString = $"ШС{loopNumber}: {payloadText}";
+
+
+                                var frame = new VartaFrame { Identifier = payloadText };
+
+
+                                // Сохраняем не только текст Value, но и HEX-код байта в Code, обьекты типа VartaValue в коллекцию - Values
+                                //frame.Values.Add(new VartaValue
+                                //{
+                                //    Identifier = payloadText
+                                //});
+
+
+
+                                DataReceivedIdentifier?.Invoke(frame);
+
+                                // Пример отправки / вывода готовой строки в логи или через событие:
+                                 DataReceivedVarta832?.Invoke($"Rx -> {payloadText}");
+                            }
+
+
+
+
+
                             else if (indexString == "00003019")
                             {
                                 // ⚡ Индекс 00003019 → трактуем как числа

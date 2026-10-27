@@ -31,7 +31,7 @@ namespace skb_home
         // DataReceived - это СОБЫТИЕ, которое может хранить СПИСОК методов
         public event Action<string> DataReceived;
 
-        //задача по приему данных
+        //задача по приему данных ВАРТЫ 816
         Task ReceiverData();
 
         // задача по передаче данных
@@ -59,12 +59,15 @@ namespace skb_home
         //Смысл делегата Action<VartaFrame>: Это готовый тип делегата из.NET, который говорит:
         //«Любой метод-обработчик, который подпишется на это событие, обязан принимать
         //ровно один параметр типа VartaFrame и возвращать void» (сигнатура вида void Method(VartaFrame frame)). ⚡
-        event Action<VartaFrame> DataReceivedFrame;
+        event Action<VartaFrame> DataReceivedFrame; //событие для базовых блоков БША
 
         // ⚡ Новое свойство для таблицы кодов
         string[] TypeValue { get; }
 
         string[] TypeValue2 { get; }
+
+        // событие для индетификатора
+        event Action<VartaFrame> DataReceivedIdentifier;
 
     }
 }

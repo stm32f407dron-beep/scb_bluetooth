@@ -94,7 +94,21 @@
                             <Label Grid.Column="0" Text="№" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
                             <Label Grid.Column="1" Text="Адреса" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
                             <Label Grid.Column="2" Text="Шлейф" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
-                            <Label Grid.Column="3" Text="Ідентифікатор" FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
+                            <!-- Заменяем Label на Button для колонки "Ідентифікатор" -->
+                            <Button Grid.Column="3" 
+                                Text="Ідентифікатор ▾" 
+                                FontAttributes="Bold" 
+                                FontSize="11" 
+                                TextColor="#004080" 
+                                BackgroundColor="#D0E1F9" 
+                                BorderColor="#7F9DB9"
+                                BorderWidth="1"
+                                CornerRadius="2"
+                                Padding="6,0,0,0"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"
+                                HeightRequest="22"
+                                Clicked="OnHeaderIdentifierClicked"/>
                             <Label Grid.Column="4" Text="Тип ШС" FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
                             <Label Grid.Column="5" Text="Код" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
                             <Label Grid.Column="6" Text="Стан" FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
