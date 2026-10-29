@@ -1787,7 +1787,7 @@ namespace skb_home.Platforms.Android
                                 var frame = new VartaFrame
                                 {
                                     Identifier = payloadText,
-                                    SubIndex = subindex.ToString("X2")
+                                    SubIndex = subindex.ToString("D2")
 
                                 };
 
