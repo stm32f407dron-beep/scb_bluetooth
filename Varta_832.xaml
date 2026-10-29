@@ -138,14 +138,51 @@
                 </ScrollView>
             </Border>
 
-            <!-- 4. ПЕРЕКЛЮЧАТЕЛЬ БЛОКОВ (БВШ 1..4) -->
+            
+            
+            
+            
+            <!-- 4. ПЕРЕКЛЮЧАТЕЛЬ БЛОКОВ (БВШ 1..4) --><!--
             <Label Text="Вибір блоку БВШ:" FontAttributes="Bold" FontSize="13" TextColor="#2C2305" Margin="2,4,0,0"/>
             <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="4">
                 <Button x:Name="BtnBsh1" Grid.Column="0" Text="БВШ 1" BackgroundColor="#2C2305" TextColor="White" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
                 <Button x:Name="BtnBsh2" Grid.Column="1" Text="БВШ 2" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
                 <Button x:Name="BtnBsh3" Grid.Column="2" Text="БВШ 3" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
                 <Button x:Name="BtnBsh4" Grid.Column="3" Text="БВШ 4" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
-            </Grid>
+            </Grid>-->
+
+
+            <!-- ПЕРЕКЛЮЧАТЕЛЬ ВСЕХ БЛОКОВ (БВШ 1..4 та виносні БВШВ 1..15) -->
+            <Label Text="Вибір блоку (БВШ / БВШВ):" FontAttributes="Bold" FontSize="13" TextColor="#2C2305" Margin="2,4,0,0"/>
+
+            <ScrollView Orientation="Horizontal" HeightRequest="40" HorizontalScrollBarVisibility="Never" Margin="0,2,0,0">
+                <HorizontalStackLayout Spacing="4">
+                    <!-- Основні блоки БВШ 1..4 -->
+                    <Button x:Name="BtnBsh1" Text="БВШ 1" BackgroundColor="#2C2305" TextColor="White" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
+                    <Button x:Name="BtnBsh2" Text="БВШ 2" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
+                    <Button x:Name="BtnBsh3" Text="БВШ 3" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
+                    <Button x:Name="BtnBsh4" Text="БВШ 4" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
+
+                    <!-- Розподільник або відступ (необов'язково) -->
+
+                    <!-- Активація / вибір виносного блоку БВШВ -->
+                    <Button x:Name="BtnBshvMode" Text="БВШВ" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnBshvModeClicked"/>
+
+                    <!-- Поле вводу номера виносного блоку (1-15) -->
+                    <Entry x:Name="EntryRemoteBlockNumber" 
+                       Text="1" 
+                       Keyboard="Numeric" 
+                       Placeholder="№ (1-15)" 
+                       WidthRequest="80"
+                       HeightRequest="36"
+                       VerticalTextAlignment="Center"
+                       HorizontalTextAlignment="Center"
+                       TextChanged="OnRemoteEntryChanged"/>
+                </HorizontalStackLayout>
+            </ScrollView>
+
+
+
 
             <!-- Кнопка считывания текущего выбранного блока -->
             <Button x:Name="BtnReadCurrent"

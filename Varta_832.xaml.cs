@@ -22,15 +22,17 @@ public partial class Varta_832 : ContentPage
     // Текущий выбранный блок БША (1..4)
     private int _selectedBlock = 1;
 
+    // Флаг режима выносных блоков
+    private bool _isRemoteBshvMode = false;
 
- 
 
     // Храним текущий выбранный сетевой адрес прибора (число от 1 до 16)
     private int _currentDeviceAddress = 1;
 
     // Флаг для блокировки повторного нажатия - для идентификатора
     public static   bool variableidentif = false;
-    
+
+    // для нормальной обрабтки кнопки идинтификатора
     private bool _isProcessingidentif = false;
 
 
@@ -86,104 +88,7 @@ public partial class Varta_832 : ContentPage
 
 
         //подписка для индетификатора
-        //_bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif) 
-        //{
-        //    MainThread.BeginInvokeOnMainThread( delegate {
-
-        //        string sub = identif.SubIndex;
-
-        //        switch (sub)
-        //        {
-        //            case "01":
-
-        //                var row = _allLoops[0];
-        //                row.Identifier = identif.Identifier;
-        //                variableidentif = true;
-        //                break;
-
-        //            case "02":
-
-        //                row = _allLoops[1];
-        //                row.Identifier = identif.Identifier;
-        //                variableidentif = true;
-        //                break;
-
-        //            case "03":
-        //                row = _allLoops[2];
-        //                row.Identifier = identif.Identifier;
-        //                variableidentif = true;
-        //                break;
-
-        //            case "04":
-        //                row = _allLoops[3];
-        //                row.Identifier = identif.Identifier;
-        //                variableidentif = true;                   
-        //                break;
-
-        //            case "05":
-        //                row = _allLoops[4];
-        //                row.Identifier = identif.Identifier;
-        //                variableidentif = true;
-        //                break;
-
-        //            case "06":
-
-        //                row = _allLoops[5];
-        //                row.Identifier = identif.Identifier;
-        //                variableidentif = true;
-        //                break;
-
-        //            case "07":
-
-        //                row = _allLoops[6];
-        //                row.Identifier = identif.Identifier;
-        //                variableidentif = true;
-        //                break;
-
-        //            case "08":
-        //                row = _allLoops[7];
-        //                row.Identifier = identif.Identifier;
-        //                variableidentif = true;
-        //                break;
-
-
-
-        //            default:
-        //                // Якщо значення поза межами 1-4
-        //             break;
-        //        }
-
-
-
-        //    });
-
-
-        //};
-
-        //
-        // Подписка для идентификатора
-        //_bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif)
-        //{
-        //    MainThread.BeginInvokeOnMainThread(delegate {
-
-        //        // Пробуем перевести субиндекс (например, "01") в число (1, 2, ... 8)
-        //        if (int.TryParse(identif.SubIndex, out int subIndexInt))
-        //        {
-        //            // Вычисляем индекс для массива _allLoops (так как шлейфы идут с 1, а индексы в массиве с 0)
-        //            int arrayIndex = subIndexInt - 1;
-
-        //            // Проверяем, что индекс находится в пределах нашего массива (от 0 до 7)
-        //            if (arrayIndex >= 0 && arrayIndex < _allLoops.Count)
-        //            {
-        //                var row = _allLoops[arrayIndex];
-        //                row.Identifier = identif.Identifier;
-        //                variableidentif = true;
-        //            }
-        //        }
-        //    });
-        //};
-
-
+        
         _bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif)
         {
             MainThread.BeginInvokeOnMainThread(delegate {
@@ -211,6 +116,9 @@ public partial class Varta_832 : ContentPage
 
         //
     }
+
+
+
     // начальная иницилизация
     // Используем List<LoopRowModel> _allLoops  как кэш для начальной иницилизации
     // Список _allLoops у нас спрятан глубоко в логике (private readonly List<LoopRowModel>).
@@ -281,8 +189,28 @@ public partial class Varta_832 : ContentPage
     }
 
     // Обработчик нажатия на кнопки «БВШ 1» ... «БВШ 4»
+    //private void OnSelectBshClicked(object sender, EventArgs e)
+    //{
+    //    if (sender is Button btn)
+    //    {
+    //        if (btn == BtnBsh1) ShowBlock(1);
+    //        else if (btn == BtnBsh2) ShowBlock(2);
+    //        else if (btn == BtnBsh3) ShowBlock(3);
+    //        else if (btn == BtnBsh4) ShowBlock(4);
+    //    }
+    //}
+
+
+    //
+    // Клик по основным блокам (БВШ 1..4)
     private void OnSelectBshClicked(object sender, EventArgs e)
     {
+        _isRemoteBshvMode = false; // Выключаем режим выносных
+
+        // Сбрасываем цвет кнопки БВШВ в обычный
+        BtnBshvMode.BackgroundColor = Color.FromArgb("#E0DFD8");
+        BtnBshvMode.TextColor = Color.FromArgb("#333");
+
         if (sender is Button btn)
         {
             if (btn == BtnBsh1) ShowBlock(1);
@@ -290,7 +218,52 @@ public partial class Varta_832 : ContentPage
             else if (btn == BtnBsh3) ShowBlock(3);
             else if (btn == BtnBsh4) ShowBlock(4);
         }
+
+        // Обновляем текст главной кнопки
+        BtnReadCurrent.Text = $"Зчитати поточний БВШ {_selectedBlock}";
+        UpdateBlockButtonsUI(); // Обновляет подсветку кнопок БВШ 1..4
     }
+
+
+    // Клик по кнопке «БВШВ» в ленте прокрутки
+    private void OnBshvModeClicked(object sender, EventArgs e)
+    {
+        _isRemoteBshvMode = true;
+
+        // Подсвечиваем кнопку БВШВ активным цветом
+        BtnBshvMode.BackgroundColor = Color.FromArgb("#2C2305");
+        BtnBshvMode.TextColor = Colors.White;
+
+        // Сбрасываем подсветку основных кнопок БВШ 1..4
+        BtnBsh1.BackgroundColor = Color.FromArgb("#E0DFD8"); BtnBsh1.TextColor = Color.FromArgb("#333");
+        BtnBsh2.BackgroundColor = Color.FromArgb("#E0DFD8"); BtnBsh2.TextColor = Color.FromArgb("#333");
+        BtnBsh3.BackgroundColor = Color.FromArgb("#E0DFD8"); BtnBsh3.TextColor = Color.FromArgb("#333");
+        BtnBsh4.BackgroundColor = Color.FromArgb("#E0DFD8"); BtnBsh4.TextColor = Color.FromArgb("#333");
+
+        int remoteNum = 1;
+        if (int.TryParse(EntryRemoteBlockNumber.Text, out int val))
+            remoteNum = val;
+
+        BtnReadCurrent.Text = $"Зчитати виносний БВШВ {remoteNum}";
+    }
+
+    // Событие при изменении цифры в Entry для выносных блоков
+    private void OnRemoteEntryChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_isRemoteBshvMode && int.TryParse(e.NewTextValue, out int remoteNum))
+        {
+            if (remoteNum >= 1 && remoteNum <= 15)
+            {
+                BtnReadCurrent.Text = $"Зчитати виносний БВШВ {remoteNum}";
+            }
+        }
+    }
+
+
+
+
+
+    //
 
     // Обновление данных при получении кадра - обработчик событий
     private void UpdateDataFromFrame(VartaFrame frame)
@@ -335,32 +308,8 @@ public partial class Varta_832 : ContentPage
         }
     }
 
-    // Считывание выбранного блока
-    //private async void OnReadCurrentBshClicked(object sender, EventArgs e)
-    //{
-    //    // Команды для субиндексов 01, 02, 03, 04
-    //    string cmd = _selectedBlock switch
-    //    {
-    //        1 => "010100003100012054",
-    //        2 => "010100003100022055",
-    //        3 => "010100003100032056",
-    //        4 => "010100003100042057",
-    //        _ => "010100003100012054"
-    //    };
-
-    //    try
-    //    {
-    //        await _bluetoothService?.TransmitterData(cmd);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        await DisplayAlert("Помилка", $"Не вдалося зчитати БВШ {_selectedBlock}: {ex.Message}", "OK");
-    //    }
-    //}
-
-    // Тулбар
-
-
+  
+    // Считывание базовых  блоков  БВШ
 
     private async void OnReadCurrentBshClicked(object sender, EventArgs e)
     {
@@ -379,7 +328,7 @@ public partial class Varta_832 : ContentPage
 
 
 
-
+    // функция красный крест стирание
     private async void OnAddressConfigClicked(object sender, EventArgs e)
     {
         //string result = await DisplayPromptAsync("Адреса приладу", "Введіть мережеву адресу:", initialValue: "1", keyboard: Keyboard.Numeric);
