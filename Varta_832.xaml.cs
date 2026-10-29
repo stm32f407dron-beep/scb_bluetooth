@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-
+using System.Text;
 
 //using static System.Net.Mime.MediaTypeNames;
 
@@ -28,6 +28,10 @@ public partial class Varta_832 : ContentPage
     // Храним текущий выбранный сетевой адрес прибора (число от 1 до 16)
     private int _currentDeviceAddress = 1;
 
+    // Флаг для блокировки повторного нажатия - для идентификатора
+    public static   bool variableidentif = false;
+    
+    private bool _isProcessingidentif = false;
 
 
     public Varta_832(IBluetooth_service bluetoothService)
@@ -82,23 +86,130 @@ public partial class Varta_832 : ContentPage
 
 
         //подписка для индетификатора
-        _bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif) 
+        //_bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif) 
+        //{
+        //    MainThread.BeginInvokeOnMainThread( delegate {
+
+        //        string sub = identif.SubIndex;
+
+        //        switch (sub)
+        //        {
+        //            case "01":
+
+        //                var row = _allLoops[0];
+        //                row.Identifier = identif.Identifier;
+        //                variableidentif = true;
+        //                break;
+
+        //            case "02":
+
+        //                row = _allLoops[1];
+        //                row.Identifier = identif.Identifier;
+        //                variableidentif = true;
+        //                break;
+
+        //            case "03":
+        //                row = _allLoops[2];
+        //                row.Identifier = identif.Identifier;
+        //                variableidentif = true;
+        //                break;
+
+        //            case "04":
+        //                row = _allLoops[3];
+        //                row.Identifier = identif.Identifier;
+        //                variableidentif = true;                   
+        //                break;
+
+        //            case "05":
+        //                row = _allLoops[4];
+        //                row.Identifier = identif.Identifier;
+        //                variableidentif = true;
+        //                break;
+
+        //            case "06":
+
+        //                row = _allLoops[5];
+        //                row.Identifier = identif.Identifier;
+        //                variableidentif = true;
+        //                break;
+
+        //            case "07":
+
+        //                row = _allLoops[6];
+        //                row.Identifier = identif.Identifier;
+        //                variableidentif = true;
+        //                break;
+
+        //            case "08":
+        //                row = _allLoops[7];
+        //                row.Identifier = identif.Identifier;
+        //                variableidentif = true;
+        //                break;
+
+
+
+        //            default:
+        //                // Якщо значення поза межами 1-4
+        //             break;
+        //        }
+
+
+
+        //    });
+
+
+        //};
+
+        //
+        // Подписка для идентификатора
+        //_bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif)
+        //{
+        //    MainThread.BeginInvokeOnMainThread(delegate {
+
+        //        // Пробуем перевести субиндекс (например, "01") в число (1, 2, ... 8)
+        //        if (int.TryParse(identif.SubIndex, out int subIndexInt))
+        //        {
+        //            // Вычисляем индекс для массива _allLoops (так как шлейфы идут с 1, а индексы в массиве с 0)
+        //            int arrayIndex = subIndexInt - 1;
+
+        //            // Проверяем, что индекс находится в пределах нашего массива (от 0 до 7)
+        //            if (arrayIndex >= 0 && arrayIndex < _allLoops.Count)
+        //            {
+        //                var row = _allLoops[arrayIndex];
+        //                row.Identifier = identif.Identifier;
+        //                variableidentif = true;
+        //            }
+        //        }
+        //    });
+        //};
+
+
+        _bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif)
         {
-            MainThread.BeginInvokeOnMainThread( delegate {
+            MainThread.BeginInvokeOnMainThread(delegate {
 
-              
-                 var row = _allLoops[0];
+                // Пробуем перевести субиндекс (например, "17" из Hex или дес.) в число
+                if (int.TryParse(identif.SubIndex, out int absoluteLoopNumber))
+                {
+                    // Так как шлейфы идут с 1 (от 1 до 32), а индексы в массиве _allLoops с 0:
+                    int arrayIndex = absoluteLoopNumber - 1;
 
-              //  row.Identifier = identif.Values[0].Identifier;
-
-                row.Identifier = identif.Identifier;
+                    if (arrayIndex >= 0 && arrayIndex < _allLoops.Count)
+                    {
+                        var row = _allLoops[arrayIndex];
+                        row.Identifier = identif.Identifier;
+                        variableidentif = true;
+                    }
+                }
             });
-        
-        
         };
 
 
 
+
+
+
+        //
     }
     // начальная иницилизация
     // Используем List<LoopRowModel> _allLoops  как кэш для начальной иницилизации
@@ -144,7 +255,8 @@ public partial class Varta_832 : ContentPage
         int startIndex = (_selectedBlock - 1) * 8;
         for (int i = 0; i < 8; i++)
         {
-            CurrentBlockLoops.Add(_allLoops[startIndex + i]); // делаем перезапись из List / ⚡ ВОТ ЗДЕСЬ ОБЪЕКТ ИЗ СУШЕСТВУЮЩЕГО СПИСКА ДОБАВЛЯЕТСЯ В ЭКРАННУЮ КОЛЛЕКЦИЮ!
+            // делаем перезапись из List / ВОТ ЗДЕСЬ ОБЪЕКТ ИЗ СУШЕСТВУЮЩЕГО СПИСКА ДОБАВЛЯЕТСЯ В ЭКРАННУЮ КОЛЛЕКЦИЮ! - блодаря этому происходит изменение в хамл
+            CurrentBlockLoops.Add(_allLoops[startIndex + i]); 
         }
 
         // Обновляем визуальный вид кнопок переключения
@@ -298,6 +410,7 @@ public partial class Varta_832 : ContentPage
                         _allLoops[startIndex + i].TypeCode = "null";
                         _allLoops[startIndex + i].StatusText = "null";
                         _allLoops[startIndex + i].StatusCode = "null";
+                        _allLoops[startIndex + i].Identifier = "null";
 
                         // Докладываем в коллекцию для экрана для отображения изменений
                         CurrentBlockLoops.Add(_allLoops[startIndex + i]);
@@ -330,7 +443,7 @@ public partial class Varta_832 : ContentPage
         }
     }
 
-    // подготовка к отсылке команды
+    // подготовка к отсылке команды базовых блоков БВШ
     private string BuildCommand(int deviceAddress, int bshNumber)
     {
         // 1. Внутренний фрейм по протоколу CV1500 (строго по таблице)
@@ -361,8 +474,41 @@ public partial class Varta_832 : ContentPage
     }
 
 
+    // подготовка к отсылке команды идентфикаторов базовых блоков БВШ
+    private string BuildIdentifierCommand(byte read,int deviceAddress,string indxstring, byte subindx,int len)
+    {
+        // переводим строку индекс в массив байт
+        byte[] indx = new byte[indxstring.Length / 2];
+        for (int i = 0; i < indx.Length; i++)
+        {
+            //конвертируем в 16 - hex(Substring - берет по 2 символа и потом их конвнртирует)
+            indx[i] = Convert.ToByte(indxstring.Substring(i * 2, 2), 16);
+        }
 
+        // создаем динамический список байтов
+        List<byte> list = new();
+        // заполняем последовательно список 
+        list.Add(read);
+        list.Add((byte)deviceAddress);
+        list.AddRange(indx);
+        list.Add(subindx);
+        list.Add((byte)len);
 
+        byte[] frameBytes = list.ToArray(); //превращаем список в массив байтов
+        //формируем чексумму
+        int sum = 0;
+        foreach (var b in frameBytes) { sum += b; }
+        //вычесляем чексумму
+        byte checksum = (byte)(sum & 0xFF);
+        //создаем массив с учетом чексуммы
+        byte[] end = new byte[frameBytes.Length + 1];
+        // копируем из источника frameBytes  в массив еnd
+        Array.Copy(frameBytes,0,end,0,frameBytes.Length);
+        //добавляем последний байт чексумму
+        end[end.Length - 1] = checksum;
+
+        return BitConverter.ToString(end).Trim().Replace("-","");
+    }
 
     //
     private async void OnSaveClicked(object sender, EventArgs e) => await DisplayAlert("Збереження", "Функція у розробці", "OK");
@@ -408,21 +554,151 @@ public partial class Varta_832 : ContentPage
 
 
     // Индетификатор
-    private async void OnHeaderIdentifierClicked(object sender, EventArgs e) 
+    //private async void OnHeaderIdentifierClicked(object sender, EventArgs e) 
+    //{
+
+    //    if (_isProcessingidentif) return;
+
+    //    try
+    //    {
+
+    //        _isProcessingidentif = true;
+
+    //        ////
+    //        //byte block = 0;
+    //        byte block = (byte)((_selectedBlock - 1) * 8);
+    //        int device = 9;
+    //        byte read = 0x01;
+    //        byte subindx = 0x01;
+    //        int len = 0x14;
+
+    //        string cmd2;
+    //        variableidentif = true;
+
+
+    //        for (byte i = 1; i < device; i++)
+    //        {
+    //            // Создаем делегат задачу с возвратом боол , благодаря  await  - эта задача не будет грузить проц., даже находясь в фоне -пуле потоков 
+    //            Func<Task<bool>> func = async delegate ()
+    //            {
+
+    //                while (!variableidentif)
+    //                    await Task.Delay(50);
+
+    //                return true;
+    //            };
+    //            //Кидаем задачу в пул потоков(фон) и ждем результат неблокируя основной поток
+    //            variableidentif = await Task.Run(func);
+
+    //            //if (subindx > 8) return;
+    //            //subindx++;
+
+    //            // работа при variableidentif = true;
+    //            if (variableidentif)
+    //            {
+    //                cmd2 = BuildIdentifierCommand(read, _currentDeviceAddress, "00003014", (byte)(block + i), len);
+    //                variableidentif = false;
+    //                await _bluetoothService?.TransmitterData(cmd2);
+
+
+    //            }
+    //            else
+    //            {
+    //                await DisplayAlert("Помилка", "Не вдалося зчитати Indef", "OK");
+    //                return;
+    //            }
+
+
+    //        }
+
+
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        await DisplayAlert("Помилка", "Не вдалося зчитати Indef", "OK");
+    //    }
+
+    //    finally { _isProcessingidentif = false; }
+
+
+    //}
+
+
+    //
+    private async void OnHeaderIdentifierClicked(object sender, EventArgs e)
     {
+        if (_isProcessingidentif) return;
+
         try
         {
-            // Передаем значения внутрь метода через аргументы
-            string cmd = "01010000301401145B";
+            _isProcessingidentif = true;
 
-            await _bluetoothService?.TransmitterData(cmd);
+            // Вычисляем смещение блока (для 1-го блока = 0, для 2-го = 8 и т.д.)
+            byte block = (byte)((_selectedBlock - 1) * 8);
+            int device = 9; // Цикл от 1 до 8 (ровно 8 шлейфов в блоке)
+            byte read = 0x01;
+            int len = 0x14;
+
+            string cmd2;
+
+            // ВАЖНО: Перед началом всего цикла делаем переменную true, 
+            // чтобы первый запрос полетел сразу без ожидания
+            variableidentif = true;
+
+            for (byte i = 1; i < device; i++)
+            {
+                // Работа при variableidentif = true (ждем подтверждения или отправляем следующий)
+                if (variableidentif)
+                {
+                    // Сначала сбрасываем флаг перед отправкой нового запроса
+                    variableidentif = false;
+
+                    // Формируем и отправляем команду для текущего шлейфа (block + i)
+                    cmd2 = BuildIdentifierCommand(read, _currentDeviceAddress, "00003014", (byte)(block + i), len);
+                    await _bluetoothService?.TransmitterData(cmd2);
+                }
+
+                // Ожидание ответа от прибора с защитой от зависания (таймаут)
+                int timeoutCounter = 0;
+                bool received = false;
+
+                while (timeoutCounter < 30) // 30 раз по 50мс = 1.5 секунды ожидания максимум на один шлейф
+                {
+                    if (variableidentif) // Если прибор прислал ответ и обработчик поднял флаг
+                    {
+                        received = true;
+                        break;
+                    }
+                    await Task.Delay(50);
+                    timeoutCounter++;
+                }
+
+                // Если вышло время, а прибор так и не ответил
+                if (!received)
+                {
+                    await DisplayAlert("Помилка", $"Прилад не відповів на шлейф {block + i}", "OK");
+                    return;
+                }
+
+                // МАЛЕНЬКАЯ ПАУЗА МЕЖДУ ЗАПРОСАМИ: 
+                // Дает Bluetooth-модулю и контроллеру прибора «вдохнуть» и не захлебнуться потоком байтов
+                await Task.Delay(50);
+            }
         }
         catch (Exception ex)
         {
             await DisplayAlert("Помилка", "Не вдалося зчитати Indef", "OK");
         }
+        finally
+        {
+            _isProcessingidentif = false;
+        }
     }
 
+
+
+
+    //
 
 }
 

@@ -1761,7 +1761,7 @@ namespace skb_home.Platforms.Android
                                 payloadText = enc.GetString(payload, 0, textLen);
                             }
 
-                            else if (indexString == "00003014")//  Индекс 00003014 → трактуем как строку (идентификатор / наименование шлейфа)
+                            else if (indexString == "00003014")//  Индекс 00003014  строкa - идентификатор 
                             {
                                 
                                 // Ищем в массиве payload первый байт 0x00 - как терминатор строки (конец текста)
@@ -1784,7 +1784,12 @@ namespace skb_home.Platforms.Android
                                 string resultString = $"ШС{loopNumber}: {payloadText}";
 
 
-                                var frame = new VartaFrame { Identifier = payloadText };
+                                var frame = new VartaFrame
+                                {
+                                    Identifier = payloadText,
+                                    SubIndex = subindex.ToString("X2")
+
+                                };
 
 
                                 // Сохраняем не только текст Value, но и HEX-код байта в Code, обьекты типа VartaValue в коллекцию - Values
