@@ -158,7 +158,7 @@
             <ScrollView Orientation="Horizontal" HeightRequest="40" HorizontalScrollBarVisibility="Never" Margin="0,2,0,0">
                 <HorizontalStackLayout Spacing="4">
                     <!-- Основні блоки БВШ 1..4 -->
-                    <Button x:Name="BtnBsh1" Text="БВШ 1" BackgroundColor="#2C2305" TextColor="White" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
+                    <Button x:Name="BtnBsh1" Text="БВШ 1" BackgroundColor="#2C2305" TextColor="White" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4"  Clicked="OnSelectBshClicked"/>
                     <Button x:Name="BtnBsh2" Text="БВШ 2" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
                     <Button x:Name="BtnBsh3" Text="БВШ 3" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>
                     <Button x:Name="BtnBsh4" Text="БВШ 4" BackgroundColor="#E0DFD8" TextColor="#333" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="4" Clicked="OnSelectBshClicked"/>

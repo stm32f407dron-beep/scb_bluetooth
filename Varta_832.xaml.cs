@@ -26,13 +26,13 @@ public partial class Varta_832 : ContentPage
     private bool _isRemoteBshvMode = false;
 
 
-    // Храним текущий выбранный сетевой адрес прибора (число от 1 до 16)
+    // Храним текущий выбранный сетевой адрес прибора (число от 1 до 15)
     private int _currentDeviceAddress = 1;
 
-    // Флаг для блокировки повторного нажатия - для идентификатора
+    // Флаг для обработки передачи и приема идентификатора
     public static   bool variableidentif = false;
 
-    // для нормальной обрабтки кнопки идинтификатора
+    // Флаг для блокировки повторного нажатия - для идентификатора
     private bool _isProcessingidentif = false;
 
 
@@ -73,7 +73,7 @@ public partial class Varta_832 : ContentPage
         LoopsCollectionView.ItemsSource = CurrentBlockLoops;
 
         // Прием кадра от Bluetooth
-        // Подписка на обработчик 
+        // Подписка на обработчик по БВШ и БВШВ
         _bluetoothService.DataReceivedFrame += delegate (VartaFrame frame)
         {
             MainThread.BeginInvokeOnMainThread(() =>
@@ -129,7 +129,7 @@ public partial class Varta_832 : ContentPage
     {
         _allLoops.Clear();
         int total = 1;
-        for (int bsh = 1; bsh <= 4; bsh++)
+        for (int bsh = 1; bsh <= 19; bsh++)
         {
             for (int loop = 1; loop <= 8; loop++)
             {
@@ -155,24 +155,57 @@ public partial class Varta_832 : ContentPage
     //На строке CurrentBlockLoops.Add(_allLoops[startIndex + i]); вы просто берёте готовые данные со склада и перекладываете их в CurrentBlockLoops.
 
     //И уже CurrentBlockLoops, будучи ObservableCollection, при каждом .Add() выбрасывает событие в движок MAUI, заставляя XAML обновить отображение строк на экране.
+    //private void ShowBlock(int blockIndex)
+    //{
+    //    _selectedBlock = blockIndex;
+    //    CurrentBlockLoops.Clear();
+
+    //    int startIndex = (_selectedBlock - 1) * 8;
+    //    for (int i = 0; i < 8; i++)
+    //    {
+    //        // делаем перезапись из List / ВОТ ЗДЕСЬ ОБЪЕКТ ИЗ СУШЕСТВУЮЩЕГО СПИСКА ДОБАВЛЯЕТСЯ В ЭКРАННУЮ КОЛЛЕКЦИЮ! - блодаря этому происходит изменение в хамл
+    //        CurrentBlockLoops.Add(_allLoops[startIndex + i]); 
+    //    }
+
+    //    // Обновляем визуальный вид кнопок переключения
+    //    UpdateBlockButtonsUI();
+    //}
+
+    //
     private void ShowBlock(int blockIndex)
     {
-        _selectedBlock = blockIndex;
+        _selectedBlock = blockIndex; // Сохраняем номер (1..4 для БВШ или 1..15 для БВШВ)
         CurrentBlockLoops.Clear();
 
-        int startIndex = (_selectedBlock - 1) * 8;
-        for (int i = 0; i < 8; i++)
+        int startIndex = 0;
+        if (_isRemoteBshvMode)
         {
-            // делаем перезапись из List / ВОТ ЗДЕСЬ ОБЪЕКТ ИЗ СУШЕСТВУЮЩЕГО СПИСКА ДОБАВЛЯЕТСЯ В ЭКРАННУЮ КОЛЛЕКЦИЮ! - блодаря этому происходит изменение в хамл
-            CurrentBlockLoops.Add(_allLoops[startIndex + i]); 
+            // Выносные блоки БВШВ начинаются с 32-го элемента в _allLoops (по 8 шлейфов)
+            startIndex = 32 + (_selectedBlock - 1) * 8;
+        }
+        else
+        {
+            // Базовые блоки БВШ (1..4)
+            startIndex = (_selectedBlock - 1) * 8;
         }
 
-        // Обновляем визуальный вид кнопок переключения
+        for (int i = 0; i < 8; i++)
+        {
+            if (startIndex + i < _allLoops.Count)
+            {
+                CurrentBlockLoops.Add(_allLoops[startIndex + i]);
+            }
+        }
+
         UpdateBlockButtonsUI();
     }
 
+
+
+    //
     private void UpdateBlockButtonsUI()
     {
+        if (_isRemoteBshvMode) return; // Выходим сразу, если включен режим выносных блоков
         BtnBsh1.BackgroundColor = _selectedBlock == 1 ? Color.FromArgb("#2C2305") : Color.FromArgb("#E0DFD8");
         BtnBsh1.TextColor = _selectedBlock == 1 ? Colors.White : Color.FromArgb("#333333");
 
@@ -202,7 +235,7 @@ public partial class Varta_832 : ContentPage
 
 
     //
-    // Клик по основным блокам (БВШ 1..4)
+    // Клик по основным блокам (БВШ 1..4) -базовый режим
     private void OnSelectBshClicked(object sender, EventArgs e)
     {
         _isRemoteBshvMode = false; // Выключаем режим выносных
@@ -241,8 +274,13 @@ public partial class Varta_832 : ContentPage
         BtnBsh4.BackgroundColor = Color.FromArgb("#E0DFD8"); BtnBsh4.TextColor = Color.FromArgb("#333");
 
         int remoteNum = 1;
+        //считываем поле 
         if (int.TryParse(EntryRemoteBlockNumber.Text, out int val))
+        { 
             remoteNum = val;
+            _selectedBlock = remoteNum;
+        }
+          
 
         BtnReadCurrent.Text = $"Зчитати виносний БВШВ {remoteNum}";
     }
@@ -250,6 +288,7 @@ public partial class Varta_832 : ContentPage
     // Событие при изменении цифры в Entry для выносных блоков
     private void OnRemoteEntryChanged(object sender, TextChangedEventArgs e)
     {
+        // Проверяем: если мы находимся в режиме БВШВ И введенный текст удается перевести в число...
         if (_isRemoteBshvMode && int.TryParse(e.NewTextValue, out int remoteNum))
         {
             if (remoteNum >= 1 && remoteNum <= 15)
@@ -265,8 +304,59 @@ public partial class Varta_832 : ContentPage
 
     //
 
-    // Обновление данных при получении кадра - обработчик событий
     private void UpdateDataFromFrame(VartaFrame frame)
+    {
+        if (frame == null || frame.Values == null) return;
+        if (!int.TryParse(frame.SubIndex, out int subIndex)) return;
+
+        int startIndex = 0;
+        bool isFrameRemote = (frame.Index == "00003024");
+
+        if (isFrameRemote)
+        {
+            startIndex = 32 + (subIndex - 1) * 8;
+        }
+        else
+        {
+            startIndex = (subIndex - 1) * 8;
+        }
+
+        if (startIndex < 0 || startIndex + 7 >= _allLoops.Count) return;
+
+        for (int i = 0; i < 8; i++)
+        {
+            var row = _allLoops[startIndex + i];
+
+            if (i < frame.Values.Count)
+            {
+                row.TypeText = frame.Values[i].Value;
+                row.TypeCode = frame.Values[i].Code;
+                row.Address = frame.Values[i].Adress;
+            }
+
+            int statusIdx = i + 8;
+            if (statusIdx < frame.Values.Count)
+            {
+                row.StatusText = frame.Values[statusIdx].Value;
+                row.StatusCode = frame.Values[statusIdx].Code;
+            }
+        }
+
+        // Если пришедший кадр совпадает с тем, что сейчас реально открыто на экране — обновляем таблицу
+        if (isFrameRemote == _isRemoteBshvMode && subIndex == _selectedBlock)
+        {
+            ShowBlock(_selectedBlock);
+        }
+    }
+
+
+
+
+
+
+
+    // Обновление данных при получении кадра - обработчик событий
+    private void UpdateDataFromFrame_no(VartaFrame frame)
     {
         if (frame == null || frame.Values == null) return; // При налл  выходим
         if (!int.TryParse(frame.SubIndex, out int bshNumber)) return; // Проверяем субиндекс на число
@@ -283,7 +373,7 @@ public partial class Varta_832 : ContentPage
             // Первые 8 значений — тип
             if (i < frame.Values.Count)
             {
-                // Вызов этих свойст трегерит события OnPropertyChanged(); и обновляет таблицу хамл
+               
                 row.TypeText = frame.Values[i].Value;
                 row.TypeCode = frame.Values[i].Code;
                 row.Address = frame.Values[i].Adress;
@@ -304,7 +394,7 @@ public partial class Varta_832 : ContentPage
         // Если пришедший кадр относится к текущему открытому блоку — обновляем вид на экране
         if (bshNumber == _selectedBlock)
         {
-            ShowBlock(_selectedBlock);
+            ShowBlock(_selectedBlock); // Вызов  тригерит события OnPropertyChanged(); и обновляет таблицу хамл
         }
     }
 
@@ -395,15 +485,43 @@ public partial class Varta_832 : ContentPage
     // подготовка к отсылке команды базовых блоков БВШ
     private string BuildCommand(int deviceAddress, int bshNumber)
     {
-        // 1. Внутренний фрейм по протоколу CV1500 (строго по таблице)
-        byte[] frameBytes = new byte[]
+        byte[] frameBytes = null;
+
+        if (!_isRemoteBshvMode)
         {
-        0x01,                        // 1. Read (тип операции: чтение = 0x01)
-        (byte)deviceAddress,         // 2. Address (сетевой адрес прибора 1..16 из Picker-а)
-        0x00, 0x00, 0x31, 0x00,      // 3. Index (запрос шлейфов БВШ)
-        (byte)bshNumber,             // 4. Subindex (номер блока БВШ: 1, 2, 3 или 4)
-        0x20                         // 5. Length (длина данных)
-        };
+            // 1. Внутренний фрейм по протоколу CV1500 (строго по таблице)
+             frameBytes = new byte[]
+            {
+                0x01,                        // 1. Read (тип операции: чтение = 0x01)
+                (byte)deviceAddress,         // 2. Address (сетевой адрес прибора 1..16 из Picker-а)
+                0x00, 0x00, 0x31, 0x00,      // 3. Index (запрос шлейфов БВШ)
+                (byte)bshNumber,             // 4. Subindex (номер блока БВШ: 1, 2, 3 или 4)
+                0x20                         // 5. Length (длина данных)
+            };
+
+
+
+        }
+        else {
+
+
+            // 1. Внутренний фрейм по протоколу CV1500 (строго по таблице)
+             frameBytes = new byte[]
+            {
+                0x01,                        // 1. Read (тип операции: чтение = 0x01)
+                (byte)deviceAddress,         // 2. Address (сетевой адрес прибора 1..16 из Picker-а)
+                0x00, 0x00, 0x30, 0x24,      // 3. Index (запрос шлейфов БВШ)
+                (byte)bshNumber,             // 4. Subindex (номер блока БВШ: 1, 2, 3 или 4)
+                0x20                         // 5. Length (длина данных)
+            };
+
+
+
+
+
+        }
+
+
 
         // 2. Считаем контрольную сумму по этим байтам
         int sum = 0;
@@ -572,6 +690,8 @@ public partial class Varta_832 : ContentPage
 
     //}
 
+
+    //
 
     //
     private async void OnHeaderIdentifierClicked(object sender, EventArgs e)

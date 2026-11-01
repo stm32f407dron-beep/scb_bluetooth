@@ -65,7 +65,7 @@ namespace skb_home.Platforms.Android
 
 
 
-
+        //Тип ШС
         public string[] TypeValue2 { get; } = { "Н/Д", "ЛОГ. 1", "ОХОР.", "ПОЖ. 1", "ПОЖ. 2", "ЛОГ. 2" };
         public AndroidBluetooth()
         {
@@ -1827,7 +1827,61 @@ namespace skb_home.Platforms.Android
                                 }
                             }
 
-                            ///////////////BVSH
+
+                            ///////////////BVSH3v
+                            else if (indexString == "00003024")
+                            {
+                                //Создаем и заполняем обьект VartaFrame
+                                var frame = new VartaFrame
+                                {
+                                    Index = indexString,
+                                    SubIndex = subindex.ToString("X2"),
+                                    Exists = payload.Length > 0 && payload[0] != 0x00,
+                                    Adress = address.ToString("X2")
+
+                                };
+                                //необходимо только 16 значений, если что метод выберет меньшее из двух чисел
+                                int count = Math.Min(16,payload.Length - 1);
+                                //Стринги для кода и названий
+                                string decoded = string.Empty;
+                                string name = string.Empty;
+                                //перебираем массив и раскидуем значения и коды
+                                for (int i = 1; i <= count; i++)
+                                {
+                                    byte b = payload[i]; //берем с первой итерации так как по 0 ячейке определяем наличие или отсутствие БВШВ 
+
+                                    if (i <= 8) 
+                                    {
+                                        decoded = b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})";
+                                        name = $"Тип ШС{i}";
+                                    }
+                                    else
+                                    {
+                                        decoded = b < TypeValue.Length ? TypeValue[b] : $"Unknown({b})";
+                                        name = $"Cтан ШС{(i - 8)}";
+                                    }
+
+                                    //заполняем коллекцию
+                                    frame.Values.Add(new VartaValue
+                                    {
+                                        Name = name,
+                                        Value = decoded,
+                                        Code = b.ToString("X2"),
+                                        Adress = address.ToString("X2")
+
+
+                                    });
+
+                                }
+                                DataReceivedFrame?.Invoke(frame);
+
+                            }
+
+
+
+
+
+                            ///////////////BVSH3m
                             else if (indexString == "00003100")
                             {
                                 numericValue = string.Join(",", payload.Select(b => b.ToString()));
