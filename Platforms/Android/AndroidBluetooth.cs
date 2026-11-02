@@ -1745,6 +1745,7 @@ namespace skb_home.Platforms.Android
                         string numericValue = string.Empty;// числовое представление данных (если это числа).
                         string hexValues = string.Empty; // список байтов в HEX‑формате.
                         string decodedValues = string.Empty; //расшифровка по таблице TypeValue
+                        // обработка конкретных индексов и субиндексов, для протоколе Varta 832
                         try
                         {
                             //  
@@ -1761,7 +1762,58 @@ namespace skb_home.Platforms.Android
                                 payloadText = enc.GetString(payload, 0, textLen);
                             }
 
-                            else if (indexString == "00003014")//  Индекс 00003014  строкa - идентификатор 
+                            //else if (indexString.Length == 8 && indexString.StartsWith("010") && indexString.EndsWith("102"))
+                            else if (indexString.Length == 8 && indexString.StartsWith("010") && indexString.EndsWith("102"))//  Индекс 01012102  строкa - идентификатор  для базового БВШВ
+                            {
+
+                                // Ищем в массиве payload первый байт 0x00 - как терминатор строки (конец текста)
+                                int nulIndex = Array.IndexOf(payload, (byte)0x00);
+
+                                // Если терминатор найден, то длина текста до него, иначе длина всего payload
+                                //если нашли ноль, то берем длину строго до него. Если нуля нет (текст занимает весь массив без остатка), берем всю длину payload.Length.
+                                int textLen = nulIndex >= 0 ? nulIndex : payload.Length;
+
+                                // Создаём объект кодировки Windows-1251 (CP1251)
+                                var enc = Encoding.GetEncoding(1251); // CP1251
+
+                                // Преобразуем байты payload в строку с использованием кодировки CP1251, начиная с нулевого индекса и длиной textLen
+                                payloadText = enc.GetString(payload, 0, textLen).Trim();
+
+                                // Субиндекс 
+                                int loopNumber = subindex;
+
+                                // Подготавливаем сводную строку для логов, отладки или отправки дальше
+                                string resultString = $"ШС{loopNumber}: {payloadText}";
+
+
+                                var frame = new VartaFrame
+                                {
+                                    Identifier = payloadText,
+                                    SubIndex = subindex.ToString("D2")
+
+                                };
+
+
+
+                                DataReceivedIdentifier?.Invoke(frame);
+
+                                // Пример отправки / вывода готовой строки в логи или через событие:
+                                DataReceivedVarta832?.Invoke($"Rx -> {payloadText}");
+                            }
+
+
+
+
+
+
+
+
+
+
+
+                            //
+
+                            else if (indexString == "00003014")//  Индекс 00003014  строкa - идентификатор  для базового БВШВ
                             {
                                 
                                 // Ищем в массиве payload первый байт 0x00 - как терминатор строки (конец текста)
@@ -1806,10 +1858,7 @@ namespace skb_home.Platforms.Android
                                  DataReceivedVarta832?.Invoke($"Rx -> {payloadText}");
                             }
 
-
-
-
-
+                            // пока непомню что это
                             else if (indexString == "00003019")
                             {
                                 // ⚡ Индекс 00003019 → трактуем как числа
@@ -1828,7 +1877,7 @@ namespace skb_home.Platforms.Android
                             }
 
 
-                            ///////////////BVSH3v
+                            ///////////////BVSH3v - external
                             else if (indexString == "00003024")
                             {
                                 //Создаем и заполняем обьект VartaFrame
@@ -1878,10 +1927,7 @@ namespace skb_home.Platforms.Android
                             }
 
 
-
-
-
-                            ///////////////BVSH3m
+                            ///////////////BVSH3m - base
                             else if (indexString == "00003100")
                             {
                                 numericValue = string.Join(",", payload.Select(b => b.ToString()));

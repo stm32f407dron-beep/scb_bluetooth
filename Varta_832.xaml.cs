@@ -89,15 +89,53 @@ public partial class Varta_832 : ContentPage
 
         //подписка для индетификатора
         
+        //_bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif)
+        //{
+        //    MainThread.BeginInvokeOnMainThread(delegate {
+
+        //        // Пробуем перевести субиндекс (например, "17" из Hex или дес.) в число
+        //        if (int.TryParse(identif.SubIndex, out int absoluteLoopNumber))
+        //        {
+        //            // Так как шлейфы идут с 1 (от 1 до 32), а индексы в массиве _allLoops с 0:
+        //            int arrayIndex = absoluteLoopNumber - 1;
+
+        //            if (arrayIndex >= 0 && arrayIndex < _allLoops.Count)
+        //            {
+        //                var row = _allLoops[arrayIndex];
+        //                row.Identifier = identif.Identifier;
+        //                variableidentif = true;
+        //            }
+        //        }
+        //    });
+        //};
+
+
+
         _bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif)
         {
             MainThread.BeginInvokeOnMainThread(delegate {
 
-                // Пробуем перевести субиндекс (например, "17" из Hex или дес.) в число
-                if (int.TryParse(identif.SubIndex, out int absoluteLoopNumber))
+                // Пробуем перевести субиндекс от прибора в число (например, 1..8)
+                if (int.TryParse(identif.SubIndex, out int subIndex))
                 {
-                    // Так как шлейфы идут с 1 (от 1 до 32), а индексы в массиве _allLoops с 0:
-                    int arrayIndex = absoluteLoopNumber - 1;
+                    int arrayIndex = 0;
+
+                    if (_isRemoteBshvMode)
+                    {
+                        // Для выносных блоков: 
+                        // Базовое смещение для блока (первый блок _selectedBlock = 1 дает 0, второй 8 и т.д.)
+                        // И плюс 32 (так как первые 32 ячейки заняты базовыми шлейфами)
+                        int blockOffset = (_selectedBlock - 1) * 8;
+                        int baseAbsoluteIndex = 32 + blockOffset;
+
+                        // Субиндекс от прибора идет с 1, поэтому переводим в локальный индекс (subIndex - 1)
+                        arrayIndex = baseAbsoluteIndex + (subIndex - 1);
+                    }
+                    else
+                    {
+                        // Для базовых блоков шлейфы идут с 1 по 32
+                        arrayIndex = subIndex - 1;
+                    }
 
                     if (arrayIndex >= 0 && arrayIndex < _allLoops.Count)
                     {
@@ -108,6 +146,9 @@ public partial class Varta_832 : ContentPage
                 }
             });
         };
+
+
+
 
 
 
@@ -757,12 +798,33 @@ public partial class Varta_832 : ContentPage
 
         try
         {
-            _isProcessingidentif = true;
+            _isProcessingidentif = true; // защита от повторного нажатия кнопки
 
             // Вычисляем смещение блока (для 1-го блока = 0, для 2-го = 8 и т.д.)
-            byte block = (byte)((_selectedBlock - 1) * 8);
-            //
-           
+          //   byte block = (byte)((_selectedBlock - 1) * 8);
+           byte block  = 0;
+          //  string indxstring = _isRemoteBshvMode == true ? "01012102" : "00003014";
+
+
+            string indxstring;
+            if (_isRemoteBshvMode)
+            {
+                // Формируем индекс для выносного блока: 01 + номер блока в HEX (2 знака) + 2102
+                // Например, для блока 1: "01" + "01" + "2102" = "01012102"
+                // Для блока 2: "01" + "02" + "2102" = "01022102"
+                indxstring = $"01{_selectedBlock:X2}2102";
+
+            }
+            else
+            {
+                // Для базовых блоков индекс всегда единый
+                indxstring = "00003014";
+                block = (byte)((_selectedBlock - 1) * 8);
+            }
+
+
+
+
 
             //
 
@@ -785,7 +847,8 @@ public partial class Varta_832 : ContentPage
                     variableidentif = false;
 
                     // Формируем и отправляем команду для текущего шлейфа (block + i)
-                    cmd2 = BuildIdentifierCommand(read, _currentDeviceAddress, "00003014", (byte)(block + i), len);
+                  //  cmd2 = BuildIdentifierCommand(read, _currentDeviceAddress, "00003014", (byte)(block + i), len);
+                    cmd2 = BuildIdentifierCommand(read, _currentDeviceAddress, indxstring, (byte)(block + i), len);
                     await _bluetoothService?.TransmitterData(cmd2);
                 }
 
@@ -800,7 +863,7 @@ public partial class Varta_832 : ContentPage
                         received = true;
                         break;
                     }
-                    await Task.Delay(10); // 50
+                    await Task.Delay(50); // 50
                     timeoutCounter++;
                 }
 
