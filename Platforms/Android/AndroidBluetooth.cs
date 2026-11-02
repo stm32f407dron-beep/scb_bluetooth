@@ -1835,7 +1835,7 @@ namespace skb_home.Platforms.Android
                                 var frame = new VartaFrame
                                 {
                                     Index = indexString,
-                                    SubIndex = subindex.ToString("X2"),
+                                    SubIndex = subindex.ToString("D2"),
                                     Exists = payload.Length > 0 && payload[0] != 0x00,
                                     Adress = address.ToString("X2")
 

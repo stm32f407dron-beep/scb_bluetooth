@@ -276,11 +276,19 @@ public partial class Varta_832 : ContentPage
         int remoteNum = 1;
         //считываем поле 
         if (int.TryParse(EntryRemoteBlockNumber.Text, out int val))
-        { 
-            remoteNum = val;
-            _selectedBlock = remoteNum;
+        {
+
+            if (val >= 1 && val <= 15)
+            {
+                remoteNum = val;
+            }
+
+            
         }
-          
+        _selectedBlock = remoteNum;
+        // Сразу выводим данные из кэша для этого выносного блока на экран
+        ShowBlock(_selectedBlock);
+
 
         BtnReadCurrent.Text = $"Зчитати виносний БВШВ {remoteNum}";
     }
@@ -294,6 +302,7 @@ public partial class Varta_832 : ContentPage
             if (remoteNum >= 1 && remoteNum <= 15)
             {
                 BtnReadCurrent.Text = $"Зчитати виносний БВШВ {remoteNum}";
+                _selectedBlock = remoteNum; // Обновляем выбранный выносной блок
             }
         }
     }
@@ -310,7 +319,7 @@ public partial class Varta_832 : ContentPage
         if (!int.TryParse(frame.SubIndex, out int subIndex)) return;
 
         int startIndex = 0;
-        bool isFrameRemote = (frame.Index == "00003024");
+        bool isFrameRemote = (frame.Index == "00003024"); //выбор статуса по индексу 00003024 - выносные блоки БВШВ
 
         if (isFrameRemote)
         {
@@ -419,7 +428,7 @@ public partial class Varta_832 : ContentPage
 
 
     // функция красный крест стирание
-    private async void OnAddressConfigClicked(object sender, EventArgs e)
+    private async void OnAddressConfigClicked_2(object sender, EventArgs e)
     {
         //string result = await DisplayPromptAsync("Адреса приладу", "Введіть мережеву адресу:", initialValue: "1", keyboard: Keyboard.Numeric);
         //if (!string.IsNullOrWhiteSpace(result))
@@ -472,6 +481,59 @@ public partial class Varta_832 : ContentPage
     }
 
 
+
+    private async void OnAddressConfigClicked(object sender, EventArgs e)
+    {
+        int blockNumber = _selectedBlock;
+        bool isRemote = _isRemoteBshvMode;
+
+        // Перевірка діапазону: для бази 1..4, для виносних 1..15
+        bool isValid = isRemote ? (blockNumber >= 1 && blockNumber <= 15) : (blockNumber >= 1 && blockNumber <= 4);
+
+        if (isValid)
+        {
+            // Рахуємо стартовий індекс у масиві _allLoops так само, как і в ShowBlock
+            int startIndex = isRemote
+                ? 32 + (blockNumber - 1) * 8
+                : (blockNumber - 1) * 8;
+
+            CurrentBlockLoops.Clear();
+            for (int i = 0; i < 8; i++)
+            {
+                int targetIndex = startIndex + i;
+                if (targetIndex < _allLoops.Count)
+                {
+                    // Очищаємо дані в загальному сховищі
+                    _allLoops[targetIndex].Address = "null";
+                    _allLoops[targetIndex].TypeText = "null";
+                    _allLoops[targetIndex].TypeCode = "null";
+                    _allLoops[targetIndex].StatusText = "null";
+                    _allLoops[targetIndex].StatusCode = "null";
+                    _allLoops[targetIndex].Identifier = "null";
+
+                    // Додаємо назад в екранну колекцію для оновлення UI
+                    CurrentBlockLoops.Add(_allLoops[targetIndex]);
+                }
+            }
+
+            string blockTypeStr = isRemote ? $"виносний БВШВ {blockNumber}" : $"базовий БВШ {blockNumber}";
+            await DisplayAlert("Видалення", $"Видалено успішно для блоку: {blockTypeStr}", "OK");
+        }
+        else
+        {
+            await DisplayAlert("Видалення", "НЕ видалено, блок поза межами допустимого діапазону", "OK");
+        }
+    }
+
+
+
+
+
+
+
+
+
+
     // запись адреса
     private void OnDeviceAddressChanged(object sender, EventArgs e)
     {
@@ -482,7 +544,7 @@ public partial class Varta_832 : ContentPage
         }
     }
 
-    // подготовка к отсылке команды базовых блоков БВШ
+    // подготовка к отсылке команды базовых и выносных блоков БВШ
     private string BuildCommand(int deviceAddress, int bshNumber)
     {
         byte[] frameBytes = null;
@@ -504,7 +566,6 @@ public partial class Varta_832 : ContentPage
         }
         else {
 
-
             // 1. Внутренний фрейм по протоколу CV1500 (строго по таблице)
              frameBytes = new byte[]
             {
@@ -514,10 +575,6 @@ public partial class Varta_832 : ContentPage
                 (byte)bshNumber,             // 4. Subindex (номер блока БВШ: 1, 2, 3 или 4)
                 0x20                         // 5. Length (длина данных)
             };
-
-
-
-
 
         }
 
@@ -704,6 +761,11 @@ public partial class Varta_832 : ContentPage
 
             // Вычисляем смещение блока (для 1-го блока = 0, для 2-го = 8 и т.д.)
             byte block = (byte)((_selectedBlock - 1) * 8);
+            //
+           
+
+            //
+
             int device = 9; // Цикл от 1 до 8 (ровно 8 шлейфов в блоке)
             byte read = 0x01;
             int len = 0x14;
@@ -738,7 +800,7 @@ public partial class Varta_832 : ContentPage
                         received = true;
                         break;
                     }
-                    await Task.Delay(50);
+                    await Task.Delay(10); // 50
                     timeoutCounter++;
                 }
 
