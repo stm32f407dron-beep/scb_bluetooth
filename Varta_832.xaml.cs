@@ -87,28 +87,6 @@ public partial class Varta_832 : ContentPage
         _bluetoothService.DataReceivedVarta832 += AddTerminalText;
 
 
-        //подписка для индетификатора
-        
-        //_bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif)
-        //{
-        //    MainThread.BeginInvokeOnMainThread(delegate {
-
-        //        // Пробуем перевести субиндекс (например, "17" из Hex или дес.) в число
-        //        if (int.TryParse(identif.SubIndex, out int absoluteLoopNumber))
-        //        {
-        //            // Так как шлейфы идут с 1 (от 1 до 32), а индексы в массиве _allLoops с 0:
-        //            int arrayIndex = absoluteLoopNumber - 1;
-
-        //            if (arrayIndex >= 0 && arrayIndex < _allLoops.Count)
-        //            {
-        //                var row = _allLoops[arrayIndex];
-        //                row.Identifier = identif.Identifier;
-        //                variableidentif = true;
-        //            }
-        //        }
-        //    });
-        //};
-
 
 
         _bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif)
@@ -149,12 +127,6 @@ public partial class Varta_832 : ContentPage
 
 
 
-
-
-
-
-
-
         //
     }
 
@@ -190,27 +162,7 @@ public partial class Varta_832 : ContentPage
         }
     }
 
-    // Переключение отображаемого блока (1, 2, 3 или 4)
-    // _allLoops (List) — это просто «тихий» склад в оперативной памяти. Сам по себе он ничего в XAML не передаёт и не обновляет.
-
-    //На строке CurrentBlockLoops.Add(_allLoops[startIndex + i]); вы просто берёте готовые данные со склада и перекладываете их в CurrentBlockLoops.
-
-    //И уже CurrentBlockLoops, будучи ObservableCollection, при каждом .Add() выбрасывает событие в движок MAUI, заставляя XAML обновить отображение строк на экране.
-    //private void ShowBlock(int blockIndex)
-    //{
-    //    _selectedBlock = blockIndex;
-    //    CurrentBlockLoops.Clear();
-
-    //    int startIndex = (_selectedBlock - 1) * 8;
-    //    for (int i = 0; i < 8; i++)
-    //    {
-    //        // делаем перезапись из List / ВОТ ЗДЕСЬ ОБЪЕКТ ИЗ СУШЕСТВУЮЩЕГО СПИСКА ДОБАВЛЯЕТСЯ В ЭКРАННУЮ КОЛЛЕКЦИЮ! - блодаря этому происходит изменение в хамл
-    //        CurrentBlockLoops.Add(_allLoops[startIndex + i]); 
-    //    }
-
-    //    // Обновляем визуальный вид кнопок переключения
-    //    UpdateBlockButtonsUI();
-    //}
+   
 
     //
     private void ShowBlock(int blockIndex)
@@ -261,19 +213,6 @@ public partial class Varta_832 : ContentPage
 
         BtnReadCurrent.Text = $"Зчитати поточний БВШ {_selectedBlock}";
     }
-
-    // Обработчик нажатия на кнопки «БВШ 1» ... «БВШ 4»
-    //private void OnSelectBshClicked(object sender, EventArgs e)
-    //{
-    //    if (sender is Button btn)
-    //    {
-    //        if (btn == BtnBsh1) ShowBlock(1);
-    //        else if (btn == BtnBsh2) ShowBlock(2);
-    //        else if (btn == BtnBsh3) ShowBlock(3);
-    //        else if (btn == BtnBsh4) ShowBlock(4);
-    //    }
-    //}
-
 
     //
     // Клик по основным блокам (БВШ 1..4) -базовый режим
@@ -405,48 +344,6 @@ public partial class Varta_832 : ContentPage
 
 
 
-    // Обновление данных при получении кадра - обработчик событий
-    private void UpdateDataFromFrame_no(VartaFrame frame)
-    {
-        if (frame == null || frame.Values == null) return; // При налл  выходим
-        if (!int.TryParse(frame.SubIndex, out int bshNumber)) return; // Проверяем субиндекс на число
-
-        int startIndex = (bshNumber - 1) * 8; // вычисляем стартовый индекс
-        // доп. защита: startIndex < 0 (Защита снизу) и tartIndex + 7 >= _allLoops.Count (Защита сверху)
-        if (startIndex < 0 || startIndex + 7 >= _allLoops.Count) return;
-
-        for (int i = 0; i < 8; i++)
-        {
-            //мы не создаём строку с нуля, а достаём уже готовую существующую строку из нашего списка-хранилища _allLoops по точному индексу.
-            var row = _allLoops[startIndex + i];
-
-            // Первые 8 значений — тип
-            if (i < frame.Values.Count)
-            {
-               
-                row.TypeText = frame.Values[i].Value;
-                row.TypeCode = frame.Values[i].Code;
-                row.Address = frame.Values[i].Adress;
-            }
-
-            // Следующие 8 значений — стан
-            int statusIdx = i + 8;
-            if (statusIdx < frame.Values.Count)
-            {
-                row.StatusText = frame.Values[statusIdx].Value;
-                row.StatusCode = frame.Values[statusIdx].Code;
-            }
-
-           
-
-        }
-
-        // Если пришедший кадр относится к текущему открытому блоку — обновляем вид на экране
-        if (bshNumber == _selectedBlock)
-        {
-            ShowBlock(_selectedBlock); // Вызов  тригерит события OnPropertyChanged(); и обновляет таблицу хамл
-        }
-    }
 
   
     // Считывание базовых  блоков  БВШ
@@ -718,78 +615,7 @@ public partial class Varta_832 : ContentPage
     private async void OnSettingsClicked(object sender, EventArgs e) => await DisplayAlert("Налаштування", "Функція у розробці", "OK");
 
 
-    // Индетификатор
-    //private async void OnHeaderIdentifierClicked(object sender, EventArgs e) 
-    //{
-
-    //    if (_isProcessingidentif) return;
-
-    //    try
-    //    {
-
-    //        _isProcessingidentif = true;
-
-    //        ////
-    //        //byte block = 0;
-    //        byte block = (byte)((_selectedBlock - 1) * 8);
-    //        int device = 9;
-    //        byte read = 0x01;
-    //        byte subindx = 0x01;
-    //        int len = 0x14;
-
-    //        string cmd2;
-    //        variableidentif = true;
-
-
-    //        for (byte i = 1; i < device; i++)
-    //        {
-    //            // Создаем делегат задачу с возвратом боол , благодаря  await  - эта задача не будет грузить проц., даже находясь в фоне -пуле потоков 
-    //            Func<Task<bool>> func = async delegate ()
-    //            {
-
-    //                while (!variableidentif)
-    //                    await Task.Delay(50);
-
-    //                return true;
-    //            };
-    //            //Кидаем задачу в пул потоков(фон) и ждем результат неблокируя основной поток
-    //            variableidentif = await Task.Run(func);
-
-    //            //if (subindx > 8) return;
-    //            //subindx++;
-
-    //            // работа при variableidentif = true;
-    //            if (variableidentif)
-    //            {
-    //                cmd2 = BuildIdentifierCommand(read, _currentDeviceAddress, "00003014", (byte)(block + i), len);
-    //                variableidentif = false;
-    //                await _bluetoothService?.TransmitterData(cmd2);
-
-
-    //            }
-    //            else
-    //            {
-    //                await DisplayAlert("Помилка", "Не вдалося зчитати Indef", "OK");
-    //                return;
-    //            }
-
-
-    //        }
-
-
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        await DisplayAlert("Помилка", "Не вдалося зчитати Indef", "OK");
-    //    }
-
-    //    finally { _isProcessingidentif = false; }
-
-
-    //}
-
-
-    //
+   
 
     //
     private async void OnHeaderIdentifierClicked(object sender, EventArgs e)
@@ -888,8 +714,12 @@ public partial class Varta_832 : ContentPage
             _isProcessingidentif = false;
         }
     }
-
-
+    //
+    private async void OnHeaderTypeClicked(object sender, EventArgs e)
+    {
+        // Відкриваємо попап, передаючи `this` (головну сторінку) та поточні 8 шлейфів
+        await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops));
+    }
 
 
     //
