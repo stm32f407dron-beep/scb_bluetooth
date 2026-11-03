@@ -40,9 +40,9 @@ public partial class Varta_832 : ContentPage
     {
         _bluetoothService = bluetoothService;
         InitializeComponent();
+        
+
         BindingContext = this; // взаимодействие этой страницы Varta_832 с хамл разметкой - привязка
-
-
 
         // Заполняем адреса от 1 до 15
         DeviceAddressPicker.Items.Clear(); // Очищает список перед заполнением, чтобы элементы не дублировались, если этот метод вызывается повторно.
@@ -863,7 +863,7 @@ public partial class Varta_832 : ContentPage
                         received = true;
                         break;
                     }
-                    await Task.Delay(50); // 50
+                    await Task.Delay(10); // 50
                     timeoutCounter++;
                 }
 
@@ -876,7 +876,7 @@ public partial class Varta_832 : ContentPage
 
                 // МАЛЕНЬКАЯ ПАУЗА МЕЖДУ ЗАПРОСАМИ: 
                 // Дает Bluetooth-модулю и контроллеру прибора «вдохнуть» и не захлебнуться потоком байтов
-                await Task.Delay(50);
+                await Task.Delay(20); // 50
             }
         }
         catch (Exception ex)
