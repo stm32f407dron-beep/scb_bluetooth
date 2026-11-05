@@ -1762,6 +1762,13 @@ namespace skb_home.Platforms.Android
                                 payloadText = enc.GetString(payload, 0, textLen);
                             }
 
+
+                            else if (indexString == "00003010") { }
+
+
+
+
+
                             //else if (indexString.Length == 8 && indexString.StartsWith("010") && indexString.EndsWith("102"))
                             else if (indexString.Length == 8 && indexString.StartsWith("010") && indexString.EndsWith("102"))//  Индекс 01012102  строкa - идентификатор  для базового БВШВ
                             {
@@ -1815,7 +1822,7 @@ namespace skb_home.Platforms.Android
 
                             else if (indexString == "00003014")//  Индекс 00003014  строкa - идентификатор  для базового БВШВ
                             {
-                                
+
                                 // Ищем в массиве payload первый байт 0x00 - как терминатор строки (конец текста)
                                 int nulIndex = Array.IndexOf(payload, (byte)0x00);
 
@@ -1855,7 +1862,7 @@ namespace skb_home.Platforms.Android
                                 DataReceivedIdentifier?.Invoke(frame);
 
                                 // Пример отправки / вывода готовой строки в логи или через событие:
-                                 DataReceivedVarta832?.Invoke($"Rx -> {payloadText}");
+                                DataReceivedVarta832?.Invoke($"Rx -> {payloadText}");
                             }
 
                             // пока непомню что это
@@ -1890,7 +1897,7 @@ namespace skb_home.Platforms.Android
 
                                 };
                                 //необходимо только 16 значений, если что метод выберет меньшее из двух чисел
-                                int count = Math.Min(16,payload.Length - 1);
+                                int count = Math.Min(16, payload.Length - 1);
                                 //Стринги для кода и названий
                                 string decoded = string.Empty;
                                 string name = string.Empty;
@@ -1899,7 +1906,7 @@ namespace skb_home.Platforms.Android
                                 {
                                     byte b = payload[i]; //берем с первой итерации так как по 0 ячейке определяем наличие или отсутствие БВШВ 
 
-                                    if (i <= 8) 
+                                    if (i <= 8)
                                     {
                                         decoded = b < TypeValue2.Length ? TypeValue2[b] : $"Unknown({b})";
                                         name = $"Тип ШС{i}";
@@ -1941,7 +1948,7 @@ namespace skb_home.Platforms.Android
                                     Exists = payload.Length > 0 && payload[0] != 0x00,// Анализ наличия блока/модуля BSVH), если первый байт payload не равен 0x00, то считаем, что блок существует.
                                     Adress = address.ToString("X2"),
                                 };
-                                
+
 
                                 int count = Math.Min(16, payload.Length - 1); // страхуем, так как обрабатывается не больше 16 параметров 
 
@@ -1979,7 +1986,7 @@ namespace skb_home.Platforms.Android
 
                             else // если индекс не известен — пробуем трактовать как текст
                             {
-                                
+
                                 // По умолчанию пробуем как текст (для всех остальных индексов)
                                 if (payload.Length > 0)
                                 {
@@ -2022,7 +2029,7 @@ namespace skb_home.Platforms.Android
 
 
 
-
+                        // обработчик в терминал
                         DataReceivedVarta832?.Invoke(
                            
                            $"Rx->{payloadHex}");
@@ -2346,7 +2353,7 @@ namespace skb_home.Platforms.Android
 
 
 
-
+        //метод отправки команды на устройство через Bluetooth (для Varta 832)
 
         public async Task TransmitterData(string command)
         {
@@ -2589,12 +2596,12 @@ namespace skb_home.Platforms.Android
 
 
         public async Task TransmitterData_writeByte(
-    byte value,
-    byte read = 0x02,
-    byte address = 0x01,
-    byte[]? index = null,
-    byte? subindex = null,
-    bool wrapWithRawStartStop = true)
+                            byte value,
+                            byte read = 0x02,
+                            byte address = 0x01,
+                            byte[]? index = null,
+                            byte? subindex = null,
+                            bool wrapWithRawStartStop = true)
         {
             await _txLock.WaitAsync();
             try

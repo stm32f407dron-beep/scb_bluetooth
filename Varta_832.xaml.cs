@@ -718,7 +718,35 @@ public partial class Varta_832 : ContentPage
     private async void OnHeaderTypeClicked(object sender, EventArgs e)
     {
         // Відкриваємо попап, передаючи `this` (головну сторінку) та поточні 8 шлейфів
-        await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops));
+       await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService));
+
+
+        //
+
+        //byte[] index = new byte[] { 0x00, 0x00, 0x30, 0x10 };
+
+
+
+        //if (_bluetoothService != null)
+        //{
+        //    // ТУТ ВАШ КОД ВІДПРАВКИ (наприклад, асинхронний виклик запису байта)
+        //    // await _bluetoothService.TransmitterData_writeByte(...);
+
+        //    await _bluetoothService.TransmitterData_writeByte(0x03, 0x02, 0x01, index, 0x04); // пример вызова метода отправки байта через Bluetooth
+
+
+
+
+
+
+        //}
+
+
+
+
+        //
+
+
     }
 
 
