@@ -734,7 +734,7 @@ public partial class Varta_832 : ContentPage
         //    // ТУТ ВАШ КОД ВІДПРАВКИ (наприклад, асинхронний виклик запису байта)
         //    // await _bluetoothService.TransmitterData_writeByte(...);
 
-        //    await _bluetoothService.TransmitterData_writeByte(0x03, 0x02, 0x01, index, 0x04); // пример вызова метода отправки байта через Bluetooth
+        //    await _bluetoothService.TransmitterData_writeByte(0x04, 0x02, 0x01, index, 0x01); // пример вызова метода отправки байта через Bluetooth
 
 
 

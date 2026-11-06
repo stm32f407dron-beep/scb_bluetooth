@@ -19,7 +19,7 @@ public partial class EditTypesPopup : ContentPage
     private readonly IBluetooth_service? _bluetoothService;
 
 
-    // Додай це поле у свій клас EditTypesPopup поруч з іншими полями:
+    // Словарь для хранения ссылок на Span для каждого LoopRowModel, чтобы обновлять текст и цвет в UI
     private readonly Dictionary<LoopRowModel, Span> _spanBuffers = new();
 
     public EditTypesPopup(Varta_832 parentPage, ObservableCollection<LoopRowModel> loopsToEdit, IBluetooth_service? bluetoothService)
@@ -32,7 +32,7 @@ public partial class EditTypesPopup : ContentPage
         _loopsToEdit = loopsToEdit;
 
         // Робімо «знімок» поточного стану до редагування
-        // Зберігаємо початкові значення типів для кожного ШС у словнику
+        // Зберігаємо початкові значення типів для кожного ШС у словнику - так как передали ссылку на коллекцию, из родительской странице
         foreach (var loop in _loopsToEdit)
         {
             _initialValues[loop] = (loop.TypeCode, loop.TypeText);
@@ -93,29 +93,31 @@ public partial class EditTypesPopup : ContentPage
 
             if (int.TryParse(subIndex, out int subIndexValue))
             {
-                int collectionIndex = subIndexValue - 1;
+                int collectionIndex = subIndexValue - 1; // Чтоб склыдывало в колекцию  ObservableCollection<LoopRowModel> _loopsToEdit с 0 до 7 (для шлейфов 1-8)
 
                 if (collectionIndex >= 0 && collectionIndex < _loopsToEdit.Count && !string.IsNullOrEmpty(bufferTypeCode))
                 {
-                    var loop = _loopsToEdit[collectionIndex];
+                    var loop = _loopsToEdit[collectionIndex];// Получаем конкретный шлейф из коллекции по индексу loop - ссылка на объект LoopRowModel  коллекции _loopsToEdit
 
                     // Оновлюємо дані у UI-потоці
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
+                        // Заполняем свойства BufferTypeCode и BufferTypeText для конкретного шлейфа
                         loop.BufferTypeCode = bufferTypeCode;
 
                         if (int.TryParse(bufferTypeCode, out int codeIndex) && codeIndex >= 0 && codeIndex < _typeValues.Length)
                         {
-                            loop.BufferTypeText = _typeValues[codeIndex];
+                            loop.BufferTypeText = _typeValues[codeIndex];// благо, що у нас є масив _typeValues, який містить текстові значення для кодів типів
                         }
                         else
                         {
                             loop.BufferTypeText = "null";
                         }
 
-                        // ⭐ А ТУТ ОДРАЗУ ОНОВЛЮЄМО ІНТЕРФЕЙС НА ЕКРАНІ!
+                        // проверка и прорисовка в UI для конкретного шлейфа, если он есть в словаре _spanBuffers
                         if (_spanBuffers.ContainsKey(loop))
                         {
+                            // непосредственная запись через Техт
                             _spanBuffers[loop].Text = loop.BufferTypeText == "null" ? "(null)" : $"({loop.BufferTypeText})";
                         }
                     });
@@ -338,14 +340,14 @@ public partial class EditTypesPopup : ContentPage
             int blockIndex = (loop.Number - 1) / 8 + 1; // номер блока (1-4) для шлейфів 1-32
 
             // Если код вообще не менялся с момента открытия окна — разрешаем сохранить без проблем
-            if (loop.TypeCode == _initialValues[loop].Code)
+            if (loop.BufferTypeCode == _initialValues[loop].Code)
             {
                 continue; // Пропускаем проверку, так как значение не изменилось - следуем к следующему шлейфу
             }
             else
             {
                 // Здесь проверяем сложные случаи: если пользователь стер значение до "null" или сменил тип
-                if (int.TryParse(loop.TypeCode, out int code) && code >= 0 && code < _typeValues.Length)
+                if (int.TryParse(loop.BufferTypeCode, out int code) && code >= 0 && code < _typeValues.Length)
                 {
 
 
@@ -359,8 +361,8 @@ public partial class EditTypesPopup : ContentPage
                         byte[] index = new byte[] { 0x00, 0x00, 0x30, lastByteOfIndex };
 
 
-                        byte subIndex = (byte)(loop.Number); 
-
+                      //  byte subIndex = (byte)(loop.Number);
+                        byte subIndex = (byte)(loop.LoopNumber);
 
                         // ТУТ ВАШ КОД ВІДПРАВКИ (наприклад, асинхронний виклик запису байта)
                         //    await _bluetoothService.TransmitterData_writeByte(0x03, 0x02, 0x01, index, 0x04); // пример вызова метода отправки байта через Bluetooth
