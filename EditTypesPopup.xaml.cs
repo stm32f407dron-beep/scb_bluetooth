@@ -15,10 +15,12 @@ public partial class EditTypesPopup : ContentPage
     // Словник для збереження початкових значень (на випадок скасування)
     private readonly Dictionary<LoopRowModel, (string Code, string Text)> _initialValues = new();
 
-
+    // Внедряем зависимость IBluetooth_service через конструктор
     private readonly IBluetooth_service? _bluetoothService;
 
 
+    // Додай це поле у свій клас EditTypesPopup поруч з іншими полями:
+    private readonly Dictionary<LoopRowModel, Span> _spanBuffers = new();
 
     public EditTypesPopup(Varta_832 parentPage, ObservableCollection<LoopRowModel> loopsToEdit, IBluetooth_service? bluetoothService)
     {
@@ -39,24 +41,47 @@ public partial class EditTypesPopup : ContentPage
         BuildRows();
 
 
-
-        //_bluetoothService?.DataReceivedBuffer += delegate (VartaFrame frame) 
+        //
+        // Підписка на подію DataReceivedBuffer для отримання даних про типи шлейфів
+        //_bluetoothService?.DataReceivedBuffer += delegate (VartaFrame frame)
         //{
         //    string address = frame.Adress;
         //    string indexString = frame.Index;
         //    string subIndex = frame.SubIndex;
         //    string bufferTypeCode = frame.BufferTypeCode; // Отримуємо код типу з буфера
-        //    // Получаем значения субиндекса и блока из строки индекса
-        //    if (int.TryParse(subIndex, out int subIndexValue) && subIndexValue > 0 && subIndexValue <= 8 && subIndexValue <= _loopsToEdit.Count && !string.IsNullOrEmpty(bufferTypeCode))
+
+        //    // Переводимо субіндекс у число
+        //    if (int.TryParse(subIndex, out int subIndexValue))
         //    {
+        //        // Переводимо у «комп'ютерний» індекс (від 0 до 7)
+        //        int collectionIndex = subIndexValue - 1;
 
-        //        _loopsToEdit[subIndexValue - 1].BufferTypeCode = bufferTypeCode;
+        //        // Перевіряємо, чи входить індекс у межі нашої колекції (від 0 до Count - 1)
+        //        if (collectionIndex >= 0 && collectionIndex < _loopsToEdit.Count && !string.IsNullOrEmpty(bufferTypeCode))
+        //        {
+        //            // Оновлюємо дані у UI-потоці, оскільки змінюємо ObservableCollection для екрана
+        //            MainThread.BeginInvokeOnMainThread(() =>
+        //            {
+        //                _loopsToEdit[collectionIndex].BufferTypeCode = bufferTypeCode;
 
+        //                // Опціонально: оновлюємо і текстовий опис типу, якщо він є в масиві
+        //                if (int.TryParse(bufferTypeCode, out int codeIndex) && codeIndex >= 0 && codeIndex < _typeValues.Length)
+        //                {
+        //                    _loopsToEdit[collectionIndex].BufferTypeText = _typeValues[codeIndex];
+        //                }
+        //            });
+        //        }
+        //        else
+        //        {
+        //            // Якщо індекс поза межами, виводимо попередження в головному потоці
+        //            MainThread.BeginInvokeOnMainThread(async () =>
+        //            {
+        //                await DisplayAlert("Помилка", "Невірний субіндекс шлейфу", "OK");
+        //            });
+        //        }
         //    }
-        //    else { DisplayAlert("Помилка", "Невірний субіндекс", "OK"); }
+        //};
 
-
-        //}; // Підписка на подію для отримання даних буфера
 
 
         _bluetoothService?.DataReceivedBuffer += delegate (VartaFrame frame)
@@ -64,39 +89,40 @@ public partial class EditTypesPopup : ContentPage
             string address = frame.Adress;
             string indexString = frame.Index;
             string subIndex = frame.SubIndex;
-            string bufferTypeCode = frame.BufferTypeCode; // Отримуємо код типу з буфера
+            string bufferTypeCode = frame.BufferTypeCode;
 
-            // Переводимо субіндекс у число
             if (int.TryParse(subIndex, out int subIndexValue))
             {
-                // Переводимо у «комп'ютерний» індекс (від 0 до 7)
                 int collectionIndex = subIndexValue - 1;
 
-                // Перевіряємо, чи входить індекс у межі нашої колекції (від 0 до Count - 1)
                 if (collectionIndex >= 0 && collectionIndex < _loopsToEdit.Count && !string.IsNullOrEmpty(bufferTypeCode))
                 {
-                    // Оновлюємо дані у UI-потоці, оскільки змінюємо ObservableCollection для екрана
+                    var loop = _loopsToEdit[collectionIndex];
+
+                    // Оновлюємо дані у UI-потоці
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        _loopsToEdit[collectionIndex].BufferTypeCode = bufferTypeCode;
+                        loop.BufferTypeCode = bufferTypeCode;
 
-                        // Опціонально: оновлюємо і текстовий опис типу, якщо він є в масиві
                         if (int.TryParse(bufferTypeCode, out int codeIndex) && codeIndex >= 0 && codeIndex < _typeValues.Length)
                         {
-                            _loopsToEdit[collectionIndex].BufferTypeText = _typeValues[codeIndex];
+                            loop.BufferTypeText = _typeValues[codeIndex];
                         }
-                    });
-                }
-                else
-                {
-                    // Якщо індекс поза межами, виводимо попередження в головному потоці
-                    MainThread.BeginInvokeOnMainThread(async () =>
-                    {
-                        await DisplayAlert("Помилка", "Невірний субіндекс шлейфу", "OK");
+                        else
+                        {
+                            loop.BufferTypeText = "null";
+                        }
+
+                        // ⭐ А ТУТ ОДРАЗУ ОНОВЛЮЄМО ІНТЕРФЕЙС НА ЕКРАНІ!
+                        if (_spanBuffers.ContainsKey(loop))
+                        {
+                            _spanBuffers[loop].Text = loop.BufferTypeText == "null" ? "(null)" : $"({loop.BufferTypeText})";
+                        }
                     });
                 }
             }
         };
+
 
 
 
@@ -143,6 +169,10 @@ public partial class EditTypesPopup : ContentPage
                 FontAttributes = FontAttributes.Bold,
                 FontSize = 12
             };
+
+
+            // Зберігаємо посилання на цей спан для цього шлейфу
+            _spanBuffers[loop] = spanBuffer;
 
             // 3. Об'єднуємо обидва спани в один Label за допомогою FormattedText
             var label = new Label
