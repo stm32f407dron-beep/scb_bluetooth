@@ -37,6 +37,73 @@ public partial class EditTypesPopup : ContentPage
         }
 
         BuildRows();
+
+
+
+        //_bluetoothService?.DataReceivedBuffer += delegate (VartaFrame frame) 
+        //{
+        //    string address = frame.Adress;
+        //    string indexString = frame.Index;
+        //    string subIndex = frame.SubIndex;
+        //    string bufferTypeCode = frame.BufferTypeCode; // Отримуємо код типу з буфера
+        //    // Получаем значения субиндекса и блока из строки индекса
+        //    if (int.TryParse(subIndex, out int subIndexValue) && subIndexValue > 0 && subIndexValue <= 8 && subIndexValue <= _loopsToEdit.Count && !string.IsNullOrEmpty(bufferTypeCode))
+        //    {
+
+        //        _loopsToEdit[subIndexValue - 1].BufferTypeCode = bufferTypeCode;
+
+        //    }
+        //    else { DisplayAlert("Помилка", "Невірний субіндекс", "OK"); }
+
+
+        //}; // Підписка на подію для отримання даних буфера
+
+
+        _bluetoothService?.DataReceivedBuffer += delegate (VartaFrame frame)
+        {
+            string address = frame.Adress;
+            string indexString = frame.Index;
+            string subIndex = frame.SubIndex;
+            string bufferTypeCode = frame.BufferTypeCode; // Отримуємо код типу з буфера
+
+            // Переводимо субіндекс у число
+            if (int.TryParse(subIndex, out int subIndexValue))
+            {
+                // Переводимо у «комп'ютерний» індекс (від 0 до 7)
+                int collectionIndex = subIndexValue - 1;
+
+                // Перевіряємо, чи входить індекс у межі нашої колекції (від 0 до Count - 1)
+                if (collectionIndex >= 0 && collectionIndex < _loopsToEdit.Count && !string.IsNullOrEmpty(bufferTypeCode))
+                {
+                    // Оновлюємо дані у UI-потоці, оскільки змінюємо ObservableCollection для екрана
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        _loopsToEdit[collectionIndex].BufferTypeCode = bufferTypeCode;
+
+                        // Опціонально: оновлюємо і текстовий опис типу, якщо він є в масиві
+                        if (int.TryParse(bufferTypeCode, out int codeIndex) && codeIndex >= 0 && codeIndex < _typeValues.Length)
+                        {
+                            _loopsToEdit[collectionIndex].BufferTypeText = _typeValues[codeIndex];
+                        }
+                    });
+                }
+                else
+                {
+                    // Якщо індекс поза межами, виводимо попередження в головному потоці
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        await DisplayAlert("Помилка", "Невірний субіндекс шлейфу", "OK");
+                    });
+                }
+            }
+        };
+
+
+
+        InitializeAllLoops_Buffer();
+
+
+
     }
 
     private void BuildRows()
@@ -55,16 +122,7 @@ public partial class EditTypesPopup : ContentPage
             grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
             grid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(70)));
 
-            //первая колонка: Label с текстом типа ШС
-            //var label = new Label
-            //{
-            //    Text = $"ШС {loop.LoopNumber}: {loop.TypeText} / ({loop.BufferTypeText})",
-            //    VerticalTextAlignment = TextAlignment.Center,
-            //    FontSize = 12,
-            //    TextColor = Colors.Black,
-            //    FontAttributes = FontAttributes.Bold
-            //};
-
+           
             //
             // 1. Перша частина мітки (Чорним: "ШС 1: ПОЖ. 1 / ")
             var spanMain = new Span
@@ -97,10 +155,6 @@ public partial class EditTypesPopup : ContentPage
             };
 
 
-
-
-
-
             //
 
             //вторая колонка: Entry для ввода кода типа ШС
@@ -131,24 +185,92 @@ public partial class EditTypesPopup : ContentPage
 
 
 
-    private void OnEntryTextChanged(LoopRowModel loop, Label label, TextChangedEventArgs e)
+    private async void InitializeAllLoops_Buffer() 
     {
-        // Проверяем введенное значение
-        if (int.TryParse(e.NewTextValue, out int code) && code >= 0 && code < _typeValues.Length)
+
+        //for (int i = 0; i < _loopsToEdit.Count; i++)
+        //{
+        //    // Отримуємо конкретний шлейф за поточним індексом `i`
+        //    var loop = _loopsToEdit[i];
+
+        //    // Тепер для кожного шлейфу рахуємо його власний блок і субіндекс
+        //    int blockIndex = (loop.Number - 1) / 8 + 1;
+        //    byte subIndex = (byte)loop.LoopNumber;
+
+        //    // Логіка перевірки та відправки...
+        //}
+
+      
+        foreach (var loop in _loopsToEdit)
         {
-            loop.BufferTypeCode = code.ToString("X2");
-            loop.BufferTypeText = _typeValues[code];
-            label.Text = $"ШС {loop.LoopNumber}: {loop.TypeText} / ({loop.BufferTypeText})";
+            //Правильно: беремо номер конкретного шлейфу, який зараз обробляється в циклі
+            int blockIndex = (loop.Number - 1) / 8 ;
+            string indxstring = $"0000301{blockIndex.ToString("X1")}"; // базовий індекс для першого блоку (1-8 шлейфів)
+            byte subIndex = (byte)loop.LoopNumber;
+            string cmd = Build_BufferFrame(0x01, 0x01, indxstring, subIndex, 0x01);
+            if (_bluetoothService != null) { await _bluetoothService.TransmitterData(cmd); }
+            await Task.Delay(150); // Невелика затримка для стабільності передачі (можна налаштувати за потребою)
+
         }
-        else
-        {
-            // Не стираем насильно текст в Entry (чтобы Android не падал с исключением индексов),
-            // но в логике и на метке четко фиксируем "null"
-            loop.BufferTypeCode = "null";
-            loop.BufferTypeText = "null";
-            label.Text = $"ШС {loop.LoopNumber}: {loop.TypeText} / (null)";
-        }
+
     }
+
+
+    private string Build_BufferFrame(byte read, int deviceAddress, string indxstring, byte subindx, int len)
+    {
+        // переводим строку индекс в массив байт
+        byte[] indx = new byte[indxstring.Length / 2];
+        for (int i = 0; i < indx.Length; i++)
+        {
+            //конвертируем в 16 - hex(Substring - берет по 2 символа и потом их конвнртирует)
+            indx[i] = Convert.ToByte(indxstring.Substring(i * 2, 2), 16);
+        }
+
+        // создаем динамический список байтов
+        List<byte> list = new();
+        // заполняем последовательно список 
+        list.Add(read);
+        list.Add((byte)deviceAddress);
+        list.AddRange(indx);
+        list.Add(subindx);
+        list.Add((byte)len);
+
+        byte[] frameBytes = list.ToArray(); //превращаем список в массив байтов
+        //формируем чексумму
+        int sum = 0;
+        foreach (var b in frameBytes) { sum += b; }
+        //вычесляем чексумму
+        byte checksum = (byte)(sum & 0xFF);
+        //создаем массив с учетом чексуммы
+        byte[] end = new byte[frameBytes.Length + 1];
+        // копируем из источника frameBytes  в массив еnd
+        Array.Copy(frameBytes, 0, end, 0, frameBytes.Length);
+        //добавляем последний байт чексумму
+        end[end.Length - 1] = checksum;
+
+        return BitConverter.ToString(end).Trim().Replace("-", "");
+    }
+
+
+
+    //private void OnEntryTextChanged(LoopRowModel loop, Label label, TextChangedEventArgs e)
+    //{
+    //    // Проверяем введенное значение
+    //    if (int.TryParse(e.NewTextValue, out int code) && code >= 0 && code < _typeValues.Length)
+    //    {
+    //        loop.BufferTypeCode = code.ToString("X2");
+    //        loop.BufferTypeText = _typeValues[code];
+    //        label.Text = $"ШС {loop.LoopNumber}: {loop.TypeText} / ({loop.BufferTypeText})";
+    //    }
+    //    else
+    //    {
+    //        // Не стираем насильно текст в Entry (чтобы Android не падал с исключением индексов),
+    //        // но в логике и на метке четко фиксируем "null"
+    //        loop.BufferTypeCode = "null";
+    //        loop.BufferTypeText = "null";
+    //        label.Text = $"ШС {loop.LoopNumber}: {loop.TypeText} / (null)";
+    //    }
+    //}
 
 
     // ⭐ Метод приймає `Span spanBuffer`, щоб змінювати текст та колір саме у синій частині

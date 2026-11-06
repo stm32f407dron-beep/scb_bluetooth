@@ -1563,10 +1563,10 @@ namespace skb_home.Platforms.Android
             }
         }
 
+        //событие для буфера - тип шлейфа
+        public event Action<VartaFrame> DataReceivedBuffer;
 
-
-
-        // Этап физического рождения в памяти (AndroidBluetooth.cs) - DataReceivedFrame
+        // Этап физического рождения в памяти (AndroidBluetooth.cs) - DataReceivedFrame   
         // В классе реализации платформа создает скрытую ссылку (мультикаст-делегат)
         public event Action<VartaFrame> DataReceivedFrame;
 
@@ -1763,8 +1763,24 @@ namespace skb_home.Platforms.Android
                             }
 
 
-                            else if (indexString == "00003010") { }
+                            //else if (indexString == "00003010") { }
+                            // для значений буферов - типа шлейфа
+                            else if (indexString == "00003010" || indexString == "00003011" || indexString == "00003012" || indexString == "00003013")
+                            {
+                              
+                                var frame = new VartaFrame
+                                {
+                                    Index = indexString,
+                                    SubIndex = subindex.ToString("D2"),
+                                    Adress = address.ToString("X2"),
+                                    BufferTypeCode = payloadHex
+                                };
 
+
+                                //вызов события  для списка делегатов, которые подписаны на событие DataReceivedBuffer - для буфера - тип шлейфа
+                                DataReceivedBuffer.Invoke(frame);
+
+                            }
 
 
 
@@ -1804,7 +1820,7 @@ namespace skb_home.Platforms.Android
 
                                 DataReceivedIdentifier?.Invoke(frame);
 
-                                // Пример отправки / вывода готовой строки в логи или через событие:
+                                // для терминала
                                 DataReceivedVarta832?.Invoke($"Rx -> {payloadText}");
                             }
 

@@ -1019,6 +1019,12 @@ public class VartaValue
     public string Adress { get; set; }
 
     public string Identifier { get; set; }
+
+
+ //   public string BufferTypeText { get; set; }
+
+    public string BufferTypeCode { get; set; }
+
 }
 
 public class VartaFrame
@@ -1029,6 +1035,10 @@ public class VartaFrame
     public string Adress { get; set; }
 
     public string Identifier { get; set; }
+
+   // public string BufferTypeText { get; set; }
+    public string BufferTypeCode { get; set; }
+
 
     // Создаем контейнер  для коллекции, Values - это коллекция (ObservableCollection<...>), список.
     public ObservableCollection<VartaValue> Values { get; set; } = new();

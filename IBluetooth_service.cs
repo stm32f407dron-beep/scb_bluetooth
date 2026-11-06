@@ -69,6 +69,8 @@ namespace skb_home
         // событие для индетификатора
         event Action<VartaFrame> DataReceivedIdentifier;
 
+        event Action<VartaFrame> DataReceivedBuffer;
+
     }
 }
 
