@@ -155,7 +155,9 @@ public partial class Varta_832 : ContentPage
                     TypeText = "null",
                     TypeCode = "null",
                     StatusText = "null",
-                    StatusCode = "null"
+                    StatusCode = "null",
+                    BufferTypeText = "null",
+                    BufferTypeCode = "null"
                 });
                 total++;
             }
@@ -872,7 +874,38 @@ public class LoopRowModel : INotifyPropertyChanged
     private string _identifier = "null";
     private Color _rowBackgroundColor = Color.FromArgb("#C8E6C9");
 
-    // номер
+
+    private string _bufferTypeText = "null";
+
+    private string _bufferTypeCode = "null";
+
+
+
+    // Буфер для хранения текста типа шлейфа, который будет использоваться в EditTypesPopup
+    public string BufferTypeText
+    {
+        get => _bufferTypeText;
+        set
+        {
+            _bufferTypeText = value;
+           
+        }
+    }
+
+    // Буфер для хранения кода типа шлейфа, который будет использоваться в EditTypesPopup
+    public string BufferTypeCode
+    {
+        get => _bufferTypeCode;
+        set
+        {
+            _bufferTypeCode = value;
+
+        }
+    }
+
+
+
+    // номер порядковый
     public int Number { get; set; }
     // адресс
     public string? Address
@@ -894,19 +927,19 @@ public class LoopRowModel : INotifyPropertyChanged
 
 
     
-
+    //Тип 
     public string TypeText
     {
         get => _typeText;
         set { _typeText = value; OnPropertyChanged(); }
     }
-
+    //код типа
     public string TypeCode
     {
         get => _typeCode;
         set { _typeCode = value; OnPropertyChanged(); }
     }
-
+    //Стан
     public string StatusText
     {
         get => _statusText;
@@ -917,7 +950,7 @@ public class LoopRowModel : INotifyPropertyChanged
             UpdateRowColor();
         }
     }
-
+    //код стана
     public string StatusCode
     {
         get => _statusCode;
@@ -929,6 +962,8 @@ public class LoopRowModel : INotifyPropertyChanged
         get => _rowBackgroundColor;
         set { _rowBackgroundColor = value; OnPropertyChanged(); }
     }
+
+
 
     private void UpdateRowColor()
     {

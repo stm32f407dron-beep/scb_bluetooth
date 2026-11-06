@@ -56,44 +56,67 @@ public partial class EditTypesPopup : ContentPage
             grid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(70)));
 
             //первая колонка: Label с текстом типа ШС
+            //var label = new Label
+            //{
+            //    Text = $"ШС {loop.LoopNumber}: {loop.TypeText} / ({loop.BufferTypeText})",
+            //    VerticalTextAlignment = TextAlignment.Center,
+            //    FontSize = 12,
+            //    TextColor = Colors.Black,
+            //    FontAttributes = FontAttributes.Bold
+            //};
+
+            //
+            // 1. Перша частина мітки (Чорним: "ШС 1: ПОЖ. 1 / ")
+            var spanMain = new Span
+            {
+                Text = $"ШС {loop.LoopNumber}: {loop.TypeText} / ",
+                TextColor = Colors.Black,
+                FontAttributes = FontAttributes.Bold,
+                FontSize = 12
+            };
+
+            // 2. Друга частина мітки (Синім: буферне значення)
+            string bufferDisplay = string.IsNullOrEmpty(loop.BufferTypeText) || loop.BufferTypeText == "null" ? "(null)" : $"({loop.BufferTypeText})";
+
+            var spanBuffer = new Span
+            {
+                Text = bufferDisplay,
+                TextColor = Colors.Blue, // ⭐ Синій колір для буфера
+                FontAttributes = FontAttributes.Bold,
+                FontSize = 12
+            };
+
+            // 3. Об'єднуємо обидва спани в один Label за допомогою FormattedText
             var label = new Label
             {
-                Text = $"ШС {loop.LoopNumber}: {loop.TypeText}",
                 VerticalTextAlignment = TextAlignment.Center,
-                FontSize = 12,
-                TextColor = Colors.Black,
-                FontAttributes = FontAttributes.Bold
+                FormattedText = new FormattedString
+                {
+                    Spans = { spanMain, spanBuffer }
+                }
             };
+
+
+
+
+
+
+            //
+
             //вторая колонка: Entry для ввода кода типа ШС
             var entry = new Entry
             {
-                Text = loop.TypeCode,
+                Text = loop.BufferTypeCode,
                 Keyboard = Keyboard.Numeric,
                 HorizontalTextAlignment = TextAlignment.Center,
                 HeightRequest = 34,
                 FontSize = 12
             };
 
-            // делаем изменение текста в Entry событием, которое будет обновлять Label и свойства типа ШС
-            entry.TextChanged +=   delegate  (object? sender, TextChangedEventArgs e)
-            {
-                // Проверяем введенное значение
-                if (int.TryParse(e.NewTextValue, out int code) && code >= 0 && code < _typeValues.Length)
-                {
-                    loop.TypeCode = code.ToString("X2");
-                    loop.TypeText = _typeValues[code];
-                    label.Text = $"ШС {loop.LoopNumber}: {loop.TypeText}";
-                }
-                else
-                {
-                    // Не стираем насильно текст в Entry (чтобы Android не падал с исключением индексов),
-                    // но в логике и на метке четко фиксируем "null"
-                    loop.TypeCode = "null";
-                    loop.TypeText = "null";
-                    label.Text = $"ШС {loop.LoopNumber}: null";
-                 
-                }
-            };
+            // делаем подписку изменение текста в Entry событием, которое будет обновлять Label и свойства типа ШС
+            entry.TextChanged +=  delegate  (object? sender, TextChangedEventArgs e) { OnEntryTextChanged(loop, spanBuffer, e); };
+
+
 
 
 
@@ -107,11 +130,52 @@ public partial class EditTypesPopup : ContentPage
     }
 
 
+
+    private void OnEntryTextChanged(LoopRowModel loop, Label label, TextChangedEventArgs e)
+    {
+        // Проверяем введенное значение
+        if (int.TryParse(e.NewTextValue, out int code) && code >= 0 && code < _typeValues.Length)
+        {
+            loop.BufferTypeCode = code.ToString("X2");
+            loop.BufferTypeText = _typeValues[code];
+            label.Text = $"ШС {loop.LoopNumber}: {loop.TypeText} / ({loop.BufferTypeText})";
+        }
+        else
+        {
+            // Не стираем насильно текст в Entry (чтобы Android не падал с исключением индексов),
+            // но в логике и на метке четко фиксируем "null"
+            loop.BufferTypeCode = "null";
+            loop.BufferTypeText = "null";
+            label.Text = $"ШС {loop.LoopNumber}: {loop.TypeText} / (null)";
+        }
+    }
+
+
+    // ⭐ Метод приймає `Span spanBuffer`, щоб змінювати текст та колір саме у синій частині
+    private void OnEntryTextChanged(LoopRowModel loop, Span spanBuffer, TextChangedEventArgs e)
+    {
+        // Проверяем введенное значение
+        if (int.TryParse(e.NewTextValue, out int code) && code >= 0 && code < _typeValues.Length)
+        {
+            loop.BufferTypeCode = code.ToString("X2");
+            loop.BufferTypeText = _typeValues[code];
+            spanBuffer.Text = $"({loop.BufferTypeText})";
+        }
+        else
+        {
+            // Не стираем насильно текст в Entry (чтобы Android не падал с исключением индексов),
+            // но в логике и на метке четко фиксируем "null"
+            loop.BufferTypeCode = "null";
+            loop.BufferTypeText = "null";
+            spanBuffer.Text = "(null)";
+        }
+    }
+
+
+
+
     private async void OnSaveClicked(object sender, EventArgs e)
     {
-
-       
-
 
         // Перевіряємо кожний шлейф перед збереженням
         foreach (var loop in _loopsToEdit)
@@ -151,11 +215,6 @@ public partial class EditTypesPopup : ContentPage
                         await _bluetoothService.TransmitterData_writeByte((byte)code, 0x02, 0x01, index, subIndex);
 
                         await Task.Delay(150); // Невелика затримка для стабільності передачі (можна налаштувати за потребою)
-
-
-
-
-
 
                     }
                     else
