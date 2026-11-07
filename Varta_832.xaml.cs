@@ -720,7 +720,7 @@ public partial class Varta_832 : ContentPage
     private async void OnHeaderTypeClicked(object sender, EventArgs e)
     {
         // Відкриваємо попап, передаючи `this` (головну сторінку) та поточні 8 шлейфів
-       await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService));
+       await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress));
 
 
         //
@@ -874,7 +874,7 @@ public class LoopRowModel : INotifyPropertyChanged
     private string _identifier = "null";
     private Color _rowBackgroundColor = Color.FromArgb("#C8E6C9");
 
-
+    // Буфер для хранения текста типа шлейфа, который будет использоваться в EditTypesPopup
     private string _bufferTypeText = "null";
 
     private string _bufferTypeCode = "null";
@@ -903,6 +903,9 @@ public class LoopRowModel : INotifyPropertyChanged
         }
     }
 
+    //
+    public Entry? AssociatedEntry { get; set; }
+    //
 
 
     // номер порядковый

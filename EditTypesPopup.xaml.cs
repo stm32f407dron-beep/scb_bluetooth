@@ -22,7 +22,13 @@ public partial class EditTypesPopup : ContentPage
     // Словарь для хранения ссылок на Span для каждого LoopRowModel, чтобы обновлять текст и цвет в UI
     private readonly Dictionary<LoopRowModel, Span> _spanBuffers = new();
 
-    public EditTypesPopup(Varta_832 parentPage, ObservableCollection<LoopRowModel> loopsToEdit, IBluetooth_service? bluetoothService)
+
+    //адресс устройства
+    private int _currentDeviceAddress = 1;
+
+    
+
+    public EditTypesPopup(Varta_832 parentPage, ObservableCollection<LoopRowModel> loopsToEdit, IBluetooth_service? bluetoothService, int currentDeviceAddress)
     {
         //Собираем визуальные элементы и связываем их с кодом
         InitializeComponent();
@@ -30,6 +36,7 @@ public partial class EditTypesPopup : ContentPage
         _parentPage = parentPage;
         _bluetoothService = bluetoothService;
         _loopsToEdit = loopsToEdit;
+        _currentDeviceAddress = currentDeviceAddress;
 
         // Робімо «знімок» поточного стану до редагування
         // Зберігаємо початкові значення типів для кожного ШС у словнику - так как передали ссылку на коллекцию, из родительской странице
@@ -38,50 +45,13 @@ public partial class EditTypesPopup : ContentPage
             _initialValues[loop] = (loop.TypeCode, loop.TypeText);
         }
 
+
+
+
         BuildRows();
 
 
-        //
-        // Підписка на подію DataReceivedBuffer для отримання даних про типи шлейфів
-        //_bluetoothService?.DataReceivedBuffer += delegate (VartaFrame frame)
-        //{
-        //    string address = frame.Adress;
-        //    string indexString = frame.Index;
-        //    string subIndex = frame.SubIndex;
-        //    string bufferTypeCode = frame.BufferTypeCode; // Отримуємо код типу з буфера
-
-        //    // Переводимо субіндекс у число
-        //    if (int.TryParse(subIndex, out int subIndexValue))
-        //    {
-        //        // Переводимо у «комп'ютерний» індекс (від 0 до 7)
-        //        int collectionIndex = subIndexValue - 1;
-
-        //        // Перевіряємо, чи входить індекс у межі нашої колекції (від 0 до Count - 1)
-        //        if (collectionIndex >= 0 && collectionIndex < _loopsToEdit.Count && !string.IsNullOrEmpty(bufferTypeCode))
-        //        {
-        //            // Оновлюємо дані у UI-потоці, оскільки змінюємо ObservableCollection для екрана
-        //            MainThread.BeginInvokeOnMainThread(() =>
-        //            {
-        //                _loopsToEdit[collectionIndex].BufferTypeCode = bufferTypeCode;
-
-        //                // Опціонально: оновлюємо і текстовий опис типу, якщо він є в масиві
-        //                if (int.TryParse(bufferTypeCode, out int codeIndex) && codeIndex >= 0 && codeIndex < _typeValues.Length)
-        //                {
-        //                    _loopsToEdit[collectionIndex].BufferTypeText = _typeValues[codeIndex];
-        //                }
-        //            });
-        //        }
-        //        else
-        //        {
-        //            // Якщо індекс поза межами, виводимо попередження в головному потоці
-        //            MainThread.BeginInvokeOnMainThread(async () =>
-        //            {
-        //                await DisplayAlert("Помилка", "Невірний субіндекс шлейфу", "OK");
-        //            });
-        //        }
-        //    }
-        //};
-
+        
 
 
         _bluetoothService?.DataReceivedBuffer += delegate (VartaFrame frame)
@@ -107,7 +77,7 @@ public partial class EditTypesPopup : ContentPage
 
                         if (int.TryParse(bufferTypeCode, out int codeIndex) && codeIndex >= 0 && codeIndex < _typeValues.Length)
                         {
-                            loop.BufferTypeText = _typeValues[codeIndex];// благо, що у нас є масив _typeValues, який містить текстові значення для кодів типів
+                            loop.BufferTypeText = _typeValues[codeIndex];//   текстові значення для кодів типів
                         }
                         else
                         {
@@ -119,7 +89,17 @@ public partial class EditTypesPopup : ContentPage
                         {
                             // непосредственная запись через Техт
                             _spanBuffers[loop].Text = loop.BufferTypeText == "null" ? "(null)" : $"({loop.BufferTypeText})";
+
                         }
+
+                        // ⭐ Те, про що ти казав: просто записуємо новий код у текст цього Entry!
+                        if (loop.AssociatedEntry != null)
+                        {
+                            loop.AssociatedEntry.Text = bufferTypeCode == "null" ? "" : bufferTypeCode;
+                        }
+
+
+
                     });
                 }
             }
@@ -199,6 +179,10 @@ public partial class EditTypesPopup : ContentPage
                 FontSize = 12
             };
 
+
+            // ⭐ Зберігаємо посилання прямо в об'єкті цього конкретного шлейфу!
+            loop.AssociatedEntry = entry;
+
             // делаем подписку изменение текста в Entry событием, которое будет обновлять Label и свойства типа ШС
             entry.TextChanged +=  delegate  (object? sender, TextChangedEventArgs e) { OnEntryTextChanged(loop, spanBuffer, e); };
 
@@ -239,7 +223,7 @@ public partial class EditTypesPopup : ContentPage
             int blockIndex = (loop.Number - 1) / 8 ;
             string indxstring = $"0000301{blockIndex.ToString("X1")}"; // базовий індекс для першого блоку (1-8 шлейфів)
             byte subIndex = (byte)loop.LoopNumber;
-            string cmd = Build_BufferFrame(0x01, 0x01, indxstring, subIndex, 0x01);
+            string cmd = Build_BufferFrame(0x01, _currentDeviceAddress, indxstring, subIndex, 0x01);
             if (_bluetoothService != null) { await _bluetoothService.TransmitterData(cmd); }
             await Task.Delay(150); // Невелика затримка для стабільності передачі (можна налаштувати за потребою)
 
@@ -285,24 +269,7 @@ public partial class EditTypesPopup : ContentPage
 
 
 
-    //private void OnEntryTextChanged(LoopRowModel loop, Label label, TextChangedEventArgs e)
-    //{
-    //    // Проверяем введенное значение
-    //    if (int.TryParse(e.NewTextValue, out int code) && code >= 0 && code < _typeValues.Length)
-    //    {
-    //        loop.BufferTypeCode = code.ToString("X2");
-    //        loop.BufferTypeText = _typeValues[code];
-    //        label.Text = $"ШС {loop.LoopNumber}: {loop.TypeText} / ({loop.BufferTypeText})";
-    //    }
-    //    else
-    //    {
-    //        // Не стираем насильно текст в Entry (чтобы Android не падал с исключением индексов),
-    //        // но в логике и на метке четко фиксируем "null"
-    //        loop.BufferTypeCode = "null";
-    //        loop.BufferTypeText = "null";
-    //        label.Text = $"ШС {loop.LoopNumber}: {loop.TypeText} / (null)";
-    //    }
-    //}
+   
 
 
     // ⭐ Метод приймає `Span spanBuffer`, щоб змінювати текст та колір саме у синій частині
@@ -363,10 +330,10 @@ public partial class EditTypesPopup : ContentPage
 
                       //  byte subIndex = (byte)(loop.Number);
                         byte subIndex = (byte)(loop.LoopNumber);
-
+                        byte adress = (byte)_currentDeviceAddress; // Используем текущий адрес устройства, переданный в конструкторе
                         // ТУТ ВАШ КОД ВІДПРАВКИ (наприклад, асинхронний виклик запису байта)
                         //    await _bluetoothService.TransmitterData_writeByte(0x03, 0x02, 0x01, index, 0x04); // пример вызова метода отправки байта через Bluetooth
-                        await _bluetoothService.TransmitterData_writeByte((byte)code, 0x02, 0x01, index, subIndex);
+                        await _bluetoothService.TransmitterData_writeByte((byte)code, 0x02, adress, index, subIndex);
 
                         await Task.Delay(150); // Невелика затримка для стабільності передачі (можна налаштувати за потребою)
 
@@ -436,12 +403,12 @@ public partial class EditTypesPopup : ContentPage
     // Кнопка «Скасувати»: повертаємо старі значення з нашого «знімка» і закриваємо
     private async void OnCancelClicked(object sender, EventArgs e)
     {
-        foreach (var pair in _initialValues)
-        {
-            var loop = pair.Key;
-            loop.TypeCode = pair.Value.Code;
-            loop.TypeText = pair.Value.Text;
-        }
+        //foreach (var pair in _initialValues)
+        //{
+        //    var loop = pair.Key;
+        //    loop.TypeCode = pair.Value.Code;
+        //    loop.TypeText = pair.Value.Text;
+        //}
 
         await Navigation.PopModalAsync();
     }
