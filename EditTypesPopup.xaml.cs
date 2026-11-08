@@ -26,9 +26,13 @@ public partial class EditTypesPopup : ContentPage
     //адресс устройства
     private int _currentDeviceAddress = 1;
 
-    
+    // глобальная память для всех шлейфов (для передачи в родительскую страницу)
+    private readonly List<LoopRowModel> _allLoopsRef;
 
-    public EditTypesPopup(Varta_832 parentPage, ObservableCollection<LoopRowModel> loopsToEdit, IBluetooth_service? bluetoothService, int currentDeviceAddress)
+    // Флаг для предотвращения повторного сохранения при быстром нажатии кнопки
+    private bool _isSaving = false;
+
+    public EditTypesPopup(Varta_832 parentPage, ObservableCollection<LoopRowModel> loopsToEdit, IBluetooth_service? bluetoothService, int currentDeviceAddress, List<LoopRowModel> allLoops)
     {
         //Собираем визуальные элементы и связываем их с кодом
         InitializeComponent();
@@ -37,6 +41,7 @@ public partial class EditTypesPopup : ContentPage
         _bluetoothService = bluetoothService;
         _loopsToEdit = loopsToEdit;
         _currentDeviceAddress = currentDeviceAddress;
+        _allLoopsRef = allLoops; // Зберігаємо посилання на глобальну колекцію всіх шлейфів
 
         // Робімо «знімок» поточного стану до редагування
         // Зберігаємо початкові значення типів для кожного ШС у словнику - так как передали ссылку на коллекцию, из родительской странице
@@ -72,16 +77,43 @@ public partial class EditTypesPopup : ContentPage
                     // Оновлюємо дані у UI-потоці
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
+
+                        int globalIndex = loop.Number - 1; // Починається з 0 для першого шлейфу!
+
+                        // ⭐ ВІДПРАВЛЯЄМО В ДЕБАГ ДЛЯ ПЕРЕВІРКИ
+                        System.Diagnostics.Debug.WriteLine($"[GLOBAL SYNC] ШС LoopNumber: {loop.LoopNumber} | Number (глобальний): {loop.Number} | calculated globalIndex: {globalIndex} | Code: {bufferTypeCode}");
+
                         // Заполняем свойства BufferTypeCode и BufferTypeText для конкретного шлейфа
                         loop.BufferTypeCode = bufferTypeCode;
+
+
 
                         if (int.TryParse(bufferTypeCode, out int codeIndex) && codeIndex >= 0 && codeIndex < _typeValues.Length)
                         {
                             loop.BufferTypeText = _typeValues[codeIndex];//   текстові значення для кодів типів
+
+
+                            if (globalIndex >= 0 && globalIndex < _allLoopsRef.Count)
+                            {
+                                // Записуємо одразу в глобальну пам'ять батьківської сторінки
+                                _allLoopsRef[globalIndex].BufferTypeCode = bufferTypeCode;
+                                _allLoopsRef[globalIndex].BufferTypeText = loop.BufferTypeText;
+                            }
+
+
+
+
                         }
                         else
                         {
                             loop.BufferTypeText = "null";
+
+                            if (globalIndex >= 0 && globalIndex < _allLoopsRef.Count)
+                            {
+                                // Записуємо одразу в глобальну пам'ять батьківської сторінки
+                                _allLoopsRef[globalIndex].BufferTypeCode = "null";
+                                _allLoopsRef[globalIndex].BufferTypeText = "null";
+                            }
                         }
 
                         // проверка и прорисовка в UI для конкретного шлейфа, если он есть в словаре _spanBuffers
@@ -301,73 +333,95 @@ public partial class EditTypesPopup : ContentPage
     private async void OnSaveClicked(object sender, EventArgs e)
     {
 
-        // Перевіряємо кожний шлейф перед збереженням
-        foreach (var loop in _loopsToEdit)
+
+        if (_isSaving) return;
+
+        try
         {
-            // Отримуємо початкове значення з того самого знімка, який ми зробили в конструкторі
-            string initialCode = _initialValues.ContainsKey(loop) ? _initialValues[loop].Code : "null";
+            _isSaving = true;
 
-            int blockIndex = (loop.Number - 1) / 8 + 1; // номер блока (1-4) для шлейфів 1-32
+            // Перевіряємо кожний шлейф перед збереженням
+            foreach (var loop in _loopsToEdit)
+            {
+                // Отримуємо початкове значення з того самого знімка, який ми зробили в конструкторі
+                string initialCode = _initialValues.ContainsKey(loop) ? _initialValues[loop].Code : "null";
 
-            // Если код вообще не менялся с момента открытия окна — разрешаем сохранить без проблем
-            if (loop.BufferTypeCode == _initialValues[loop].Code)
-            {
-                // Якщо раніше була решітка, але користувач повернув значення назад — знімаємо її
-                loop.IsTypeModified = false;
-                continue; // Пропускаем проверку, так как значение не изменилось - следуем к следующему шлейфу
-            }
-            else
-            {
-                // Здесь проверяем сложные случаи: если пользователь стер значение до "null" или сменил тип
-                if (int.TryParse(loop.BufferTypeCode, out int code) && code >= 0 && code < _typeValues.Length)
+                int blockIndex = (loop.Number - 1) / 8 + 1; // номер блока (1-4) для шлейфів 1-32
+
+                // Если код вообще не менялся с момента открытия окна — разрешаем сохранить без проблем
+                if (loop.BufferTypeCode == _initialValues[loop].Code)
                 {
-
-
-                    // 2. ТУТ ВАШ КОД ВІДПРАВКИ ЧЕРЕЗ BLUETOOTH (через ваш метод TransmitterData_writeByte)
-                    if (_bluetoothService != null)
+                    // Якщо раніше була решітка, але користувач повернув значення назад — знімаємо її
+                    loop.IsTypeModified = false;
+                    continue; // Пропускаем проверку, так как значение не изменилось - следуем к следующему шлейфу
+                }
+                else
+                {
+                    // Здесь проверяем сложные случаи: если пользователь стер значение до "null" или сменил тип
+                    if (int.TryParse(loop.BufferTypeCode, out int code) && code >= 0 && code < _typeValues.Length)
                     {
 
-                        // 1. ДИНАМІЧНО ФОРМУЄМО ІНДЕКС ПАМ'ЯТІ
-                        // Базові байти: 0x00, 0x00, 0x30, а останній байт залежить від блоку (0x10 для 1-го, 0x11 для 2-го і т.д.)
-                        byte lastByteOfIndex = (byte)(0x10 + (blockIndex - 1));
-                        byte[] index = new byte[] { 0x00, 0x00, 0x30, lastByteOfIndex };
+
+                        // 2. ТУТ ВАШ КОД ВІДПРАВКИ ЧЕРЕЗ BLUETOOTH (через ваш метод TransmitterData_writeByte)
+                        if (_bluetoothService != null)
+                        {
+
+                            // 1. ДИНАМІЧНО ФОРМУЄМО ІНДЕКС ПАМ'ЯТІ
+                            // Базові байти: 0x00, 0x00, 0x30, а останній байт залежить від блоку (0x10 для 1-го, 0x11 для 2-го і т.д.)
+                            byte lastByteOfIndex = (byte)(0x10 + (blockIndex - 1));
+                            byte[] index = new byte[] { 0x00, 0x00, 0x30, lastByteOfIndex };
 
 
-                      //  byte subIndex = (byte)(loop.Number);
-                        byte subIndex = (byte)(loop.LoopNumber);
-                        byte adress = (byte)_currentDeviceAddress; // Используем текущий адрес устройства, переданный в конструкторе
-                        // ТУТ ВАШ КОД ВІДПРАВКИ (наприклад, асинхронний виклик запису байта)
-                        //    await _bluetoothService.TransmitterData_writeByte(0x03, 0x02, 0x01, index, 0x04); // пример вызова метода отправки байта через Bluetooth
-                        await _bluetoothService.TransmitterData_writeByte((byte)code, 0x02, adress, index, subIndex);
+                            //  byte subIndex = (byte)(loop.Number);
+                            byte subIndex = (byte)(loop.LoopNumber);
+                            byte adress = (byte)_currentDeviceAddress; // Используем текущий адрес устройства, переданный в конструкторе
+                                                                       // ТУТ ВАШ КОД ВІДПРАВКИ (наприклад, асинхронний виклик запису байта)
+                                                                       //    await _bluetoothService.TransmitterData_writeByte(0x03, 0x02, 0x01, index, 0x04); // пример вызова метода отправки байта через Bluetooth
+                            await _bluetoothService.TransmitterData_writeByte((byte)code, 0x02, adress, index, subIndex);
 
-                        await Task.Delay(150); // Невелика затримка для стабільності передачі (можна налаштувати за потребою)
-                                               // ⭐ Успішно збережено: вмикаємо прапорець модифікації (з'явиться решітка / буфер)
-                        loop.IsTypeModified = true;
+                            await Task.Delay(150); // Невелика затримка для стабільності передачі (можна налаштувати за потребою)
+                                                   // ⭐ Успішно збережено: вмикаємо прапорець модифікації (з'явиться решітка / буфер)
+                            loop.IsTypeModified = true;
+
+                        }
+                        else
+                        {
+                            await DisplayAlert("Помилка", "Bluetooth сервіс не ініціалізовано. Збереження неможливе.", "OK");
+                            return; // Обов'язково зупиняємо збереження і НЕ закриваємо вікно!
+                        }
+
 
                     }
                     else
                     {
-                        await DisplayAlert("Помилка", "Bluetooth сервіс не ініціалізовано. Збереження неможливе.", "OK");
-                        return; // Обов'язково зупиняємо збереження і НЕ закриваємо вікно!
+                        await DisplayAlert("Помилка", $"Невірний тип для ШС {loop.LoopNumber}. Введіть значення від 0 до 5.", "OK");
+                        return; // Зупиняємо збереження і НЕ закриваємо вікно!
                     }
 
 
-                }
-                else 
-                {
-                    await DisplayAlert("Помилка", $"Невірний тип для ШС {loop.LoopNumber}. Введіть значення від 0 до 5.", "OK");
-                    return; // Зупиняємо збереження і НЕ закриваємо вікно!
                 }
 
 
             }
 
-        
+
+            // Якщо все заповнено правильно — закриваємо вікно
+            await Navigation.PopModalAsync();
+
+
+        }
+        catch (Exception ex)
+        {
+
+            await DisplayAlert("Помилка", $"Помилка збереження: {ex.Message}", "OK");
+        }
+        finally
+        {
+            _isSaving = false; // Снимаем блокировку после завершения операции
         }
 
 
-        // Якщо все заповнено правильно — закриваємо вікно
-        await Navigation.PopModalAsync();
+       
     }
 
 

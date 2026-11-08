@@ -460,6 +460,9 @@ public partial class Varta_832 : ContentPage
                     _allLoops[targetIndex].StatusText = "null";
                     _allLoops[targetIndex].StatusCode = "null";
                     _allLoops[targetIndex].Identifier = "null";
+                    _allLoops[targetIndex].BufferTypeText = "null";
+                    _allLoops[targetIndex].BufferTypeCode = "null";
+
 
                     // Додаємо назад в екранну колекцію для оновлення UI
                     CurrentBlockLoops.Add(_allLoops[targetIndex]);
@@ -739,7 +742,7 @@ public partial class Varta_832 : ContentPage
             _isProcessingTypeEdit = true; // Блокуємо кнопку
 
             // Відкриваємо попап і чекаємо, поки користувач його закриє
-            await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress));
+            await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress, _allLoops));
 
             ////Был ли считан модуль БВШВ (Bvsh_modul = true) или нет (Bvsh_modul = false)
             //if (Bvsh_modul) 
@@ -962,7 +965,7 @@ public class LoopRowModel : INotifyPropertyChanged
         set
         {
             _bufferTypeText = value;
-         //   OnPropertyChanged();
+           OnPropertyChanged();
         }
     }
 
@@ -973,7 +976,7 @@ public class LoopRowModel : INotifyPropertyChanged
         set
         {
             _bufferTypeCode = value;
-
+            OnPropertyChanged();
         }
     }
 
