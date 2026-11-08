@@ -1961,7 +1961,7 @@ namespace skb_home.Platforms.Android
                                 {
                                     Index = indexString,
                                     SubIndex = subindex.ToString("X2"),
-                                    Exists = payload.Length > 0 && payload[0] != 0x00,// Анализ наличия блока/модуля BSVH), если первый байт payload не равен 0x00, то считаем, что блок существует.
+                                    Exists = payload.Length > 0 && payload[0] == 0x11,// Анализ наличия блока/модуля BSVH), если первый байт payload не равен 0x00, то считаем, что блок существует.
                                     Adress = address.ToString("X2"),
                                 };
 

@@ -223,6 +223,9 @@ public partial class EditTypesPopup : ContentPage
             int blockIndex = (loop.Number - 1) / 8 ;
             string indxstring = $"0000301{blockIndex.ToString("X1")}"; // базовий індекс для першого блоку (1-8 шлейфів)
             byte subIndex = (byte)loop.LoopNumber;
+
+            // ⭐ ВИВОДИМО В ДЕБАГ ДЛЯ ПЕРЕВІРКИ
+            System.Diagnostics.Debug.WriteLine($"[INIT BUFFER] ШС LoopNumber: {loop.LoopNumber} | Number: {loop.Number} | calculated blockIndex: {blockIndex} | indxstring: {indxstring} | subIndex: {subIndex}");
             string cmd = Build_BufferFrame(0x01, _currentDeviceAddress, indxstring, subIndex, 0x01);
             if (_bluetoothService != null) { await _bluetoothService.TransmitterData(cmd); }
             await Task.Delay(150); // Невелика затримка для стабільності передачі (можна налаштувати за потребою)
@@ -309,6 +312,8 @@ public partial class EditTypesPopup : ContentPage
             // Если код вообще не менялся с момента открытия окна — разрешаем сохранить без проблем
             if (loop.BufferTypeCode == _initialValues[loop].Code)
             {
+                // Якщо раніше була решітка, але користувач повернув значення назад — знімаємо її
+                loop.IsTypeModified = false;
                 continue; // Пропускаем проверку, так как значение не изменилось - следуем к следующему шлейфу
             }
             else
@@ -336,6 +341,8 @@ public partial class EditTypesPopup : ContentPage
                         await _bluetoothService.TransmitterData_writeByte((byte)code, 0x02, adress, index, subIndex);
 
                         await Task.Delay(150); // Невелика затримка для стабільності передачі (можна налаштувати за потребою)
+                                               // ⭐ Успішно збережено: вмикаємо прапорець модифікації (з'явиться решітка / буфер)
+                        loop.IsTypeModified = true;
 
                     }
                     else

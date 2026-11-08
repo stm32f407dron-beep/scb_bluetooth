@@ -1,4 +1,5 @@
 
+
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -35,6 +36,11 @@ public partial class Varta_832 : ContentPage
     // Флаг для блокировки повторного нажатия - для идентификатора
     private bool _isProcessingidentif = false;
 
+
+    // Флаг для блокировки повторного нажатия - для редактирования типа шлейфа Тип ШС
+    private bool _isProcessingTypeEdit = false;
+
+    private bool Bvsh_modul = false;
 
     public Varta_832(IBluetooth_service bluetoothService)
     {
@@ -293,12 +299,16 @@ public partial class Varta_832 : ContentPage
 
 
 
-    //
+    // Обновление данных из пришедшего кадра VartaFrame - обработчик события DataReceivedFrame
 
     private void UpdateDataFromFrame(VartaFrame frame)
     {
         if (frame == null || frame.Values == null) return;
         if (!int.TryParse(frame.SubIndex, out int subIndex)) return;
+
+        //frame.Exists
+        Bvsh_modul = frame.Exists; // Сохраняем флаг наличия блока/модуля BSVH
+
 
         int startIndex = 0;
         bool isFrameRemote = (frame.Index == "00003024"); //выбор статуса по индексу 00003024 - выносные блоки БВШВ
@@ -716,18 +726,80 @@ public partial class Varta_832 : ContentPage
             _isProcessingidentif = false;
         }
     }
-    //
+    // переход на редактирование типа шлейфа Тип ШС
     private async void OnHeaderTypeClicked(object sender, EventArgs e)
     {
+
+
+        if (_isProcessingTypeEdit) return; // защита от повторного нажатия кнопки
+
+
+        try
+        {
+            _isProcessingTypeEdit = true; // Блокуємо кнопку
+
+            // Відкриваємо попап і чекаємо, поки користувач його закриє
+            await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress));
+
+            ////Был ли считан модуль БВШВ (Bvsh_modul = true) или нет (Bvsh_modul = false)
+            //if (Bvsh_modul) 
+            //{
+
+            //    //// ⭐ ТУТ ТВОЯ ЛОГІКА ПІСЛЯ ЗАКРИТТЯ ПОПАПУ:
+            //    //// Перевіряємо шлейфи, порівнюємо дані та ставимо прапорець для появи решітки '#'
+            //    //foreach (var loop in CurrentBlockLoops)
+            //    //{
+            //    //    // Приклад умови: якщо буферний текст відрізняється від звичайного — вмикаємо решітку
+            //    //    if (!string.IsNullOrEmpty(loop.BufferTypeText) && loop.BufferTypeText != loop.TypeText)
+            //    //    {
+            //    //        loop.IsTypeModified = true;
+            //    //    }
+            //    //}
+
+
+            //    foreach (var loop in CurrentBlockLoops)
+            //    {
+            //        // Виводимо в консоль Visual Studio поточні значення для кожного шлейфу
+            //        System.Diagnostics.Debug.WriteLine($"[DEBUG] ШС {loop.LoopNumber} | TypeText: '{loop.TypeText}' | BufferTypeText: '{loop.BufferTypeText}'");
+
+            //        // Приклад умови: якщо буферний текст відрізняється від звичайного — вмикаємо решітку
+            //        if (!string.IsNullOrEmpty(loop.BufferTypeText) && loop.BufferTypeText != loop.TypeText)
+            //        {
+            //            loop.IsTypeModified = true;
+            //            System.Diagnostics.Debug.WriteLine($"[DEBUG] -> РЕШІТКА УВІМКНЕНА для ШС {loop.LoopNumber}");
+            //        }
+            //        else
+            //        {
+            //            // Додаємо гілку для перевірки, якщо вони рівні (щоб бачити, чи знімається прапорець)
+            //            loop.IsTypeModified = false;
+            //        }
+            //    }
+
+
+
+            //}
+            
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Помилка", $"Не вдалося відкрити редагування типів: {ex.Message}", "OK");
+        }
+        finally
+        {
+            // Обов'язково знімаємо блокування у будь-якому випадку (навіть якщо сталася помилка)
+            _isProcessingTypeEdit = false;
+        }
+
+
+
+
+
+
         // Відкриваємо попап, передаючи `this` (головну сторінку) та поточні 8 шлейфів
-       await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress));
-
-
+      //  await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress));
         //
 
         //byte[] index = new byte[] { 0x00, 0x00, 0x30, 0x10 };
-
-
 
         //if (_bluetoothService != null)
         //{
@@ -736,23 +808,9 @@ public partial class Varta_832 : ContentPage
 
         //    await _bluetoothService.TransmitterData_writeByte(0x04, 0x02, 0x01, index, 0x01); // пример вызова метода отправки байта через Bluetooth
 
-
-
-
-
-
         //}
 
-
-
-
-        //
-
-
     }
-
-
-    //
 
 }
 
@@ -879,6 +937,22 @@ public class LoopRowModel : INotifyPropertyChanged
 
     private string _bufferTypeCode = "null";
 
+    // # - для записи в EditTypesPopup, чтобы знать, что тип был изменен - и записи в приборе конфигуратора
+    private bool _isTypeModified;
+    public bool IsTypeModified
+    {
+        get => _isTypeModified;
+        set
+        {
+            _isTypeModified = value;
+            OnPropertyChanged();
+        }
+    }
+
+
+
+
+    //
 
 
     // Буфер для хранения текста типа шлейфа, который будет использоваться в EditTypesPopup
@@ -888,7 +962,7 @@ public class LoopRowModel : INotifyPropertyChanged
         set
         {
             _bufferTypeText = value;
-           
+         //   OnPropertyChanged();
         }
     }
 

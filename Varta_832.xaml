@@ -137,7 +137,21 @@
                                         <Label Grid.Column="1" Text="{Binding Address}"  FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
                                         <Label Grid.Column="2" Text="{Binding LoopNumber}" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
                                         <Label Grid.Column="3" Text="{Binding Identifier}"  FontAttributes="Bold" LineBreakMode="TailTruncation" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
-                                        <Label Grid.Column="4" Text="{Binding TypeText}"  FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
+                                        <HorizontalStackLayout Grid.Column="4" Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding TypeText}" FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0,0,0" FontSize="11" TextColor="Black"/>
+                                            <Label Text="{Binding BufferTypeText}" 
+                                               IsVisible="{Binding IsTypeModified}" 
+                                               FontAttributes="Bold" 
+                                               VerticalTextAlignment="Center" 
+                                               Margin="10,0,0,0"   
+                                               FontSize="11" 
+                                               TextColor="#006"/>
+                                        </HorizontalStackLayout>
+
+                                        <!--<Label Grid.Column="4" Text="{Binding TypeText}"  FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>-->
+                                        
+                                        
+                                        
                                         <Label Grid.Column="5" Text="{Binding TypeCode}"  FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
                                         <Label Grid.Column="6" Text="{Binding StatusText}" FontAttributes="Bold" VerticalTextAlignment="Center" Margin="4,0" FontSize="11" TextColor="Black"/>
                                         <Label Grid.Column="7" Text="{Binding StatusCode}"  FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="11" TextColor="Black"/>
