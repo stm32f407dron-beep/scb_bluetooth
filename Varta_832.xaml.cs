@@ -1,9 +1,12 @@
 
 
+
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
+
+using static Microsoft.Maui.ApplicationModel.Permissions;
 
 //using static System.Net.Mime.MediaTypeNames;
 
@@ -194,7 +197,7 @@ public partial class Varta_832 : ContentPage
         {
             if (startIndex + i < _allLoops.Count)
             {
-                CurrentBlockLoops.Add(_allLoops[startIndex + i]);
+                CurrentBlockLoops.Add(_allLoops[startIndex + i]); // выводим на экран 8 шлейфов выбранного блока
             }
         }
 
@@ -333,6 +336,25 @@ public partial class Varta_832 : ContentPage
                 row.TypeText = frame.Values[i].Value;
                 row.TypeCode = frame.Values[i].Code;
                 row.Address = frame.Values[i].Adress;
+
+
+                // ⭐ ПЕРЕВІРКА ПРИ ЗЧИТУВАННІ:
+                // Якщо буферний код збігається з реальним кодом на приладі (або якщо буфер пустий/"null"),
+                // це означає, що зміну застосовано/скасовано — знімаємо прапорець модифікації (решітку).
+                if (row.BufferTypeCode == "null" || row.BufferTypeCode == row.TypeCode)
+                {
+                    row.IsTypeModified = false;
+                }
+                else
+                {
+                    // Якщо буфер відрізняється від приладу — залишаємо прапорець активним (решітка залишається)
+                    row.IsTypeModified = true;
+                }
+
+
+
+
+
             }
 
             int statusIdx = i + 8;
@@ -630,9 +652,9 @@ public partial class Varta_832 : ContentPage
     private async void OnSettingsClicked(object sender, EventArgs e) => await DisplayAlert("Налаштування", "Функція у розробці", "OK");
 
 
-   
 
-    //
+
+    //считывание идентификаторов БВШ 1..4 и БВШВ 1..15
     private async void OnHeaderIdentifierClicked(object sender, EventArgs e)
     {
         if (_isProcessingidentif) return;
@@ -641,9 +663,11 @@ public partial class Varta_832 : ContentPage
         {
             _isProcessingidentif = true; // защита от повторного нажатия кнопки
 
+
+
             // Вычисляем смещение блока (для 1-го блока = 0, для 2-го = 8 и т.д.)
-          //   byte block = (byte)((_selectedBlock - 1) * 8);
-           byte block  = 0;
+            //   byte block = (byte)((_selectedBlock - 1) * 8);
+            byte block  = 0;
           //  string indxstring = _isRemoteBshvMode == true ? "01012102" : "00003014";
 
 
@@ -734,7 +758,12 @@ public partial class Varta_832 : ContentPage
     {
 
 
-        if (_isProcessingTypeEdit) return; // защита от повторного нажатия кнопки
+        if (_isProcessingTypeEdit) return; // защита от повторного нажатия кнопки   TransmitterData
+
+
+        //await _bluetoothService.TransmitterData("010100002101010126");
+
+        //return;
 
 
         try
@@ -742,7 +771,7 @@ public partial class Varta_832 : ContentPage
             _isProcessingTypeEdit = true; // Блокуємо кнопку
 
             // Відкриваємо попап і чекаємо, поки користувач його закриє
-            await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress, _allLoops));
+            await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress, _allLoops, _isRemoteBshvMode));
 
             ////Был ли считан модуль БВШВ (Bvsh_modul = true) или нет (Bvsh_modul = false)
             //if (Bvsh_modul) 
@@ -1171,3 +1200,71 @@ public class VartaFrame
 //OnPropertyChanged();
 //// внутри которого: PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("StatusText"));
 //MAUI слышит этот вызов события, видит имя свойства "StatusText" и адрес конкретной строки(this), после чего мгновенно обновляет текст ячейки на экране.
+
+
+
+
+
+//Хто саме підписується на INotifyPropertyChanged?
+//Саме двіжок прив'язки XAML (Binding Engine) під капотом підписується на подію PropertyChanged кожного окремого об'єкта LoopRowModel,
+//коли цей об'єкт потрапляє на екран. Коли об'єкт «дзвонить у дзвіночок», движок одразу знає, який саме Label треба оновити.
+
+//Що робить колекція(ObservableCollection)?
+//Колекція не підписується на зміни всередині об'єктів. Її роль — бути «контейнером-передавачем».
+//Вона каже елементу CollectionView: "Ось тобі 8 посилань на об'єкти в пам'яті, намалюй для них 8 рядків".
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Архитектурный механизм и последовательность действий
+//Ниже описан пошаговый процесс работы приложения при приеме данных, их хранении и реактивном обновлении пользовательского интерфейса(UI) в.NET MAUI.
+
+//1. Инициализация и подготовка данных в памяти
+//Создание глобального кеша: При запуске приложения метод InitializeAllLoops() создает в памяти единый массив (_allLoops типа List<LoopRowModel>), содержащий все 152 шлейфа(по 8 шлейфов на каждый из 19 возможных блоков). Объекты инициализируются базовыми или пустыми значениями "null".
+
+//Отображение текущего блока: Метод ShowBlock(int blockIndex) выбирает из глобального кеша срез ровно из 8 объектов для текущего блока и заносит их по ссылке в экранную коллекцию CurrentBlockLoops(тип ObservableCollection<LoopRowModel>).
+
+//Связь с интерфейсом(Мост): В конструкторе страницы CollectionView.ItemsSource = CurrentBlockLoops связывает экранную таблицу (CollectionView) с коллекцией CurrentBlockLoops. Движок MAUI автоматически строит 8 строк на экране на основе этих объектов.
+
+//2. Прием данных от Bluetooth-устройства
+//Асинхронное чтение: Фоновый сервис принимает пакет от прибора через единственный Bluetooth-сокет.Эксклюзивный доступ к сокету во время отправки запросов гарантируется семафором SemaphoreSlim(1, 1).
+
+//Событие приема кадра: Когда кадр(VartaFrame) полностью сформирован, срабатывает событие DataReceivedFrame.
+
+//3. Потокобезопасное обновление данных
+//Переход в главный поток UI: С помощью MainThread.BeginInvokeOnMainThread обработчик переносит выполнение в главный поток пользовательского интерфейса, чтобы безопасно менять графические свойства.
+
+//Обновление глобального кеша: В методе UpdateDataFromFrame(VartaFrame frame) код находит нужный объект в глобальном хранилище (_allLoops) по индексу и обновляет его свойства (например, TypeText, TypeCode, Address, StatusText).
+
+//4. Реактивное обновление экрана (Data Binding)
+//Срабатывание сеттера и событие: Когда свойство объекта LoopRowModel изменяется (например, row.TypeCode = frame.Values[i].Code), срабатывает стандартный сеттер этого свойства.
+
+//Вызов OnPropertyChanged(): Благодаря интерфейсу INotifyPropertyChanged и атрибуту[CallerMemberName], сеттер автоматически вызывает метод PropertyChanged?.Invoke(...), передавая имя изменившегося свойства.
+
+//Движок привязки (Binding Engine): Визуальный движок XAML, который под капотом подписан на это событие через конструкции вроде { Binding TypeCode}, «слышит» этот сигнал.
+
+//Точечная перерисовка: Движок MAUI считывает новое значение через геттер и обновляет текст исключительно в конкретной ячейке на экране, не перерисовывая всю таблицу целиком.
+
+
+//[БУДІВЕЛЬНІ БЛОКИ АРХІТЕКТУРИ]
+       
+// 1. Глобальний кеш            2.Екранний міст             3. Модель рядка(Дані)      4. Візуальний UI(XAML)
+//+-----------------------+     +-----------------------+    +-----------------------+   +-------------------+
+//| _allLoops             |     | CurrentBlockLoops     |    | LoopRowModel          |   | CollectionView    |
+//| (List<LoopRowModel>)  | --> | (ObservableCollection)| -> | (INotifyPropertyChanged)|   | (Таблиця на екрані)|
+//| Всі 152 шлейфи в пам'яті    | Показує поточні 8 рядів    | Зберігає числа та тексти  |   | Відображає 8 рядків|
+//+-----------------------+     +-----------------------+    +-----------------------+   +-------------------+
+//                                                                       ^                         |
+//                                                                       | (Слідкує за змінами)    | (Підписка через
+//                                                                       +-------------------------+  {Binding TypeCode})

@@ -1764,10 +1764,10 @@ namespace skb_home.Platforms.Android
 
 
                             //else if (indexString == "00003010") { }
-                            // для значений буферов - типа шлейфа
+                            // для значений буферов - типа шлейфа для базового БВШ
                             else if (indexString == "00003010" || indexString == "00003011" || indexString == "00003012" || indexString == "00003013")
                             {
-                              
+
                                 var frame = new VartaFrame
                                 {
                                     Index = indexString,
@@ -1779,14 +1779,16 @@ namespace skb_home.Platforms.Android
 
                                 //вызов события  для списка делегатов, которые подписаны на событие DataReceivedBuffer - для буфера - тип шлейфа
                                 DataReceivedBuffer.Invoke(frame);
+                                //вывод данных в терминал
+                                DataReceivedVarta832?.Invoke($"Rx -> {payloadHex}");
 
                             }
 
 
 
-
+                            // для идентификатора внешнего БВШВ
                             //else if (indexString.Length == 8 && indexString.StartsWith("010") && indexString.EndsWith("102"))
-                            else if (indexString.Length == 8 && indexString.StartsWith("010") && indexString.EndsWith("102"))//  Индекс 01012102  строкa - идентификатор  для базового БВШВ
+                            else if (indexString.Length == 8 && indexString.StartsWith("010") && indexString.EndsWith("102"))//  Индекс 010**102  строкa - идентификатор  для внешнего БВШВ
                             {
 
                                 // Ищем в массиве payload первый байт 0x00 - как терминатор строки (конец текста)
@@ -1950,7 +1952,29 @@ namespace skb_home.Platforms.Android
                             }
 
 
-                            ///////////////BVSH3m - base
+                            // для тип ШС внешнего БВШВ - BVSH3v - external
+                            else if (indexString.Length == 8 && indexString.StartsWith("010") && indexString.EndsWith("101")) 
+                            {
+                            
+                            
+                              var frame = new VartaFrame
+                              {
+                                  Index = indexString,
+                                  SubIndex = subindex.ToString("D2"),
+                                  Adress = address.ToString("X2"),
+                                  BufferTypeCode = payloadHex
+                              };
+                                DataReceivedBuffer?.Invoke(frame);
+                                DataReceivedVarta832?.Invoke($"Rx -> {payloadHex}");
+
+                            }
+
+
+
+
+
+
+                            //BVSH3m - base
                             else if (indexString == "00003100")
                             {
                                 numericValue = string.Join(",", payload.Select(b => b.ToString()));
@@ -2429,7 +2453,7 @@ namespace skb_home.Platforms.Android
                                                byte? subindex = null,
                                                bool wrapWithRawStartStop = true)
         {
-            await _txLock.WaitAsync();
+            await _txLock.WaitAsync(); // Создаем замок для предотвращения одновременного доступа к сокету других потоков
             try
             {
                 if (bluetoothSocket == null || bluetoothSocket.OutputStream == null)
@@ -2498,16 +2522,16 @@ namespace skb_home.Platforms.Android
                 // Отправляем
                 try
                 {
-                    var outStream = bluetoothSocket.OutputStream;
-                    await outStream.WriteAsync(toSend, 0, toSend.Length).ConfigureAwait(false);
-                    await outStream.FlushAsync().ConfigureAwait(false);
+                    var outStream = bluetoothSocket.OutputStream; // получаем поток записи из сокета в временном контексте
+                    await outStream.WriteAsync(toSend, 0, toSend.Length).ConfigureAwait(false); // асинхронная запись байтов в поток и ConfigureAwait(false)
+                    await outStream.FlushAsync().ConfigureAwait(false); // убедиться, что данные отправлены - вызвать Flush, а не ждать пока данные будут полностью заполнят буфер Bluetooth
 
                     System.Diagnostics.Debug.WriteLine("TX OK");
                 }
                 catch (Exception writeEx)
                 {
                     System.Diagnostics.Debug.WriteLine($"TX ERROR: {writeEx}");
-                    throw;
+                    throw; // пробрасываем исключение дальше, для  останоки выполнения следующих команд
                 }
             }
             finally

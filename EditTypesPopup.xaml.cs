@@ -32,7 +32,12 @@ public partial class EditTypesPopup : ContentPage
     // Флаг для предотвращения повторного сохранения при быстром нажатии кнопки
     private bool _isSaving = false;
 
-    public EditTypesPopup(Varta_832 parentPage, ObservableCollection<LoopRowModel> loopsToEdit, IBluetooth_service? bluetoothService, int currentDeviceAddress, List<LoopRowModel> allLoops)
+
+    private bool _isRemoteBshvMode = false;
+
+
+
+    public EditTypesPopup(Varta_832 parentPage, ObservableCollection<LoopRowModel> loopsToEdit, IBluetooth_service? bluetoothService, int currentDeviceAddress, List<LoopRowModel> allLoops, bool isRemoteBshvMode)
     {
         //Собираем визуальные элементы и связываем их с кодом
         InitializeComponent();
@@ -42,6 +47,7 @@ public partial class EditTypesPopup : ContentPage
         _loopsToEdit = loopsToEdit;
         _currentDeviceAddress = currentDeviceAddress;
         _allLoopsRef = allLoops; // Зберігаємо посилання на глобальну колекцію всіх шлейфів
+        _isRemoteBshvMode = isRemoteBshvMode; // режим блоков БВШВ (true) або БВШ (false) - для правильного расчета индекса памяти
 
         // Робімо «знімок» поточного стану до редагування
         // Зберігаємо початкові значення типів для кожного ШС у словнику - так как передали ссылку на коллекцию, из родительской странице
@@ -236,24 +242,41 @@ public partial class EditTypesPopup : ContentPage
     private async void InitializeAllLoops_Buffer() 
     {
 
-        //for (int i = 0; i < _loopsToEdit.Count; i++)
-        //{
-        //    // Отримуємо конкретний шлейф за поточним індексом `i`
-        //    var loop = _loopsToEdit[i];
-
-        //    // Тепер для кожного шлейфу рахуємо його власний блок і субіндекс
-        //    int blockIndex = (loop.Number - 1) / 8 + 1;
-        //    byte subIndex = (byte)loop.LoopNumber;
-
-        //    // Логіка перевірки та відправки...
-        //}
-
-      
+       
         foreach (var loop in _loopsToEdit)
         {
+
+            int blockIndex = 0;
+            string indxstring = string.Empty;
+           
+            // условие для режима БВШВ (BVSH3v) или БВШ (BVSH3m)
+            if (_isRemoteBshvMode) {
+
+                 blockIndex = ((loop.Number - 33) / 8) + 1;
+                 indxstring = $"01{blockIndex.ToString("X2")}2101";
+                
+            }
+
+            // Умова для режиму БВШ (BVSH3m)
+            else
+            {
+
+                //Правильно: беремо номер конкретного шлейфу, який зараз обробляється в циклі
+                 blockIndex = (loop.Number - 1) / 8;
+
+                 indxstring = $"0000301{blockIndex.ToString("X1")}"; // базовий індекс для першого блоку (1-8 шлейфів)
+              
+
+              
+
+
+            }
+
+
             //Правильно: беремо номер конкретного шлейфу, який зараз обробляється в циклі
-            int blockIndex = (loop.Number - 1) / 8 ;
-            string indxstring = $"0000301{blockIndex.ToString("X1")}"; // базовий індекс для першого блоку (1-8 шлейфів)
+          //  int blockIndex = (loop.Number - 1) / 8;
+
+         //   string indxstring = $"0000301{blockIndex.ToString("X1")}"; // базовий індекс для першого блоку (1-8 шлейфів)
             byte subIndex = (byte)loop.LoopNumber;
 
             // ⭐ ВИВОДИМО В ДЕБАГ ДЛЯ ПЕРЕВІРКИ
@@ -261,6 +284,12 @@ public partial class EditTypesPopup : ContentPage
             string cmd = Build_BufferFrame(0x01, _currentDeviceAddress, indxstring, subIndex, 0x01);
             if (_bluetoothService != null) { await _bluetoothService.TransmitterData(cmd); }
             await Task.Delay(150); // Невелика затримка для стабільності передачі (можна налаштувати за потребою)
+
+
+
+
+
+
 
         }
 
@@ -339,10 +368,22 @@ public partial class EditTypesPopup : ContentPage
         try
         {
             _isSaving = true;
+            bool hasNullValues = false; 
 
             // Перевіряємо кожний шлейф перед збереженням
             foreach (var loop in _loopsToEdit)
             {
+
+
+                // Перевіряємо, чи є хоча б одне незчитане значення
+                if (string.IsNullOrEmpty(loop.TypeText) || loop.TypeText == "null" || loop.TypeCode == "null")
+                {
+                    hasNullValues = true;
+                }
+
+
+
+
                 // Отримуємо початкове значення з того самого знімка, який ми зробили в конструкторі
                 string initialCode = _initialValues.ContainsKey(loop) ? _initialValues[loop].Code : "null";
 
@@ -403,6 +444,14 @@ public partial class EditTypesPopup : ContentPage
 
 
             }
+
+
+            if (hasNullValues)
+            {
+                await DisplayAlert("Попередження", "Не забудьте спочатку зчитати блоки БВШ перед записом у прилад ВАРТА-832", "OK");
+            }
+
+
 
 
             // Якщо все заповнено правильно — закриваємо вікно
