@@ -367,8 +367,8 @@ public partial class EditTypesPopup : ContentPage
 
         try
         {
-            _isSaving = true;
-            bool hasNullValues = false; 
+            _isSaving = true; // Блокируем повторное сохранение до завершения текущей операции
+            bool hasNullValues = false; //флаг для проверки нне прочитанных значений модулей БВШ и БВШВ перед сохранением
 
             // Перевіряємо кожний шлейф перед збереженням
             foreach (var loop in _loopsToEdit)
@@ -381,13 +381,35 @@ public partial class EditTypesPopup : ContentPage
                     hasNullValues = true;
                 }
 
-
-
-
+             
                 // Отримуємо початкове значення з того самого знімка, який ми зробили в конструкторі
                 string initialCode = _initialValues.ContainsKey(loop) ? _initialValues[loop].Code : "null";
 
-                int blockIndex = (loop.Number - 1) / 8 + 1; // номер блока (1-4) для шлейфів 1-32
+               //  int blockIndex = (loop.Number - 1) / 8 + 1; // номер блока (1-4) для шлейфів 1-32
+                int blockIndex = 0;
+
+                //
+                // условие для режима БВШВ (BVSH3v) или БВШ (BVSH3m)
+                if (_isRemoteBshvMode)
+                {
+
+                    blockIndex = ((loop.Number - 33) / 8) + 1;
+                    //  indxstring = $"01{blockIndex.ToString("X2")}2101";
+
+                }
+
+                // Умова для режиму БВШ (BVSH3m)
+                else
+                {
+
+                    //Правильно: беремо номер конкретного шлейфу, який зараз обробляється в циклі
+                    blockIndex = (loop.Number - 1) / 8 + 1;
+
+                    //   indxstring = $"0000301{blockIndex.ToString("X1")}"; // базовий індекс для першого блоку (1-8 шлейфів)
+
+                }
+                //
+
 
                 // Если код вообще не менялся с момента открытия окна — разрешаем сохранить без проблем
                 if (loop.BufferTypeCode == _initialValues[loop].Code)
@@ -407,17 +429,39 @@ public partial class EditTypesPopup : ContentPage
                         if (_bluetoothService != null)
                         {
 
-                            // 1. ДИНАМІЧНО ФОРМУЄМО ІНДЕКС ПАМ'ЯТІ
-                            // Базові байти: 0x00, 0x00, 0x30, а останній байт залежить від блоку (0x10 для 1-го, 0x11 для 2-го і т.д.)
+                           
+                            
+                            // Для  начало просто иницилизируем базовыми БВШ
                             byte lastByteOfIndex = (byte)(0x10 + (blockIndex - 1));
                             byte[] index = new byte[] { 0x00, 0x00, 0x30, lastByteOfIndex };
+
+                            //  для режима БВШВ (BVSH3v) и БВШ (BVSH3m)
+                            if (_isRemoteBshvMode)
+                            {
+                                lastByteOfIndex = (byte)(0x00 + blockIndex);
+                                index = new byte[] { 0x01, lastByteOfIndex, 0x21, 0x01 };
+
+                            }
+                            else
+                            {
+                                lastByteOfIndex = (byte)(0x10 + (blockIndex - 1));
+                                index = new byte[] { 0x00, 0x00, 0x30, lastByteOfIndex };
+                            }
+
 
 
                             //  byte subIndex = (byte)(loop.Number);
                             byte subIndex = (byte)(loop.LoopNumber);
                             byte adress = (byte)_currentDeviceAddress; // Используем текущий адрес устройства, переданный в конструкторе
-                                                                       // ТУТ ВАШ КОД ВІДПРАВКИ (наприклад, асинхронний виклик запису байта)
-                                                                       //    await _bluetoothService.TransmitterData_writeByte(0x03, 0x02, 0x01, index, 0x04); // пример вызова метода отправки байта через Bluetooth
+
+
+
+                           
+
+
+
+                            // ТУТ ВАШ КОД ВІДПРАВКИ (наприклад, асинхронний виклик запису байта)
+                            //    await _bluetoothService.TransmitterData_writeByte(0x03, 0x02, 0x01, index, 0x04); // пример вызова метода отправки байта через Bluetooth
                             await _bluetoothService.TransmitterData_writeByte((byte)code, 0x02, adress, index, subIndex);
 
                             await Task.Delay(150); // Невелика затримка для стабільності передачі (можна налаштувати за потребою)
