@@ -62,17 +62,17 @@ public partial class EditTypesPopup : ContentPage
         BuildRows();
 
 
-        
 
+        // обработчик приема данных от Bluetooth после отправки команды на чтение буферов(нажатие кнопки Зберегти)
 
         _bluetoothService?.DataReceivedBuffer += delegate (VartaFrame frame)
         {
             string address = frame.Adress;
             string indexString = frame.Index;
-            string subIndex = frame.SubIndex;
-            string bufferTypeCode = frame.BufferTypeCode;
+            string subIndex = frame.SubIndex; // идет от 01 до 08 (для шлейфов 1-8)
+            string bufferTypeCode = frame.BufferTypeCode; // данные
 
-            if (int.TryParse(subIndex, out int subIndexValue))
+            if (int.TryParse(subIndex, out int subIndexValue)) // Преобразуем subIndex в целое число
             {
                 int collectionIndex = subIndexValue - 1; // Чтоб склыдывало в колекцию  ObservableCollection<LoopRowModel> _loopsToEdit с 0 до 7 (для шлейфов 1-8)
 
@@ -84,7 +84,7 @@ public partial class EditTypesPopup : ContentPage
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
 
-                        int globalIndex = loop.Number - 1; // Починається з 0 для першого шлейфу!
+                        int globalIndex = loop.Number - 1; // глобальный індекс для складирования данных в глобальную память _allLoopsRef
 
                         // ⭐ ВІДПРАВЛЯЄМО В ДЕБАГ ДЛЯ ПЕРЕВІРКИ
                         System.Diagnostics.Debug.WriteLine($"[GLOBAL SYNC] ШС LoopNumber: {loop.LoopNumber} | Number (глобальний): {loop.Number} | calculated globalIndex: {globalIndex} | Code: {bufferTypeCode}");
@@ -96,12 +96,12 @@ public partial class EditTypesPopup : ContentPage
 
                         if (int.TryParse(bufferTypeCode, out int codeIndex) && codeIndex >= 0 && codeIndex < _typeValues.Length)
                         {
-                            loop.BufferTypeText = _typeValues[codeIndex];//   текстові значення для кодів типів
+                            loop.BufferTypeText = _typeValues[codeIndex];//   вычисляем текстовое значение типа по индексу из массива _typeValues
 
 
                             if (globalIndex >= 0 && globalIndex < _allLoopsRef.Count)
                             {
-                                // Записуємо одразу в глобальну пам'ять батьківської сторінки
+                                // Записуємо одразу в глобальну пам'ять(_allLoopsRef) батьківської сторінки
                                 _allLoopsRef[globalIndex].BufferTypeCode = bufferTypeCode;
                                 _allLoopsRef[globalIndex].BufferTypeText = loop.BufferTypeText;
                             }
@@ -112,18 +112,18 @@ public partial class EditTypesPopup : ContentPage
                         }
                         else
                         {
-                            loop.BufferTypeText = "null";
+                            loop.BufferTypeText = "null"; // если код не валидный, то ставим "null" в текстовое значение типа
 
                             if (globalIndex >= 0 && globalIndex < _allLoopsRef.Count)
                             {
-                                // Записуємо одразу в глобальну пам'ять батьківської сторінки
+                                // Записуємо одразу в глобальну пам'ять(_allLoopsRef) батьківської сторінки
                                 _allLoopsRef[globalIndex].BufferTypeCode = "null";
                                 _allLoopsRef[globalIndex].BufferTypeText = "null";
                             }
                         }
 
                         // проверка и прорисовка в UI для конкретного шлейфа, если он есть в словаре _spanBuffers
-                        if (_spanBuffers.ContainsKey(loop))
+                        if (_spanBuffers.ContainsKey(loop)) //содержит ли словарь обьект коллекции loop
                         {
                             // непосредственная запись через Техт
                             _spanBuffers[loop].Text = loop.BufferTypeText == "null" ? "(null)" : $"({loop.BufferTypeText})";
@@ -219,6 +219,7 @@ public partial class EditTypesPopup : ContentPage
 
 
             // ⭐ Зберігаємо посилання прямо в об'єкті цього конкретного шлейфу!
+            // Теперь каждый конкретный объект шлейфа (loop) «знает в лицо» свое личное поле ввода на экране через свойство AssociatedEntry
             loop.AssociatedEntry = entry;
 
             // делаем подписку изменение текста в Entry событием, которое будет обновлять Label и свойства типа ШС
@@ -375,7 +376,7 @@ public partial class EditTypesPopup : ContentPage
             {
 
 
-                // Перевіряємо, чи є хоча б одне незчитане значення
+                // Проверка на null або "null" значення для TypeText та TypeCode для выдачи предупреждения пользователю перед сохранением
                 if (string.IsNullOrEmpty(loop.TypeText) || loop.TypeText == "null" || loop.TypeCode == "null")
                 {
                     hasNullValues = true;
@@ -429,8 +430,8 @@ public partial class EditTypesPopup : ContentPage
                         if (_bluetoothService != null)
                         {
 
-                           
-                            
+
+                            // Вычисляем индекс блока и формируем массив байт для отправки в зависимости отблока БВШВ или БВШ
                             // Для  начало просто иницилизируем базовыми БВШ
                             byte lastByteOfIndex = (byte)(0x10 + (blockIndex - 1));
                             byte[] index = new byte[] { 0x00, 0x00, 0x30, lastByteOfIndex };

@@ -97,7 +97,7 @@ public partial class Varta_832 : ContentPage
 
 
 
-
+        // обработчик индетификатора
         _bluetoothService.DataReceivedIdentifier += delegate (VartaFrame identif)
         {
             MainThread.BeginInvokeOnMainThread(delegate {
@@ -365,6 +365,9 @@ public partial class Varta_832 : ContentPage
             }
         }
 
+      
+
+
         // Если пришедший кадр совпадает с тем, что сейчас реально открыто на экране — обновляем таблицу
         if (isFrameRemote == _isRemoteBshvMode && subIndex == _selectedBlock)
         {
@@ -390,6 +393,11 @@ public partial class Varta_832 : ContentPage
             string cmd = BuildCommand(_currentDeviceAddress, _selectedBlock);
 
             await _bluetoothService?.TransmitterData(cmd);
+
+            await Task.Delay(150);
+
+            await OnHeaderIdentifierClicked_method();
+
         }
         catch (Exception ex)
         {
@@ -400,58 +408,7 @@ public partial class Varta_832 : ContentPage
 
 
     // функция красный крест стирание
-    private async void OnAddressConfigClicked_2(object sender, EventArgs e)
-    {
-        //string result = await DisplayPromptAsync("Адреса приладу", "Введіть мережеву адресу:", initialValue: "1", keyboard: Keyboard.Numeric);
-        //if (!string.IsNullOrWhiteSpace(result))
-        //{
-        //    await DisplayAlert("Адреса", $"Виставлено: {result}", "OK");
-        //}
-
-       
-        int block = _selectedBlock; // текущий блок
-        if (block >= 1 && block <= 4) // защита
-        {
-            int startIndex = (block - 1) * 8;//выясняем стартовый индекс блока
-            switch (block)
-            {
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-
-                    CurrentBlockLoops.Clear();
-                    for (int i = 0; i < 8; i++)
-                    {
-             
-                        // Обращаемся к существующему объекту в хранилище по правильному индексу (+ i)
-                        _allLoops[startIndex + i].Address = "null";
-                        _allLoops[startIndex + i].TypeText = "null";
-                        _allLoops[startIndex + i].TypeCode = "null";
-                        _allLoops[startIndex + i].StatusText = "null";
-                        _allLoops[startIndex + i].StatusCode = "null";
-                        _allLoops[startIndex + i].Identifier = "null";
-
-                        // Докладываем в коллекцию для экрана для отображения изменений
-                        CurrentBlockLoops.Add(_allLoops[startIndex + i]);
-                       
-                    }
-                    await DisplayAlert("Видалення", $"Виделено успішно, блоку{block}", "OK");
-                    break;
-
-                    default:
-                    // Якщо значення поза межами 1-4
-                    break;
-            }
-
-
-        }
-        else { await DisplayAlert("Видалення", "НЕ Виделено,блок по замежами", "OK"); }
-
-
-
-    }
-
+   
 
 
     private async void OnAddressConfigClicked(object sender, EventArgs e)
@@ -753,6 +710,118 @@ public partial class Varta_832 : ContentPage
             _isProcessingidentif = false;
         }
     }
+    //
+
+    private async Task OnHeaderIdentifierClicked_method()
+    {
+        if (_isProcessingidentif) return;
+
+        try
+        {
+            _isProcessingidentif = true; // защита от повторного нажатия кнопки
+
+
+
+            // Вычисляем смещение блока (для 1-го блока = 0, для 2-го = 8 и т.д.)
+            //   byte block = (byte)((_selectedBlock - 1) * 8);
+            byte block = 0;
+            //  string indxstring = _isRemoteBshvMode == true ? "01012102" : "00003014";
+
+
+            string indxstring;
+            if (_isRemoteBshvMode)
+            {
+                // Формируем индекс для выносного блока: 01 + номер блока в HEX (2 знака) + 2102
+                // Например, для блока 1: "01" + "01" + "2102" = "01012102"
+                // Для блока 2: "01" + "02" + "2102" = "01022102"
+                indxstring = $"01{_selectedBlock:X2}2102";
+
+            }
+            else
+            {
+                // Для базовых блоков индекс всегда единый
+                indxstring = "00003014";
+                block = (byte)((_selectedBlock - 1) * 8);
+            }
+
+
+
+
+
+            //
+
+            int device = 9; // Цикл от 1 до 8 (ровно 8 шлейфов в блоке)
+            byte read = 0x01;
+            int len = 0x14;
+
+            string cmd2;
+
+            // ВАЖНО: Перед началом всего цикла делаем переменную true, 
+            // чтобы первый запрос полетел сразу без ожидания
+            variableidentif = true;
+
+            for (byte i = 1; i < device; i++)
+            {
+                // Работа при variableidentif = true (ждем подтверждения или отправляем следующий)
+                if (variableidentif)
+                {
+                    // Сначала сбрасываем флаг перед отправкой нового запроса
+                    variableidentif = false;
+
+                    // Формируем и отправляем команду для текущего шлейфа (block + i)
+                    //  cmd2 = BuildIdentifierCommand(read, _currentDeviceAddress, "00003014", (byte)(block + i), len);
+                    cmd2 = BuildIdentifierCommand(read, _currentDeviceAddress, indxstring, (byte)(block + i), len);
+                    await _bluetoothService?.TransmitterData(cmd2);
+                }
+
+                // Ожидание ответа от прибора с защитой от зависания (таймаут)
+                int timeoutCounter = 0;
+                bool received = false;
+
+                while (timeoutCounter < 30) // 30 раз по 50мс = 1.5 секунды ожидания максимум на один шлейф
+                {
+                    if (variableidentif) // Если прибор прислал ответ и обработчик поднял флаг
+                    {
+                        received = true;
+                        break;
+                    }
+                    await Task.Delay(10); // 50
+                    timeoutCounter++;
+                }
+
+                // Если вышло время, а прибор так и не ответил
+                if (!received)
+                {
+                    await DisplayAlert("Помилка", $"Прилад не відповів на шлейф {block + i}", "OK");
+                    return;
+                }
+
+                // МАЛЕНЬКАЯ ПАУЗА МЕЖДУ ЗАПРОСАМИ: 
+                // Дает Bluetooth-модулю и контроллеру прибора «вдохнуть» и не захлебнуться потоком байтов
+                await Task.Delay(20); // 50
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Помилка", "Не вдалося зчитати Indef", "OK");
+        }
+        finally
+        {
+            _isProcessingidentif = false;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    //
+
     // переход на редактирование типа шлейфа Тип ШС
     private async void OnHeaderTypeClicked(object sender, EventArgs e)
     {
@@ -773,43 +842,7 @@ public partial class Varta_832 : ContentPage
             // Відкриваємо попап і чекаємо, поки користувач його закриє
             await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress, _allLoops, _isRemoteBshvMode));
 
-            ////Был ли считан модуль БВШВ (Bvsh_modul = true) или нет (Bvsh_modul = false)
-            //if (Bvsh_modul) 
-            //{
-
-            //    //// ⭐ ТУТ ТВОЯ ЛОГІКА ПІСЛЯ ЗАКРИТТЯ ПОПАПУ:
-            //    //// Перевіряємо шлейфи, порівнюємо дані та ставимо прапорець для появи решітки '#'
-            //    //foreach (var loop in CurrentBlockLoops)
-            //    //{
-            //    //    // Приклад умови: якщо буферний текст відрізняється від звичайного — вмикаємо решітку
-            //    //    if (!string.IsNullOrEmpty(loop.BufferTypeText) && loop.BufferTypeText != loop.TypeText)
-            //    //    {
-            //    //        loop.IsTypeModified = true;
-            //    //    }
-            //    //}
-
-
-            //    foreach (var loop in CurrentBlockLoops)
-            //    {
-            //        // Виводимо в консоль Visual Studio поточні значення для кожного шлейфу
-            //        System.Diagnostics.Debug.WriteLine($"[DEBUG] ШС {loop.LoopNumber} | TypeText: '{loop.TypeText}' | BufferTypeText: '{loop.BufferTypeText}'");
-
-            //        // Приклад умови: якщо буферний текст відрізняється від звичайного — вмикаємо решітку
-            //        if (!string.IsNullOrEmpty(loop.BufferTypeText) && loop.BufferTypeText != loop.TypeText)
-            //        {
-            //            loop.IsTypeModified = true;
-            //            System.Diagnostics.Debug.WriteLine($"[DEBUG] -> РЕШІТКА УВІМКНЕНА для ШС {loop.LoopNumber}");
-            //        }
-            //        else
-            //        {
-            //            // Додаємо гілку для перевірки, якщо вони рівні (щоб бачити, чи знімається прапорець)
-            //            loop.IsTypeModified = false;
-            //        }
-            //    }
-
-
-
-            //}
+           
             
         }
         catch (Exception ex)
@@ -823,24 +856,6 @@ public partial class Varta_832 : ContentPage
         }
 
 
-
-
-
-
-        // Відкриваємо попап, передаючи `this` (головну сторінку) та поточні 8 шлейфів
-      //  await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress));
-        //
-
-        //byte[] index = new byte[] { 0x00, 0x00, 0x30, 0x10 };
-
-        //if (_bluetoothService != null)
-        //{
-        //    // ТУТ ВАШ КОД ВІДПРАВКИ (наприклад, асинхронний виклик запису байта)
-        //    // await _bluetoothService.TransmitterData_writeByte(...);
-
-        //    await _bluetoothService.TransmitterData_writeByte(0x04, 0x02, 0x01, index, 0x01); // пример вызова метода отправки байта через Bluetooth
-
-        //}
 
     }
 
