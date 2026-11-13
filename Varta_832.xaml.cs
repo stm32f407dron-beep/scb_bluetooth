@@ -409,8 +409,6 @@ public partial class Varta_832 : ContentPage
 
     // функция красный крест стирание
    
-
-
     private async void OnAddressConfigClicked(object sender, EventArgs e)
     {
         int blockNumber = _selectedBlock;
@@ -456,13 +454,6 @@ public partial class Varta_832 : ContentPage
             await DisplayAlert("Видалення", "НЕ видалено, блок поза межами допустимого діапазону", "OK");
         }
     }
-
-
-
-
-
-
-
 
 
 
@@ -714,14 +705,11 @@ public partial class Varta_832 : ContentPage
 
     private async Task OnHeaderIdentifierClicked_method()
     {
-        if (_isProcessingidentif) return;
+       
 
         try
         {
-            _isProcessingidentif = true; // защита от повторного нажатия кнопки
-
-
-
+            
             // Вычисляем смещение блока (для 1-го блока = 0, для 2-го = 8 и т.д.)
             //   byte block = (byte)((_selectedBlock - 1) * 8);
             byte block = 0;
@@ -744,11 +732,6 @@ public partial class Varta_832 : ContentPage
                 block = (byte)((_selectedBlock - 1) * 8);
             }
 
-
-
-
-
-            //
 
             int device = 9; // Цикл от 1 до 8 (ровно 8 шлейфов в блоке)
             byte read = 0x01;
@@ -807,7 +790,7 @@ public partial class Varta_832 : ContentPage
         }
         finally
         {
-            _isProcessingidentif = false;
+          
         }
     }
 

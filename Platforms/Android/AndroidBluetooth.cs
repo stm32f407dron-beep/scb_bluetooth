@@ -1778,7 +1778,7 @@ namespace skb_home.Platforms.Android
 
 
                                 //вызов события  для списка делегатов, которые подписаны на событие DataReceivedBuffer - для буфера - тип шлейфа
-                                DataReceivedBuffer.Invoke(frame);
+                                DataReceivedBuffer?.Invoke(frame);
                                 //вывод данных в терминал
                                 DataReceivedVarta832?.Invoke($"Rx -> {payloadHex}");
 
