@@ -1863,10 +1863,18 @@ namespace skb_home.Platforms.Android
 
                                 var frame = new VartaFrame
                                 {
+
+
                                     Identifier = payloadText,
                                     SubIndex = subindex.ToString("D2")
 
                                 };
+
+
+                                //if (!string.IsNullOrEmpty(payloadText))
+                                //{
+                                //    frame.Identifier = payloadText;
+                                //}
 
 
                                 // Сохраняем не только текст Value, но и HEX-код байта в Code, обьекты типа VartaValue в коллекцию - Values
@@ -1881,6 +1889,17 @@ namespace skb_home.Platforms.Android
 
                                 // Пример отправки / вывода готовой строки в логи или через событие:
                                 DataReceivedVarta832?.Invoke($"Rx -> {payloadText}");
+
+                                
+                                //  if (frameBytes[6] == 0x02) {
+                                //    DataReceivedVarta832?.Invoke($"[Varta832 RX DETAILS] Read: 0x{read:X2}, Address: 0x{address:X2}, Index: {indexString}, SubIndex: 0x{subindex:X2} ({subindex}), Length: {length}," +
+                                //        $" Checksum: Expected=0x{expectedChk:X2}, Actual=0x{actualChk:X2} ({(chkOk ? "OK" : "FAIL")}), PayloadHex: {payloadHex}");
+                                //}
+
+                              //  System.Diagnostics.Debug.WriteLine($"[Varta832 RX DETAILS] Read: 0x{read:X2}, Address: 0x{address:X2}, Index: {indexString}, SubIndex: 0x{subindex:X2} ({subindex}), Length: {length}, PayloadHex: {payloadHex}");
+                              //  System.Diagnostics.Debug.WriteLine($"[Varta832 RX DETAILS] Read: 0x{read:X2}, Address: 0x{address:X2}, Index: {indexString}, SubIndex: 0x{subindex:X2} ({subindex}), Length: {length}, Checksum: Expected=0x{expectedChk:X2}, Actual=0x{actualChk:X2} ({(chkOk ? "OK" : "FAIL")}), PayloadHex: {payloadHex}");
+
+
                             }
 
                             // пока непомню что это
@@ -2469,7 +2488,11 @@ namespace skb_home.Platforms.Android
                 byte usedSubindex = subindex ?? 0x01;
 
                 // данные ASCII + NUL
-                byte[] dataBytes = Encoding.ASCII.GetBytes(dataAscii ?? string.Empty);
+              // byte[] dataBytes = Encoding.ASCII.GetBytes(dataAscii ?? string.Empty); // для ВАРТЫ_816
+
+                byte[] dataBytes = Encoding.GetEncoding(1251).GetBytes(dataAscii ?? string.Empty); // для ВАРТЫ_832 (кириллица)
+
+
                 if (dataBytes.Length + 1 > 255) throw new ArgumentOutOfRangeException(nameof(dataAscii));
                 byte[] dataWithNull = new byte[dataBytes.Length + 1];
                 Array.Copy(dataBytes, 0, dataWithNull, 0, dataBytes.Length);
@@ -2533,10 +2556,16 @@ namespace skb_home.Platforms.Android
                     System.Diagnostics.Debug.WriteLine($"TX ERROR: {writeEx}");
                     throw; // пробрасываем исключение дальше, для  останоки выполнения следующих команд
                 }
+
+                DataReceivedVarta832?.Invoke($" Tx_string-> {asciiHex}"); //просмотр в терминале отправки команды
+
             }
             finally
             {
                 _txLock.Release();
+
+                
+
             }
         }
 

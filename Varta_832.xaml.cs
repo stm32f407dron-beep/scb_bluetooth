@@ -127,7 +127,13 @@ public partial class Varta_832 : ContentPage
                     if (arrayIndex >= 0 && arrayIndex < _allLoops.Count)
                     {
                         var row = _allLoops[arrayIndex];
-                        row.Identifier = identif.Identifier;
+
+                        if (!string.IsNullOrEmpty(identif.Identifier))
+                        {
+                            row.Identifier = identif.Identifier;
+                        }
+
+                    //   row.Identifier = identif.Identifier;
                         variableidentif = true;
                     }
                 }
@@ -609,92 +615,15 @@ public partial class Varta_832 : ContentPage
 
         try
         {
-            _isProcessingidentif = true; // защита от повторного нажатия кнопки
 
+            _isProcessingidentif = true;
+           // await Navigation.PushModalAsync(new EditTypesPopup(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress, _allLoops, _isRemoteBshvMode));
+            await Navigation.PushModalAsync(new IdentifierPage(this, CurrentBlockLoops, _bluetoothService, _currentDeviceAddress, _allLoops, _isRemoteBshvMode, _selectedBlock));
 
-
-            // Вычисляем смещение блока (для 1-го блока = 0, для 2-го = 8 и т.д.)
-            //   byte block = (byte)((_selectedBlock - 1) * 8);
-            byte block  = 0;
-          //  string indxstring = _isRemoteBshvMode == true ? "01012102" : "00003014";
-
-
-            string indxstring;
-            if (_isRemoteBshvMode)
-            {
-                // Формируем индекс для выносного блока: 01 + номер блока в HEX (2 знака) + 2102
-                // Например, для блока 1: "01" + "01" + "2102" = "01012102"
-                // Для блока 2: "01" + "02" + "2102" = "01022102"
-                indxstring = $"01{_selectedBlock:X2}2102";
-
-            }
-            else
-            {
-                // Для базовых блоков индекс всегда единый
-                indxstring = "00003014";
-                block = (byte)((_selectedBlock - 1) * 8);
-            }
-
-
-
-
-
-            //
-
-            int device = 9; // Цикл от 1 до 8 (ровно 8 шлейфов в блоке)
-            byte read = 0x01;
-            int len = 0x14;
-
-            string cmd2;
-
-            // ВАЖНО: Перед началом всего цикла делаем переменную true, 
-            // чтобы первый запрос полетел сразу без ожидания
-            variableidentif = true;
-
-            for (byte i = 1; i < device; i++)
-            {
-                // Работа при variableidentif = true (ждем подтверждения или отправляем следующий)
-                if (variableidentif)
-                {
-                    // Сначала сбрасываем флаг перед отправкой нового запроса
-                    variableidentif = false;
-
-                    // Формируем и отправляем команду для текущего шлейфа (block + i)
-                  //  cmd2 = BuildIdentifierCommand(read, _currentDeviceAddress, "00003014", (byte)(block + i), len);
-                    cmd2 = BuildIdentifierCommand(read, _currentDeviceAddress, indxstring, (byte)(block + i), len);
-                    await _bluetoothService?.TransmitterData(cmd2);
-                }
-
-                // Ожидание ответа от прибора с защитой от зависания (таймаут)
-                int timeoutCounter = 0;
-                bool received = false;
-
-                while (timeoutCounter < 30) // 30 раз по 50мс = 1.5 секунды ожидания максимум на один шлейф
-                {
-                    if (variableidentif) // Если прибор прислал ответ и обработчик поднял флаг
-                    {
-                        received = true;
-                        break;
-                    }
-                    await Task.Delay(10); // 50
-                    timeoutCounter++;
-                }
-
-                // Если вышло время, а прибор так и не ответил
-                if (!received)
-                {
-                    await DisplayAlert("Помилка", $"Прилад не відповів на шлейф {block + i}", "OK");
-                    return;
-                }
-
-                // МАЛЕНЬКАЯ ПАУЗА МЕЖДУ ЗАПРОСАМИ: 
-                // Дает Bluetooth-модулю и контроллеру прибора «вдохнуть» и не захлебнуться потоком байтов
-                await Task.Delay(20); // 50
-            }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Помилка", "Не вдалося зчитати Indef", "OK");
+            await DisplayAlert("Помилка", "Не вдалося перейти до Indef", "OK");
         }
         finally
         {
@@ -967,7 +896,7 @@ public class LoopRowModel : INotifyPropertyChanged
 
     private string _bufferTypeCode = "null";
 
-    // # - для записи в EditTypesPopup, чтобы знать, что тип был изменен - и записи в приборе конфигуратора
+    // # - для записи в EditTypesPopup, чтобы знать, что тип был изменен - и записи в приборе конфигуратора - для тип ШС
     private bool _isTypeModified;
     public bool IsTypeModified
     {
@@ -978,11 +907,6 @@ public class LoopRowModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
-
-
-
-    //
 
 
     // Буфер для хранения текста типа шлейфа, который будет использоваться в EditTypesPopup
@@ -1007,7 +931,7 @@ public class LoopRowModel : INotifyPropertyChanged
         }
     }
 
-    //
+    // EditTypesPopup
     public Entry? AssociatedEntry { get; set; }
     //
 
