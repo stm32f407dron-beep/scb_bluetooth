@@ -2494,34 +2494,34 @@ namespace skb_home.Platforms.Android
 
 
                 if (dataBytes.Length + 1 > 255) throw new ArgumentOutOfRangeException(nameof(dataAscii));
-                byte[] dataWithNull = new byte[dataBytes.Length + 1];
-                Array.Copy(dataBytes, 0, dataWithNull, 0, dataBytes.Length);
-                dataWithNull[dataBytes.Length] = 0x00;
+                byte[] dataWithNull = new byte[dataBytes.Length + 1]; // плюс 1 байт для нуль-терминатор
+                Array.Copy(dataBytes, 0, dataWithNull, 0, dataBytes.Length); // копируем из dataBytes в dataWithNull с нулевых индексов
+                dataWithNull[dataBytes.Length] = 0x00; // добавляем в последний байт нуль
 
-                // формируем внутренний (бинарный) фрейм: read, address, index(4), subindex, length, data...
-                var frame = new List<byte>(7 + index.Length + dataWithNull.Length);
-                frame.Add(read);
-                frame.Add(address);
-                frame.AddRange(index);
-                frame.Add(usedSubindex);
-                frame.Add((byte)dataWithNull.Length);
-                frame.AddRange(dataWithNull);
+                // формируем внутренний (бинарный) фрейм: read, address, index(4), subindex, length, data,checksum
+                var frame = new List<byte>(7 + index.Length + dataWithNull.Length); // 7 - это общее понятие по таблице, в конструкторе листа приблизительно взято кол-во байт, но не меньше
+                frame.Add(read); // чтение 1 байт
+                frame.Add(address);// адрес 1 байт
+                frame.AddRange(index); // индекс 4 байта
+                frame.Add(usedSubindex); // субиндекс 1 байт
+                frame.Add((byte)dataWithNull.Length); // длина данных 1 байт
+                frame.AddRange(dataWithNull);     // сами данные 
 
                 // checksum по внутреннему фрейму
                 int sum = 0;
                 foreach (var b in frame) sum += b;
                 byte chk = (byte)(sum & 0xFF);
-                frame.Add(chk);
+                frame.Add(chk); // чекксумма 1 байт
 
-                // Бинарный внутренний фрейм (включая chk)
+                // Бинарный внутренний фрейм (включая chk) - создаем массив из листа
                 byte[] frameBytes = frame.ToArray();
-                var innerBinaryHex = BitConverter.ToString(frameBytes).Replace("-", "");
+                var innerBinaryHex = BitConverter.ToString(frameBytes).Replace("-", ""); // конвертируем в строку
                 System.Diagnostics.Debug.WriteLine($"INNER FRAME (binary with chk): {innerBinaryHex}");
                 System.Diagnostics.Debug.WriteLine($"rawStart=0x{rawStart:X2}, rawStop=0x{rawStop:X2}");
 
                 // Конвертируем внутренний фрейм в ASCII-HEX (каждый байт -> 2 ASCII символа '0'..'F')
-                string asciiHex = innerBinaryHex; // уже в виде "0201..." верхнего регистра
-                var asciiBytes = Encoding.ASCII.GetBytes(asciiHex);
+                string asciiHex = innerBinaryHex; // перезаписуем в  новую строковую переменную
+                var asciiBytes = Encoding.ASCII.GetBytes(asciiHex); // теоритически можно и так - Encoding.GetEncoding(1251)
                 System.Diagnostics.Debug.WriteLine($"INNER FRAME (ASCII-HEX text): {asciiHex}");
 
                 // Формируем toSend: rawStart + asciiBytes + rawStop  (или без обёртки если wrapWithRawStartStop=false)

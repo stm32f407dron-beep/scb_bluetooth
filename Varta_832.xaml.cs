@@ -568,7 +568,51 @@ public partial class Varta_832 : ContentPage
 
     private async void OnStubTabClicked(object sender, EventArgs e)
     {
-        if (sender is Button b) await DisplayAlert("Вкладка", $"Розділ '{b.Text}' у розробці", "OK");
+        if (sender is Button b) 
+        {
+
+            string tabName = b.Text;
+
+            if (tabName == "БКН")
+            {
+
+                await Navigation.PushAsync(new BKNPage(_bluetoothService));
+                // Логіка для вкладки БКН
+                await DisplayAlert("Вкладка", "Відкрито розділ БКН", "OK");
+            }
+            else if (tabName == "BVK")
+            {
+                // Логіка для BVK
+            }
+            else if (tabName == "БВК-8")
+            {
+                // Логіка для БВК-8
+            }
+            else if (tabName == "Реле")
+            {
+                // Логіка для Реле
+            }
+            else if (tabName == "Віртуальні ключі")
+            {
+                // Логіка для Віртуальних ключів
+            }
+            else if (tabName == "CIE")
+            {
+                // Логіка для CIE
+            }
+            else if (tabName == "Configuration of loops from a file")
+            {
+                // Логіка для завантаження конфігурації з файлу
+            }
+            else
+            {
+                // Універсальна заглушка для інших
+                await DisplayAlert("Вкладка", $"Розділ '{tabName}' у розробці", "OK");
+            }
+
+          //  await DisplayAlert("Вкладка", $"Розділ '{b.Text}' у розробці", "OK");
+
+        } 
     }
 
     // Терминал
